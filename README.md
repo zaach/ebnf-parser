@@ -4,7 +4,7 @@ A parser for BNF and EBNF grammars used by jison.
 
 ## install
 
-    npm install bnf-parser
+    npm install ebnf-parser
 
 
 ## build
