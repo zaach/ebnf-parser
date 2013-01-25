@@ -16,8 +16,9 @@
   ],
   "author": "Zach Carter",
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
     "jison": "0.3.12",
-    "lex-parser": "0.0.1"
+    "lex-parser": "0.0.1",
+    "test": "*"
   }
 }
