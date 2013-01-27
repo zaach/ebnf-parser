@@ -151,3 +151,16 @@ exports["test expression action"] = function () {
 
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };
+
+exports["test quote in rule"] = function () {
+    var grammar = "%lex\n%%\n\\' return \"'\"\n/lex\n%% test: foo bar \"'\";";
+    console.log(grammar);
+    var expected = {lex: {
+      rules: [
+        ["'", "return \"'\""]
+      ]
+    },
+    bnf: {test: ["foo bar '"]}};
+
+    assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
+};
