@@ -1,6 +1,6 @@
 {
   "name": "ebnf-parser",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A parser for BNF and EBNF grammars used by jison",
   "main": "ebnf-parser.js",
   "scripts": {
@@ -17,6 +17,7 @@
   "author": "Zach Carter",
   "license": "MIT",
   "devDependencies": {
+    "jison": "0.4.x",
     "lex-parser": "0.1.0",
     "test": "*"
   }
