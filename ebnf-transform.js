@@ -1,46 +1,5 @@
 var EBNF = (function(){
-    var grammar = {
-        "lex": {
-            "rules": [
-                ["\\s+", "/* skip whitespace */"],
-                ["[A-Za-z_]+", "return 'symbol';"],
-                ["'[^']*'", "return 'symbol';"],
-                ["\\\\.", "return 'symbol';"],
-                ["bar", "return 'bar';"],
-                ["\\(", "return '(';"],
-                ["\\)", "return ')';"],
-                ["\\*", "return '*';"],
-                ["\\+", "return '+';"],
-                ["\\?", "return '?';"],
-                ["\\|", "return '|';"],
-                ["$", "return 'EOF';"]
-            ]
-        },
-        "start": "production",
-        "bnf": {
-            "production": [
-                ["handle EOF", "return $handle;"]
-            ],
-            "handle_list": [
-                ["handle", "$$ = [$handle];"],
-                ["handle_list | handle", "$handle_list.push($handle);"]
-            ],
-            "handle": [
-                ["", "$$ = [];"],
-                ["handle expression_suffix", "$handle.push($expression_suffix);"]
-            ],
-            "expression_suffix": [
-                ["expression suffix", "if ($suffix) $$ = [$suffix, $expression]; else $$ = $expression;"]
-            ],
-            "expression": [
-                ["symbol", "$$ = ['symbol', $symbol];"],
-                ["( handle_list )", "$$ = ['()', $handle_list];"]
-            ],
-            "suffix": ["", "*", "?", "+"]
-        }
-    };
-
-    var parser = new require('jison').Parser(grammar);
+    var parser = require('./transform-parser.js');
 
     var transformExpression = function(e, opts, emit) {
         var type = e[0], value = e[1], name;
