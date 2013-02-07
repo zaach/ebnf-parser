@@ -205,3 +205,4 @@ exports["test windows line endings"] = function () {
 
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };
+
