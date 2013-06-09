@@ -6,7 +6,6 @@
   "scripts": {
     "test": "make test"
   },
-  "repository": "",
   "keywords": [
     "bnf",
     "ebnf",
@@ -14,11 +13,18 @@
     "parser",
     "jison"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/zaach/ebnf-parser.git"
+  },
   "author": "Zach Carter",
   "license": "MIT",
+  "engines": {
+    "node": ">=0.9"
+  },
   "devDependencies": {
-    "jison": "0.4.x",
-    "lex-parser": "0.1.0",
-    "test": "*"
+    "jison": "git://github.com/GerHobbelt/jison.git",
+    "lex-parser": "git://github.com/GerHobbelt/lex-parser.git",
+    "test": ">=0.4.0"
   }
 }
