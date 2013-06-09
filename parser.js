@@ -68,8 +68,8 @@
   }
   while parser (grammar) errors will also provide these members, i.e. parser errors deliver a superset of attributes: {
     loc:         (yylloc)
-    expected:    (string describing the set of expected tokens)
-    recoverable: (boolean: TRUE when the parser has a error recovery rule available for this particular error)
+    expected:    (array describing the set of expected tokens; may be empty when we cannot easily produce such a set)
+    recoverable: (boolean: TRUE when the parser MAY have an error recovery rule available for this particular error)
   }
 */
 var parser = (function(){
@@ -116,11 +116,11 @@ case 17:this.$ = $$[$0];
 break;
 case 18:
             this.$ = $$[$0-1];
-            if ($$[$0][0] in this.$) 
+            if ($$[$0][0] in this.$)
                 this.$[$$[$0][0]] = this.$[$$[$0][0]].concat($$[$0][1]);
             else
                 this.$[$$[$0][0]] = $$[$0][1];
-        
+
 break;
 case 19:this.$ = {}; this.$[$$[$0][0]] = $$[$0][1];
 break;
@@ -135,7 +135,7 @@ case 23:
             if($$[$0]) this.$.push($$[$0]);
             if($$[$0-1]) this.$.push($$[$0-1]);
             if (this.$.length === 1) this.$ = this.$[0];
-        
+
 break;
 case 24:this.$ = $$[$0-1]; this.$.push($$[$0])
 break;
@@ -145,13 +145,13 @@ case 26:this.$ = $$[$0-2]; this.$.push($$[$0].join(' '));
 break;
 case 27:this.$ = [$$[$0].join(' ')];
 break;
-case 28:this.$ = $$[$0-1] + $$[$0]; 
+case 28:this.$ = $$[$0-1] + $$[$0];
 break;
-case 29:this.$ = $$[$0]; 
+case 29:this.$ = $$[$0];
 break;
-case 30:this.$ = ebnf ? "'" + $$[$0] + "'" : $$[$0]; 
+case 30:this.$ = ebnf ? "'" + $$[$0] + "'" : $$[$0];
 break;
-case 31:this.$ = '(' + $$[$0-1].join(' | ') + ')'; 
+case 31:this.$ = '(' + $$[$0-1].join(' | ') + ')';
 break;
 case 32:this.$ = ''
 break;
