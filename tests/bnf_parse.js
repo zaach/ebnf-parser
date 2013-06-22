@@ -125,8 +125,8 @@ exports["test balanced braces"] = function () {
 };
 
 exports["test brace within a multi-line comment"] = function () {
-    var grammar = "%% test: foo bar { node({}); /* { */ }; hello: world ;";
-    var expected = {bnf: {test: [["foo bar"," node({}); /* { */ " ]], hello: ["world"]}};
+    var grammar = "%% test: foo bar { node({}, 3 / 4); /* { */ }; hello: world ;";
+    var expected = {bnf: {test: [["foo bar"," node({}, 3 / 4); /* { */ " ]], hello: ["world"]}};
 
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };
