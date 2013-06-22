@@ -28,10 +28,10 @@
 "%right"                return 'RIGHT';
 "%nonassoc"             return 'NONASSOC';
 "%lex"[\w\W]*?"/lex"    return 'LEX_BLOCK';
-"%"[a-zA-Z]+[^\n]*      /* ignore unrecognized decl */
+"%"[a-zA-Z]+[^\r\n]*    /* ignore unrecognized decl */
 "<"[a-zA-Z]*">"         /* ignore type */
 "{{"[\w\W]*?"}}"        yytext = yytext.substr(2, yyleng-4); return 'ACTION';
-"%{"(.|\n)*?"%}"        yytext = yytext.substr(2, yytext.length-4);return 'ACTION';
+"%{"(.|\r|\n)*?"%}"     yytext = yytext.substr(2, yytext.length-4);return 'ACTION';
 "{"                     yy.depth=0; this.begin('action'); return '{';
 "->".*                  yytext = yytext.substr(2, yyleng-2); return 'ARROW_ACTION';
 .                       /* ignore bad characters */
@@ -46,6 +46,6 @@
 <action>"{"                       yy.depth++; return '{';
 <action>"}"                       yy.depth==0? this.begin(ebnf ? 'ebnf' : 'bnf') : yy.depth--; return '}';
 
-<code>(.|\n)+           return 'CODE';
+<code>(.|\n|\r)+         return 'CODE';
 
 %%

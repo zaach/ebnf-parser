@@ -192,3 +192,10 @@ exports["test quote in rule"] = function () {
 
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };
+
+exports["test windows line endings"] = function () {
+    var grammar = "%{baz\r\n%}%% test: foo bar | {\r\naction;\r\nhi};\r\nhello: world ;%%foo;\r\nbar;";
+    var expected = {bnf: {test: ["foo bar", [ "", "\r\naction;\r\nhi" ]], hello: ["world"]}, moduleInclude: 'baz\r\nfoo;\r\nbar;'};
+
+    assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
+};
