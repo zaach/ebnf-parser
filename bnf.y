@@ -163,12 +163,19 @@ action
 action_body
     :
         {$$ = '';}
-    | ACTION_BODY
-        {$$ = yytext;}
-    | action_body '{' action_body '}' ACTION_BODY
+    | action_comments_body
+        {$$ = $1;}
+    | action_body '{' action_body '}' action_comments_body
         {$$ = $1+$2+$3+$4+$5;}
     | action_body '{' action_body '}'
         {$$ = $1+$2+$3+$4;}
+    ;
+
+action_comments_body
+    : ACTION_BODY
+        { $$ = yytext; }
+    | action_comments_body ACTION_BODY
+        { $$ = $1+$2; }
     ;
 
 %%
