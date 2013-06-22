@@ -37,12 +37,14 @@
 .                       /* ignore bad characters */
 <*><<EOF>>              return 'EOF';
 
-<action>"/*"(.|\n|\r)*?"*/" return 'ACTION_BODY';
-<action>"//".*              return 'ACTION_BODY';
-<action>"/"[^{}/]+          return 'ACTION_BODY';
-<action>[^{}/]+             return 'ACTION_BODY';
-<action>"{"                 yy.depth++; return '{';
-<action>"}"                 yy.depth==0? this.begin(ebnf ? 'ebnf' : 'bnf') : yy.depth--; return '}';
+<action>"/*"(.|\n|\r)*?"*/"       return 'ACTION_BODY';
+<action>"//".*                    return 'ACTION_BODY';
+<action>\"("\\\\"|'\"'|[^"])*\"   return 'ACTION_BODY';
+<action>"'"("\\\\"|"\'"|[^'])*"'" return 'ACTION_BODY';
+<action>[/"'][^{}/"']+            return 'ACTION_BODY';
+<action>[^{}/"']+                 return 'ACTION_BODY';
+<action>"{"                       yy.depth++; return '{';
+<action>"}"                       yy.depth==0? this.begin(ebnf ? 'ebnf' : 'bnf') : yy.depth--; return '}';
 
 <code>(.|\n)+           return 'CODE';
 

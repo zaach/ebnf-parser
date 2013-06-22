@@ -138,6 +138,20 @@ exports["test brace within a single-line comment"] = function () {
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };
 
+exports["test brace within a string"] = function () {
+    var grammar = "%% test: foo bar { node({}, 3 / 4, '{'); /* { */ }; hello: world ;";
+    var expected = {bnf: {test: [["foo bar"," node({}, 3 / 4, '{'); /* { */ " ]], hello: ["world"]}};
+
+    assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
+};
+
+exports["test brace within a string with double quotes"] = function () {
+    var grammar = "%% test: foo bar { node({}, 3 / 4, \"{\"); /* { */ }; hello: world ;";
+    var expected = {bnf: {test: [["foo bar"," node({}, 3 / 4, \"{\"); /* { */ " ]], hello: ["world"]}};
+
+    assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
+};
+
 exports["test code declaration"] = function () {
     var grammar = "%{var foo = 'bar';%}\n%%hello: world;";
     var expected = {bnf: {hello: ["world"]}, moduleInclude: "var foo = 'bar';"};
