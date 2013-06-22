@@ -27,18 +27,6 @@ bnf.yy.addDeclaration = function (grammar, decl) {
 
 };
 
-// helps tokenize comments
-bnf.yy.lexComment = function (lexer) {
-    var ch = lexer.input();
-    if (ch === '/') {
-        lexer.yytext = lexer.yytext.replace(/\*(.|\s)\/\*/, '*$1');
-        return;
-    } else {
-        lexer.unput('/*');
-        lexer.more();
-    }
-};
-
 // parse an embedded lex section
 var parseLex = function (text) {
     return jisonlex.parse(text.replace(/(?:^%lex)|(?:\/lex$)/g, ''));
