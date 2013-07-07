@@ -120,7 +120,7 @@ case 18:
                 this.$[$$[$0][0]] = this.$[$$[$0][0]].concat($$[$0][1]);
             else
                 this.$[$$[$0][0]] = $$[$0][1];
-
+        
 break;
 case 19:this.$ = {}; this.$[$$[$0][0]] = $$[$0][1];
 break;
@@ -135,7 +135,7 @@ case 23:
             if($$[$0]) this.$.push($$[$0]);
             if($$[$0-1]) this.$.push($$[$0-1]);
             if (this.$.length === 1) this.$ = this.$[0];
-
+        
 break;
 case 24:this.$ = $$[$0-1]; this.$.push($$[$0])
 break;
@@ -145,13 +145,13 @@ case 26:this.$ = $$[$0-2]; this.$.push($$[$0].join(' '));
 break;
 case 27:this.$ = [$$[$0].join(' ')];
 break;
-case 28:this.$ = $$[$0-1] + $$[$0];
+case 28:this.$ = $$[$0-1] + $$[$0]; 
 break;
-case 29:this.$ = $$[$0];
+case 29:this.$ = $$[$0]; 
 break;
-case 30:this.$ = ebnf ? "'" + $$[$0] + "'" : $$[$0];
+case 30:this.$ = ebnf ? "'" + $$[$0] + "'" : $$[$0]; 
 break;
-case 31:this.$ = '(' + $$[$0-1].join(' | ') + ')';
+case 31:this.$ = '(' + $$[$0-1].join(' | ') + ')'; 
 break;
 case 32:this.$ = ''
 break;
@@ -315,9 +315,9 @@ parse: function parse(input) {
                     expected: expected,
                     recoverable: (error_rule_depth !== false)
                 });
-                if (!p.recoverable) {
-                    return a;
-                }
+				if (!p.recoverable) {
+					return a;
+				}
             } else if (preErrorSymbol !== EOF) {
                 error_rule_depth = locateNearestErrorRecoveryRule(state);
             }
@@ -748,12 +748,19 @@ next:function () {
 
 // return next match that has a token
 lex:function lex() {
-        var r = this.next();
-        if (r) {
-            return r;
-        } else {
-            return this.lex();
+        var r;
+        // allow the PRE/POST handlers set/modify the return token for maximum flexibility of the generated lexer:
+        if (typeof this.options.pre_lex === 'function') {
+            r = this.options.pre_lex.bind(this)();
         }
+        while (!r) {
+            r = this.next();
+        };
+        if (typeof this.options.post_lex === 'function') {
+            // (also account for a userdef function which does not return any value: keep the token as is)
+            r = this.options.post_lex.bind(this)(r) || r;
+        }
+        return r;
     },
 
 // activates a new lexer condition state (pushes the new lexer condition state onto the condition stack)
