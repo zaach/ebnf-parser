@@ -16,6 +16,7 @@
   ],
   "author": "Zach Carter",
   "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/zaach/ebnf-parser.git" },
   "devDependencies": {
     "jison": "0.4.x",
     "lex-parser": "0.1.0",
