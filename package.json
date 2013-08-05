@@ -1,6 +1,6 @@
 {
   "name": "ebnf-parser",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "A parser for BNF and EBNF grammars used by jison",
   "main": "ebnf-parser.js",
   "scripts": {
