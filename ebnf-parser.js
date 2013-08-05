@@ -19,6 +19,12 @@ bnf.yy.addDeclaration = function (grammar, decl) {
         }
         grammar.operators.push(decl.operator);
     }
+    else if (decl.parseParam) {
+        if (!grammar.parseParams) {
+            grammar.parseParams = [];
+        }
+        grammar.parseParams = grammar.parseParams.concat(decl.parseParam);
+    }
     else if (decl.include) {
         if (!grammar.moduleInclude)
             grammar.moduleInclude = '';

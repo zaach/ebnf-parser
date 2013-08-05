@@ -27,6 +27,7 @@
 "%left"                 return 'LEFT';
 "%right"                return 'RIGHT';
 "%nonassoc"             return 'NONASSOC';
+"%parse-param"          return 'PARSE_PARAM';
 "%lex"[\w\W]*?"/lex"    return 'LEX_BLOCK';
 "%"[a-zA-Z]+[^\r\n]*    /* ignore unrecognized decl */
 "<"[a-zA-Z]*">"         /* ignore type */

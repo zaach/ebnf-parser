@@ -206,3 +206,9 @@ exports["test windows line endings"] = function () {
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };
 
+exports["test parse params"] = function () {
+    var grammar = "%parse-param first second\n%%hello: world;%%";
+    var expected = {bnf: {hello: ["world"]}, parseParams: ["first", "second"]};
+
+    assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
+};

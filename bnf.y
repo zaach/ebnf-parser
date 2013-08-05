@@ -37,6 +37,13 @@ declaration
         {$$ = {operator: $1};}
     | ACTION
         {$$ = {include: $1};}
+    | parse_param
+        {$$ = {parseParam: $1};}
+    ;
+
+parse_param
+    : PARSE_PARAM token_list
+        {$$ = $2;}
     ;
 
 operator
