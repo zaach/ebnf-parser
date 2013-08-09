@@ -122,7 +122,9 @@ handle_sublist
     ;
 
 expression_suffix
-    : expression suffix
+    : expression suffix ALIAS
+        {$$ = $expression + $suffix + "[" + $ALIAS + "]"; }
+    | expression suffix
         {$$ = $expression + $suffix; }
     ;
 
