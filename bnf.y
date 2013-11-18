@@ -37,6 +37,13 @@ declaration
         {$$ = {operator: $1};}
     | ACTION
         {$$ = {include: $1};}
+    | parse_param
+        {$$ = {parseParam: $1};}
+    ;
+
+parse_param
+    : PARSE_PARAM token_list
+        {$$ = $2;}
     ;
 
 operator
@@ -115,7 +122,9 @@ handle_sublist
     ;
 
 expression_suffix
-    : expression suffix
+    : expression suffix ALIAS
+        {$$ = $expression + $suffix + "[" + $ALIAS + "]"; }
+    | expression suffix
         {$$ = $expression + $suffix; }
     ;
 

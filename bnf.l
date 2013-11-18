@@ -1,3 +1,5 @@
+id                        [a-zA-Z][a-zA-Z0-9_-]*
+
 %x action code
 %s bnf ebnf
 
@@ -14,7 +16,8 @@
 \s+                     /* skip whitespace */
 "//".*                  /* skip comment */
 "/*"(.|\n|\r)*?"*/"     /* skip comment */
-[a-zA-Z][a-zA-Z0-9_-]*  return 'ID';
+"["{id}"]"              yytext = yytext.substr(1, yyleng-2); return 'ALIAS';
+{id}                    return 'ID';
 '"'[^"]+'"'             yytext = yytext.substr(1, yyleng-2); return 'STRING';
 "'"[^']+"'"             yytext = yytext.substr(1, yyleng-2); return 'STRING';
 ":"                     return ':';
@@ -27,6 +30,7 @@
 "%left"                 return 'LEFT';
 "%right"                return 'RIGHT';
 "%nonassoc"             return 'NONASSOC';
+"%parse-param"          return 'PARSE_PARAM';
 "%lex"[\w\W]*?"/lex"    return 'LEX_BLOCK';
 "%"[a-zA-Z]+[^\r\n]*    /* ignore unrecognized decl */
 "<"[a-zA-Z]*">"         /* ignore type */
