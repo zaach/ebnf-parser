@@ -13,7 +13,7 @@
 
 \s+                     /* skip whitespace */
 "//".*                  /* skip comment */
-"/*"[^*]*"*"            return yy.lexComment(this);
+"/*"(.|\n|\r)*?"*/"     /* skip comment */
 [a-zA-Z][a-zA-Z0-9_-]*  return 'ID';
 '"'[^"]+'"'             yytext = yytext.substr(1, yyleng-2); return 'STRING';
 "'"[^']+"'"             yytext = yytext.substr(1, yyleng-2); return 'STRING';
@@ -28,19 +28,25 @@
 "%right"                return 'RIGHT';
 "%nonassoc"             return 'NONASSOC';
 "%lex"[\w\W]*?"/lex"    return 'LEX_BLOCK';
-"%"[a-zA-Z]+[^\n]*      /* ignore unrecognized decl */
+"%"[a-zA-Z]+[^\r\n]*    /* ignore unrecognized decl */
 "<"[a-zA-Z]*">"         /* ignore type */
 "{{"[\w\W]*?"}}"        yytext = yytext.substr(2, yyleng-4); return 'ACTION';
-"%{"(.|\n)*?"%}"        yytext = yytext.substr(2, yytext.length-4); return 'ACTION';
+"%{"(.|\r|\n)*?"%}"     yytext = yytext.substr(2, yytext.length-4); return 'ACTION';
 "{"                     yy.depth = 0; this.pushState('action'); return '{';
 "->".*                  yytext = yytext.substr(2, yyleng-2); return 'ARROW_ACTION';
 .                       /* ignore bad characters */
 <*><<EOF>>              return 'EOF';
 
-<action>[^{}]+          return 'ACTION_BODY';
-<action>"{"             yy.depth++; return '{';
+<action>"/*"(.|\n|\r)*?"*/"           return 'ACTION_BODY';
+<action>"//".*                        return 'ACTION_BODY';
+<action>"/"[^ /]*?['"{}'][^ ]*?"/"    return 'ACTION_BODY'; // regexp with braces or quotes (and no spaces)
+<action>\"("\\\\"|'\"'|[^"])*\"       return 'ACTION_BODY';
+<action>"'"("\\\\"|"\'"|[^'])*"'"     return 'ACTION_BODY';
+<action>[/"'][^{}/"']+                return 'ACTION_BODY';
+<action>[^{}/"']+                     return 'ACTION_BODY';
+<action>"{"                           yy.depth++; return '{';
 <action>"}"             if (yy.depth == 0) this.popState(); else yy.depth--; return '}';
 
-<code>(.|\n)+           return 'CODE';
+<code>(.|\n|\r)+         return 'CODE';
 
 %%

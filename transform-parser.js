@@ -219,7 +219,9 @@ var parser = (function() {
             this.lexer.yy = this.yy;
             this.yy.lexer = this.lexer;
             this.yy.parser = this;
-            if (typeof this.lexer.yylloc === "undefined") this.lexer.yylloc = {};
+            if (typeof this.lexer.yylloc === "undefined") {
+                this.lexer.yylloc = {};
+            }
             var yyloc = this.lexer.yylloc;
             lstack.push(yyloc);
             var ranges = this.lexer.options && this.lexer.options.ranges;
