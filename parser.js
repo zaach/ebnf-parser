@@ -72,7 +72,7 @@
     recoverable: (boolean: TRUE when the parser MAY have an error recovery rule available for this particular error)
   }
 */
-var bnf = (function(){
+var parser = (function(){
 var parser = {trace: function trace() { },
 yy: {},
 symbols_: {"error":2,"spec":3,"declaration_list":4,"%%":5,"grammar":6,"optional_end_block":7,"EOF":8,"CODE":9,"declaration":10,"START":11,"id":12,"LEX_BLOCK":13,"operator":14,"ACTION":15,"parse_param":16,"PARSE_PARAM":17,"token_list":18,"associativity":19,"LEFT":20,"RIGHT":21,"NONASSOC":22,"symbol":23,"production_list":24,"production":25,":":26,"handle_list":27,";":28,"|":29,"handle_action":30,"handle":31,"prec":32,"action":33,"expression_suffix":34,"handle_sublist":35,"expression":36,"suffix":37,"ALIAS":38,"ID":39,"STRING":40,"(":41,")":42,"*":43,"?":44,"+":45,"PREC":46,"{":47,"action_body":48,"}":49,"ARROW_ACTION":50,"action_comments_body":51,"ACTION_BODY":52,"$accept":0,"$end":1},
@@ -921,9 +921,9 @@ return new Parser;
 
 
 if (typeof require !== 'undefined' && typeof exports !== 'undefined') {
-exports.parser = bnf;
-exports.Parser = bnf.Parser;
-exports.parse = function () { return bnf.parse.apply(bnf, arguments); };
+exports.parser = parser;
+exports.Parser = parser.Parser;
+exports.parse = function () { return parser.parse.apply(parser, arguments); };
 exports.main = function commonjsMain(args) {
     if (!args[1]) {
         console.log('Usage: '+args[0]+' FILE');
