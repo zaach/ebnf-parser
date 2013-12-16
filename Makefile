@@ -1,7 +1,7 @@
 
-all: install build test
+all: npm-install build test
 
-install:
+npm-install:
 	npm install
 
 build:
@@ -24,4 +24,4 @@ superclean: clean
 
 
 
-.PHONY: all install build test clean superclean
+.PHONY: all npm-install build test clean superclean
