@@ -1,4 +1,5 @@
 id                        [a-zA-Z][a-zA-Z0-9_-]*
+BR                        \r\n|\n|\r
 
 %x action code
 %s bnf ebnf
@@ -31,14 +32,14 @@ id                        [a-zA-Z][a-zA-Z0-9_-]*
 "%right"                return 'RIGHT';
 "%nonassoc"             return 'NONASSOC';
 "%parse-param"          return 'PARSE_PARAM';
-"%lex"[\w\W]*?"/lex"    return 'LEX_BLOCK';
+"%lex"[\w\W]*?{BR}\s*"/lex"\b         return 'LEX_BLOCK';
 "%"[a-zA-Z]+[^\r\n]*    /* ignore unrecognized decl */
 "<"[a-zA-Z]*">"         /* ignore type */
 "{{"[\w\W]*?"}}"        yytext = yytext.substr(2, yyleng - 4); return 'ACTION';
 "%{"(.|\r|\n)*?"%}"     yytext = yytext.substr(2, yytext.length - 4); return 'ACTION';
 "{"                     yy.depth = 0; this.pushState('action'); return '{';
 "->".*                  yytext = yytext.substr(2, yyleng - 2); return 'ARROW_ACTION';
-.                       /* ignore bad characters */
+.                       throw new Error("unsupported input character: " + yytext); /* b0rk on bad characters */
 <*><<EOF>>              return 'EOF';
 
 <action>"/*"(.|\n|\r)*?"*/"           return 'ACTION_BODY';
@@ -51,6 +52,6 @@ id                        [a-zA-Z][a-zA-Z0-9_-]*
 <action>"{"                           yy.depth++; return '{';
 <action>"}"             if (yy.depth == 0) { this.popState(); } else { yy.depth--; } return '}';
 
-<code>(.|\n|\r)+         return 'CODE';
+<code>(.|\n|\r)+        return 'CODE';
 
 %%
