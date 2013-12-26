@@ -108,7 +108,7 @@
                                                  the scan when a token is returned by the action code.
   }
 */
-var parser = (function(){
+var bnf = (function(){
 var parser = {trace: function trace() { },
 yy: {},
 symbols_: {"error":2,"spec":3,"declaration_list":4,"%%":5,"grammar":6,"optional_end_block":7,"EOF":8,"CODE":9,"declaration":10,"START":11,"id":12,"LEX_BLOCK":13,"operator":14,"ACTION":15,"parse_param":16,"PARSE_PARAM":17,"token_list":18,"associativity":19,"LEFT":20,"RIGHT":21,"NONASSOC":22,"symbol":23,"production_list":24,"production":25,":":26,"handle_list":27,";":28,"|":29,"handle_action":30,"handle":31,"prec":32,"action":33,"expression_suffix":34,"handle_sublist":35,"expression":36,"suffix":37,"ALIAS":38,"ID":39,"STRING":40,"(":41,")":42,"*":43,"?":44,"+":45,"PREC":46,"{":47,"action_body":48,"}":49,"ARROW_ACTION":50,"action_comments_body":51,"ACTION_BODY":52,"$accept":0,"$end":1},
@@ -122,7 +122,7 @@ var $0 = $$.length - 1;
 switch (yystate) {
 case 1:this.$ = $$[$0-4]; return extend(this.$, $$[$0-2]);
 break;
-case 2:this.$ = $$[$0-5]; yy.addDeclaration(this.$,{include:$$[$0-1]}); return extend(this.$, $$[$0-3]);
+case 2:this.$ = $$[$0-5]; yy.addDeclaration(this.$,{include: $$[$0-1]}); return extend(this.$, $$[$0-3]);
 break;
 case 5:this.$ = $$[$0-1]; yy.addDeclaration(this.$, $$[$0]);
 break;
@@ -225,7 +225,7 @@ case 51:this.$ = $$[$0-3] + $$[$0-2] + $$[$0-1] + $$[$0];
 break;
 case 52: this.$ = yytext; 
 break;
-case 53: this.$ = $$[$0-1]+$$[$0]; 
+case 53: this.$ = $$[$0-1] + $$[$0]; 
 break;
 }
 },
@@ -530,7 +530,7 @@ var ebnf = false;
 
 
 // transform ebnf to bnf if necessary
-function extend (json, grammar) {
+function extend(json, grammar) {
     json.bnf = ebnf ? transform(grammar) : grammar;
     return json;
 }
@@ -971,7 +971,7 @@ case 42:return 9;
 break;
 }
 },
-rules: [/^(?:%%)/,/^(?:\()/,/^(?:\))/,/^(?:\*)/,/^(?:\?)/,/^(?:\+)/,/^(?:\s+)/,/^(?:\/\/.*)/,/^(?:\/\*(.|\n|\r)*?\*\/)/,/^(?:\[([a-zA-Z][a-zA-Z0-9_-]*)\])/,/^(?:([a-zA-Z][a-zA-Z0-9_-]*))/,/^(?:"[^"]+")/,/^(?:'[^']+')/,/^(?::)/,/^(?:;)/,/^(?:\|)/,/^(?:%%)/,/^(?:%ebnf)/,/^(?:%prec)/,/^(?:%start)/,/^(?:%left)/,/^(?:%right)/,/^(?:%nonassoc)/,/^(?:%parse-param)/,/^(?:%lex[\w\W]*?(\r\n|\n|\r)\s*\/lex\b)/,/^(?:%[a-zA-Z]+[^\r\n]*)/,/^(?:<[a-zA-Z]*>)/,/^(?:\{\{[\w\W]*?\}\})/,/^(?:%\{(.|\r|\n)*?%\})/,/^(?:\{)/,/^(?:->.*)/,/^(?:.)/,/^(?:$)/,/^(?:\/\*(.|\n|\r)*?\*\/)/,/^(?:\/\/.*)/,/^(?:\/[^ /]*?['"{}'][^ ]*?\/)/,/^(?:"(\\\\|\\"|[^"])*")/,/^(?:'(\\\\|\\'|[^'])*')/,/^(?:[/"'][^{}/"']+)/,/^(?:[^{}/"']+)/,/^(?:\{)/,/^(?:\})/,/^(?:(.|\n|\r)+)/],
+rules: [/^(?:%%)/,/^(?:\()/,/^(?:\))/,/^(?:\*)/,/^(?:\?)/,/^(?:\+)/,/^(?:\s+)/,/^(?:\/\/.*)/,/^(?:\/\*(.|\n|\r)*?\*\/)/,/^(?:\[([a-zA-Z][a-zA-Z0-9_-]*)\])/,/^(?:([a-zA-Z][a-zA-Z0-9_-]*))/,/^(?:"[^"]+")/,/^(?:'[^']+')/,/^(?::)/,/^(?:;)/,/^(?:\|)/,/^(?:%%)/,/^(?:%ebnf\b)/,/^(?:%prec\b)/,/^(?:%start\b)/,/^(?:%left\b)/,/^(?:%right\b)/,/^(?:%nonassoc\b)/,/^(?:%parse-param\b)/,/^(?:%lex[\w\W]*?(\r\n|\n|\r)\s*\/lex\b)/,/^(?:%[a-zA-Z]+[^\r\n]*)/,/^(?:<[a-zA-Z]*>)/,/^(?:\{\{[\w\W]*?\}\})/,/^(?:%\{(.|\r|\n)*?%\})/,/^(?:\{)/,/^(?:->.*)/,/^(?:.)/,/^(?:$)/,/^(?:\/\*(.|\n|\r)*?\*\/)/,/^(?:\/\/.*)/,/^(?:\/[^ /]*?['"{}'][^ ]*?\/)/,/^(?:"(\\\\|\\"|[^"])*")/,/^(?:'(\\\\|\\'|[^'])*')/,/^(?:[/"'][^{}/"']+)/,/^(?:[^{}/"']+)/,/^(?:\{)/,/^(?:\})/,/^(?:(.|\n|\r)+)/],
 conditions: {"bnf":{"rules":[0,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32],"inclusive":true},"ebnf":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32],"inclusive":true},"action":{"rules":[32,33,34,35,36,37,38,39,40,41],"inclusive":false},"code":{"rules":[32,42],"inclusive":false},"INITIAL":{"rules":[6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32],"inclusive":true}}
 };
 return lexer;
@@ -986,9 +986,9 @@ return new Parser;
 
 
 if (typeof require !== 'undefined' && typeof exports !== 'undefined') {
-exports.parser = parser;
-exports.Parser = parser.Parser;
-exports.parse = function () { return parser.parse.apply(parser, arguments); };
+exports.parser = bnf;
+exports.Parser = bnf.Parser;
+exports.parse = function () { return bnf.parse.apply(bnf, arguments); };
 exports.main = function commonjsMain(args) {
     if (!args[1]) {
         console.log('Usage: '+args[0]+' FILE');

@@ -13,7 +13,7 @@ spec
     : declaration_list '%%' grammar optional_end_block EOF
         {$$ = $1; return extend($$, $3);}
     | declaration_list '%%' grammar '%%' CODE EOF
-        {$$ = $1; yy.addDeclaration($$,{include:$5}); return extend($$, $3);}
+        {$$ = $1; yy.addDeclaration($$,{include: $5}); return extend($$, $3);}
     ;
 
 optional_end_block
@@ -189,13 +189,13 @@ action_comments_body
     : ACTION_BODY
         { $$ = yytext; }
     | action_comments_body ACTION_BODY
-        { $$ = $1+$2; }
+        { $$ = $1 + $2; }
     ;
 
 %%
 
 // transform ebnf to bnf if necessary
-function extend (json, grammar) {
+function extend(json, grammar) {
     json.bnf = ebnf ? transform(grammar) : grammar;
     return json;
 }

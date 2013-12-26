@@ -2,6 +2,7 @@
 
 A parser for BNF and EBNF grammars used by jison.
 
+
 ## install
 
     npm install ebnf-parser
@@ -14,6 +15,7 @@ To build the parser yourself, clone the git repo then run:
     make
 
 This will generate `parser.js`, which is required by `ebnf-parser.js`.
+
 
 ## usage
 
@@ -47,7 +49,7 @@ The parser can parse its own BNF grammar, shown below:
         : declaration_list '%%' grammar optional_end_block EOF
             {$$ = $1; return extend($$, $3);}
         | declaration_list '%%' grammar '%%' CODE EOF
-            {$$ = $1; yy.addDeclaration($$,{include:$5}); return extend($$, $3);}
+            {$$ = $1; yy.addDeclaration($$,{include: $5}); return extend($$, $3);}
         ;
 
     optional_end_block
@@ -71,6 +73,13 @@ The parser can parse its own BNF grammar, shown below:
             {$$ = {operator: $1};}
         | ACTION
             {$$ = {include: $1};}
+        | parse_param
+            {$$ = {parseParam: $1};}
+        ;
+
+    parse_param
+        : PARSE_PARAM token_list
+            {$$ = $2;}
         ;
 
     operator
@@ -101,9 +110,13 @@ The parser can parse its own BNF grammar, shown below:
 
     production_list
         : production_list production
-            {$$ = $1;
-              if($2[0] in $$) $$[$2[0]] = $$[$2[0]].concat($2[1]);
-              else  $$[$2[0]] = $2[1];}
+            {
+                $$ = $1;
+                if ($2[0] in $$)
+                    $$[$2[0]] = $$[$2[0]].concat($2[1]);
+                else
+                    $$[$2[0]] = $2[1];
+            }
         | production
             {$$ = {}; $$[$1[0]] = $1[1];}
         ;
@@ -122,7 +135,8 @@ The parser can parse its own BNF grammar, shown below:
 
     handle_action
         : handle prec action
-            {$$ = [($1.length ? $1.join(' ') : '')];
+            {
+                $$ = [($1.length ? $1.join(' ') : '')];
                 if($3) $$.push($3);
                 if($2) $$.push($2);
                 if ($$.length === 1) $$ = $$[0];
@@ -144,7 +158,9 @@ The parser can parse its own BNF grammar, shown below:
         ;
 
     expression_suffix
-        : expression suffix
+        : expression suffix ALIAS
+            {$$ = $expression + $suffix + "[" + $ALIAS + "]"; }
+        | expression suffix
             {$$ = $expression + $suffix; }
         ;
 
@@ -152,7 +168,7 @@ The parser can parse its own BNF grammar, shown below:
         : ID
             {$$ = $1; }
         | STRING
-            {$$ = ebnf ? "'"+$1+"'" : $1; }
+            {$$ = ebnf ? "'" + $1 + "'" : $1; }
         | '(' handle_sublist ')'
             {$$ = '(' + $handle_sublist.join(' | ') + ')'; }
         ;
@@ -189,7 +205,7 @@ The parser can parse its own BNF grammar, shown below:
         | ACTION
             {$$ = $1;}
         | ARROW_ACTION
-            {$$ = '$$ ='+$1+';';}
+            {$$ = '$$ =' + $1 + ';';}
         |
             {$$ = '';}
         ;
@@ -197,21 +213,29 @@ The parser can parse its own BNF grammar, shown below:
     action_body
         :
             {$$ = '';}
-        | ACTION_BODY
-            {$$ = yytext;}
-        | action_body '{' action_body '}' ACTION_BODY
-            {$$ = $1+$2+$3+$4+$5;}
+        | action_comments_body
+            {$$ = $1;}
+        | action_body '{' action_body '}' action_comments_body
+            {$$ = $1 + $2 + $3 + $4 + $5;}
         | action_body '{' action_body '}'
-            {$$ = $1+$2+$3+$4;}
+            {$$ = $1 + $2 + $3 + $4;}
+        ;
+
+    action_comments_body
+        : ACTION_BODY
+            { $$ = yytext; }
+        | action_comments_body ACTION_BODY
+            { $$ = $1 + $2; }
         ;
 
     %%
 
     // transform ebnf to bnf if necessary
-    function extend (json, grammar) {
+    function extend(json, grammar) {
         json.bnf = ebnf ? transform(grammar) : grammar;
         return json;
     }
+
 
 ## license
 
