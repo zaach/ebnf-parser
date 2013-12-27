@@ -109,7 +109,7 @@ handle_action
 
 handle
     : handle expression_suffix
-        {$$ = $1; $$.push($2)}
+        {$$ = $1; $$.push($2);}
     |
         {$$ = [];}
     ;
