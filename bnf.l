@@ -4,6 +4,8 @@ BR                                      \r\n|\n|\r
 %x action code
 %s bnf ebnf
 
+%options easy_keyword_rules
+
 %%
 
 <bnf,ebnf>"%%"                          this.pushState('code'); return '%%';

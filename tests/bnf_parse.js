@@ -118,7 +118,7 @@ exports["test embedded lexical block"] = function () {
 };
 
 exports["test lexer %option easy_keyword_rules"] = function () {
-    var grammar = "%lex \n%option easy_keyword_rules\n%%\n'foo' return 'foo';\n'bar' {return 'bar';}\n'baz' {return 'baz';}\n'world' {return 'world';}\n/lex\
+    var grammar = "%lex \n%options easy_keyword_rules\n%%\n'foo' return 'foo';\n'bar' {return 'bar';}\n'baz' {return 'baz';}\n'world' {return 'world';}\n/lex\
                    %% test: foo bar | baz ; hello: world ;";
     var expected = {
                         lex: {
@@ -127,7 +127,10 @@ exports["test lexer %option easy_keyword_rules"] = function () {
                                ["bar\\b", "return 'bar';"],
                                ["baz\\b", "return 'baz';"],
                                ["world\\b", "return 'world';"]
-                            ]
+                            ],
+                            options: {
+                                easy_keyword_rules: true
+                            }
                         },
                         bnf: {test: ["foo bar", "baz"], hello: ["world"]}
                     };
