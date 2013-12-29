@@ -18,6 +18,8 @@ test:
 
 
 clean:
+	-rm -f parser.js
+	-rm -f transform-parser.js
 
 superclean: clean
 	-find . -type d -name 'node_modules' -exec rm -rf "{}" \;
