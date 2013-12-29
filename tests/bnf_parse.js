@@ -105,10 +105,10 @@ exports["test embedded lexical block"] = function () {
     var expected = {
                         lex: {
                             rules: [
-                               ["foo\\b", "return 'foo';"],
-                               ["bar\\b", "return 'bar';"],
-                               ["baz\\b", "return 'baz';"],
-                               ["world\\b", "return 'world';"]
+                               ["foo", "return 'foo';"],
+                               ["bar", "return 'bar';"],
+                               ["baz", "return 'baz';"],
+                               ["world", "return 'world';"]
                             ]
                         },
                         bnf: {test: ["foo bar", "baz"], hello: ["world"]}
