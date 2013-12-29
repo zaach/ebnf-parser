@@ -117,6 +117,24 @@ exports["test embedded lexical block"] = function () {
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };
 
+exports["test lexer %option easy_keyword_rules"] = function () {
+    var grammar = "%lex \n%option easy_keyword_rules\n%%\n'foo' return 'foo';\n'bar' {return 'bar';}\n'baz' {return 'baz';}\n'world' {return 'world';}\n/lex\
+                   %% test: foo bar | baz ; hello: world ;";
+    var expected = {
+                        lex: {
+                            rules: [
+                               ["foo\\b", "return 'foo';"],
+                               ["bar\\b", "return 'bar';"],
+                               ["baz\\b", "return 'baz';"],
+                               ["world\\b", "return 'world';"]
+                            ]
+                        },
+                        bnf: {test: ["foo bar", "baz"], hello: ["world"]}
+                    };
+
+    assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
+};
+
 exports["test balanced braces"] = function () {
     var grammar = "%% test: foo bar { node({}, node({foo:'bar'})); }; hello: world ;";
     var expected = {bnf: {test: [["foo bar"," node({}, node({foo:'bar'})); " ]], hello: ["world"]}};
