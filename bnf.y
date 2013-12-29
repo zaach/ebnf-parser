@@ -21,6 +21,13 @@ optional_end_block
     | '%%'
     ;
 
+optional_action_header_block
+    :
+        {$$ = {};}
+    | optional_action_header_block ACTION
+        {$$ = $1; yy.addDeclaration($$,{actionInclude: $2});}
+    ;
+
 declaration_list
     : declaration_list declaration
         {$$ = $1; yy.addDeclaration($$, $2);}
@@ -68,8 +75,8 @@ token_list
     ;
 
 grammar
-    : production_list
-        {$$ = $1;}
+    : optional_action_header_block production_list
+        {$$ = $1; $$.grammar = $2;}
     ;
 
 production_list
@@ -196,7 +203,10 @@ action_comments_body
 
 // transform ebnf to bnf if necessary
 function extend(json, grammar) {
-    json.bnf = ebnf ? transform(grammar) : grammar;
+    json.bnf = ebnf ? transform(grammar.grammar) : grammar.grammar;
+    if (grammar.actionInclude) {
+        json.actionInclude = grammar.actionInclude;
+    }
     return json;
 }
 
