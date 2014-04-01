@@ -5,10 +5,10 @@ npm-install:
 	npm install
 
 build:
-	node ./node_modules/.bin/jison bnf.y bnf.l
+	./node_modules/.bin/jison bnf.y bnf.l
 	mv bnf.js parser.js
 
-	node ./node_modules/.bin/jison ebnf.y
+	./node_modules/.bin/jison ebnf.y
 	mv ebnf.js transform-parser.js
 
 test:

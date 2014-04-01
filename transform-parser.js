@@ -116,14 +116,13 @@
                               `this` refers to the Lexer object.
   }
 */
-var ebnf = (function(){
+var parser = (function(){
 var parser = {trace: function trace() { },
 yy: {},
 symbols_: {"error":2,"production":3,"handle":4,"EOF":5,"handle_list":6,"|":7,"expression_suffix":8,"expression":9,"suffix":10,"ALIAS":11,"symbol":12,"(":13,")":14,"*":15,"?":16,"+":17,"$accept":0,"$end":1},
 terminals_: {2:"error",5:"EOF",7:"|",11:"ALIAS",12:"symbol",13:"(",14:")",15:"*",16:"?",17:"+"},
 productions_: [0,[3,2],[6,1],[6,3],[4,0],[4,2],[8,3],[8,2],[9,1],[9,3],[10,0],[10,1],[10,1],[10,1]],
-performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */
-/**/) {
+performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
 var $0 = $$.length - 1;
@@ -192,20 +191,28 @@ parse: function parse(input) {
 
     //this.reductionCount = this.shiftCount = 0;
 
-    this.lexer.setInput(input);
-    this.lexer.yy = this.yy;
-    this.yy.lexer = this.lexer;
-    this.yy.parser = this;
-    if (typeof this.lexer.yylloc === 'undefined') {
-        this.lexer.yylloc = {};
+    var lexer = Object.create(this.lexer);
+    var sharedState = { yy: {} };
+    // copy state
+    for (var k in this.yy) {
+      if (Object.prototype.hasOwnProperty.call(this.yy, k)) {
+        sharedState.yy[k] = this.yy[k];
+      }
     }
-    var yyloc = this.lexer.yylloc;
+
+    lexer.setInput(input, sharedState.yy);
+    sharedState.yy.lexer = lexer;
+    sharedState.yy.parser = this;
+    if (typeof lexer.yylloc === 'undefined') {
+        lexer.yylloc = {};
+    }
+    var yyloc = lexer.yylloc;
     lstack.push(yyloc);
 
-    var ranges = this.lexer.options && this.lexer.options.ranges;
+    var ranges = lexer.options && lexer.options.ranges;
 
-    if (typeof this.yy.parseError === 'function') {
-        this.parseError = this.yy.parseError;
+    if (typeof sharedState.yy.parseError === 'function') {
+        this.parseError = sharedState.yy.parseError;
     } else {
         this.parseError = Object.getPrototypeOf(this).parseError; // because in the generated code 'this.__proto__.parseError' doesn't work for everyone: http://javascriptweblog.wordpress.com/2010/06/07/understanding-javascript-prototypes/
     }
@@ -218,7 +225,7 @@ parse: function parse(input) {
 
     function lex() {
         var token;
-        token = self.lexer.lex() || EOF; // $end = 1
+        token = lexer.lex() || EOF; // $end = 1
         // if token isn't its numeric value, convert
         if (typeof token !== 'number') {
             token = self.symbols_[token] || token;
@@ -235,10 +242,10 @@ parse: function parse(input) {
     var retval = false;
 
     if (this.pre_parse) {
-        this.pre_parse(this.yy);
+        this.pre_parse(sharedState.yy);
     }
-    if (this.yy.pre_parse) {
-        this.yy.pre_parse(this.yy);
+    if (sharedState.yy.pre_parse) {
+        sharedState.yy.pre_parse(sharedState.yy);
     }
 
     try {
@@ -294,25 +301,25 @@ parse: function parse(input) {
                             expected.push("'" + this.terminals_[p] + "'");
                         }
                     }
-                    if (this.lexer.showPosition) {
-                        errStr = 'Parse error on line ' + (yylineno + 1) + ":\n" + this.lexer.showPosition() + "\nExpecting " + expected.join(', ') + ", got '" + (this.terminals_[symbol] || symbol) + "'";
+                    if (lexer.showPosition) {
+                        errStr = 'Parse error on line ' + (yylineno + 1) + ":\n" + lexer.showPosition() + "\nExpecting " + expected.join(', ') + ", got '" + (this.terminals_[symbol] || symbol) + "'";
                     } else {
                         errStr = 'Parse error on line ' + (yylineno + 1) + ": Unexpected " +
                                  (symbol == EOF ? "end of input" :
                                   ("'" + (this.terminals_[symbol] || symbol) + "'"));
                     }
                     a = this.parseError(errStr, p = {
-                        text: this.lexer.match,
+                        text: lexer.match,
                         token: this.terminals_[symbol] || symbol,
-                        line: this.lexer.yylineno,
+                        line: lexer.yylineno,
                         loc: yyloc,
                         expected: expected,
                         recoverable: (error_rule_depth !== false)
                     });
-    				if (!p.recoverable) {
-    					retval = a;
+                    if (!p.recoverable) {
+                        retval = a;
                         break;
-    				}
+                    }
                 } else if (preErrorSymbol !== EOF) {
                     error_rule_depth = locateNearestErrorRecoveryRule(state);
                 }
@@ -321,9 +328,9 @@ parse: function parse(input) {
                 if (recovering == 3) {
                     if (symbol === EOF || preErrorSymbol === EOF) {
                         retval = this.parseError(errStr || 'Parsing halted while starting to recover from another error.', {
-                            text: this.lexer.match,
+                            text: lexer.match,
                             token: this.terminals_[symbol] || symbol,
-                            line: this.lexer.yylineno,
+                            line: lexer.yylineno,
                             loc: yyloc,
                             expected: expected,
                             recoverable: false
@@ -332,19 +339,19 @@ parse: function parse(input) {
                     }
 
                     // discard current lookahead and grab another
-                    yyleng = this.lexer.yyleng;
-                    yytext = this.lexer.yytext;
-                    yylineno = this.lexer.yylineno;
-                    yyloc = this.lexer.yylloc;
+                    yyleng = lexer.yyleng;
+                    yytext = lexer.yytext;
+                    yylineno = lexer.yylineno;
+                    yyloc = lexer.yylloc;
                     symbol = lex();
                 }
 
                 // try to recover from error
                 if (error_rule_depth === false) {
                     retval = this.parseError(errStr || 'Parsing halted. No suitable error recovery rule available.', {
-                        text: this.lexer.match,
+                        text: lexer.match,
                         token: this.terminals_[symbol] || symbol,
-                        line: this.lexer.yylineno,
+                        line: lexer.yylineno,
                         loc: yyloc,
                         expected: expected,
                         recoverable: false
@@ -363,9 +370,9 @@ parse: function parse(input) {
             // this shouldn't happen, unless resolve defaults are off
             if (action[0] instanceof Array && action.length > 1) {
                 retval = this.parseError('Parse Error: multiple actions possible at state: ' + state + ', token: ' + symbol, {
-                    text: this.lexer.match,
+                    text: lexer.match,
                     token: this.terminals_[symbol] || symbol,
-                    line: this.lexer.yylineno,
+                    line: lexer.yylineno,
                     loc: yyloc,
                     expected: expected,
                     recoverable: false
@@ -378,15 +385,15 @@ parse: function parse(input) {
                 //this.shiftCount++;
 
                 stack.push(symbol);
-                vstack.push(this.lexer.yytext);
-                lstack.push(this.lexer.yylloc);
+                vstack.push(lexer.yytext);
+                lstack.push(lexer.yylloc);
                 stack.push(action[1]); // push state
                 symbol = null;
                 if (!preErrorSymbol) { // normal execution / no error
-                    yyleng = this.lexer.yyleng;
-                    yytext = this.lexer.yytext;
-                    yylineno = this.lexer.yylineno;
-                    yyloc = this.lexer.yylloc;
+                    yyleng = lexer.yyleng;
+                    yytext = lexer.yytext;
+                    yylineno = lexer.yylineno;
+                    yyloc = lexer.yylloc;
                     if (recovering > 0) {
                         recovering--;
                     }
@@ -415,7 +422,7 @@ parse: function parse(input) {
                 if (ranges) {
                   yyval._$.range = [lstack[lstack.length - (len || 1)].range[0], lstack[lstack.length - 1].range[1]];
                 }
-                r = this.performAction.apply(yyval, [yytext, yyleng, yylineno, this.yy, action[1], vstack, lstack].concat(args));
+                r = this.performAction.apply(yyval, [yytext, yyleng, yylineno, sharedState.yy, action[1], vstack, lstack].concat(args));
 
                 if (typeof r !== 'undefined') {
                     retval = r;
@@ -449,12 +456,12 @@ parse: function parse(input) {
     } finally {
         var rv;
 
-        if (this.yy.post_parse) {
-            rv = this.yy.post_parse(this.yy, retval);
+        if (sharedState.yy.post_parse) {
+            rv = sharedState.yy.post_parse(sharedState.yy, retval);
             if (typeof rv !== 'undefined') retval = rv;
         }
         if (this.post_parse) {
-            rv = this.post_parse(this.yy, retval);
+            rv = this.post_parse(sharedState.yy, retval);
             if (typeof rv !== 'undefined') retval = rv;
         }
     }
@@ -832,8 +839,7 @@ stateStackSize:function stateStackSize() {
         return this.conditionStack.length;
     },
 options: {},
-performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START
-/**/) {
+performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
 
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
@@ -919,9 +925,9 @@ return new Parser;
 
 
 if (typeof require !== 'undefined' && typeof exports !== 'undefined') {
-exports.parser = ebnf;
-exports.Parser = ebnf.Parser;
-exports.parse = function () { return ebnf.parse.apply(ebnf, arguments); };
+exports.parser = parser;
+exports.Parser = parser.Parser;
+exports.parse = function () { return parser.parse.apply(parser, arguments); };
 exports.main = function commonjsMain(args) {
     if (!args[1]) {
         console.log('Usage: '+args[0]+' FILE');
