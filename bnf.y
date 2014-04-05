@@ -11,9 +11,16 @@ var ebnf = false;
 
 spec
     : declaration_list '%%' grammar optional_end_block EOF
-        {$$ = $1; return extend($$, $3);}
+        {
+          $$ = $1;
+          return extend($$, $3);
+        }
     | declaration_list '%%' grammar '%%' CODE EOF
-        {$$ = $1; yy.addDeclaration($$,{include:$5}); return extend($$, $3);}
+        {
+          $$ = $1;
+          yy.addDeclaration($$, { include: $5 });
+          return extend($$, $3);
+        }
     ;
 
 optional_end_block
@@ -39,6 +46,13 @@ declaration
         {$$ = {include: $1};}
     | parse_param
         {$$ = {parseParam: $1};}
+    | options
+        {$$ = {options: $1};}
+    ;
+
+options
+    : OPTIONS token_list
+        {$$ = $2;}
     ;
 
 parse_param

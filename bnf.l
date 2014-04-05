@@ -1,4 +1,5 @@
-id                        [a-zA-Z][a-zA-Z0-9_-]*
+id                [a-zA-Z][a-zA-Z0-9_-]*
+
 
 %x action code
 %s bnf ebnf
@@ -31,6 +32,7 @@ id                        [a-zA-Z][a-zA-Z0-9_-]*
 "%right"                return 'RIGHT';
 "%nonassoc"             return 'NONASSOC';
 "%parse-param"          return 'PARSE_PARAM';
+"%options"              return 'OPTIONS';
 "%lex"[\w\W]*?"/lex"    return 'LEX_BLOCK';
 "%"[a-zA-Z]+[^\r\n]*    /* ignore unrecognized decl */
 "<"[a-zA-Z]*">"         /* ignore type */
