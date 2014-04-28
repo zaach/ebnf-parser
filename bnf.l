@@ -1,6 +1,7 @@
 id                                      [a-zA-Z][a-zA-Z0-9_-]*
 BR                                      \r\n|\n|\r
 
+
 %x action code
 %s bnf ebnf
 
@@ -34,6 +35,7 @@ BR                                      \r\n|\n|\r
 "%right"                                return 'RIGHT';
 "%nonassoc"                             return 'NONASSOC';
 "%parse-param"                          return 'PARSE_PARAM';
+"%options"                              return 'OPTIONS';
 "%lex"[\w\W]*?{BR}\s*"/lex"\b           return 'LEX_BLOCK';
 "%"[a-zA-Z]+[^\r\n]*                    /* ignore unrecognized decl */
 "<"[a-zA-Z]*">"                         /* ignore type */

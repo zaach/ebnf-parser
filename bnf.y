@@ -11,9 +11,16 @@ var ebnf = false;
 
 spec
     : declaration_list '%%' grammar optional_end_block EOF
-        {$$ = $1; return extend($$, $3);}
+        {
+          $$ = $1;
+          return extend($$, $3);
+        }
     | declaration_list '%%' grammar '%%' CODE EOF
-        {$$ = $1; yy.addDeclaration($$,{include: $5}); return extend($$, $3);}
+        {
+          $$ = $1;
+          yy.addDeclaration($$, { include: $5 });
+          return extend($$, $3);
+        }
     ;
 
 optional_end_block
@@ -23,9 +30,14 @@ optional_end_block
 
 optional_action_header_block
     :
-        {$$ = {};}
+        {
+	  $$ = {};
+	}
     | optional_action_header_block ACTION
-        {$$ = $1; yy.addDeclaration($$,{actionInclude: $2});}
+        {
+	  $$ = $1; 
+	  yy.addDeclaration($$, { actionInclude: $2 });
+	}
     ;
 
 declaration_list
@@ -46,6 +58,13 @@ declaration
         {$$ = {include: $1};}
     | parse_param
         {$$ = {parseParam: $1};}
+    | options
+        {$$ = {options: $1};}
+    ;
+
+options
+    : OPTIONS token_list
+        {$$ = $2;}
     ;
 
 parse_param
@@ -76,7 +95,10 @@ token_list
 
 grammar
     : optional_action_header_block production_list
-        {$$ = $1; $$.grammar = $2;}
+        {
+	  $$ = $1; 
+	  $$.grammar = $2;
+	}
     ;
 
 production_list
@@ -99,9 +121,14 @@ production
 
 handle_list
     : handle_list '|' handle_action
-        {$$ = $1; $$.push($3);}
+        {
+	  $$ = $1; 
+	  $$.push($3);
+	}
     | handle_action
-        {$$ = [$1];}
+        {
+	  $$ = [$1];
+	}
     ;
 
 handle_action
@@ -116,32 +143,52 @@ handle_action
 
 handle
     : handle expression_suffix
-        {$$ = $1; $$.push($2);}
+        {
+	  $$ = $1; 
+	  $$.push($2);
+	}
     |
-        {$$ = [];}
+        {
+	  $$ = [];
+	}
     ;
 
 handle_sublist
     : handle_sublist '|' handle
-        {$$ = $1; $$.push($3.join(' '));}
+        {
+	  $$ = $1; 
+	  $$.push($3.join(' '));
+	}
     | handle
-        {$$ = [$1.join(' ')];}
+        {
+	  $$ = [$1.join(' ')];
+	}
     ;
 
 expression_suffix
     : expression suffix ALIAS
-        {$$ = $expression + $suffix + "[" + $ALIAS + "]"; }
+        {
+	  $$ = $expression + $suffix + "[" + $ALIAS + "]"; 
+	}
     | expression suffix
-        {$$ = $expression + $suffix; }
+        {
+	  $$ = $expression + $suffix; 
+	}
     ;
 
 expression
     : ID
-        {$$ = $1; }
+        {
+	  $$ = $1; 
+	}
     | STRING
-        {$$ = ebnf ? "'" + $1 + "'" : $1; }
+        {
+	  $$ = ebnf ? "'" + $1 + "'" : $1; 
+	}
     | '(' handle_sublist ')'
-        {$$ = '(' + $handle_sublist.join(' | ') + ')'; }
+        {
+	  $$ = '(' + $handle_sublist.join(' | ') + ')'; 
+	}
     ;
 
 suffix
@@ -153,9 +200,13 @@ suffix
 
 prec
     : PREC symbol
-        {$$ = {prec: $2};}
+        {
+	  $$ = { prec: $2 };
+	}
     |
-        {$$ = null;}
+        {
+	  $$ = null;
+	}
     ;
 
 symbol
