@@ -23,7 +23,7 @@
     "node": ">=0.9"
   },
   "devDependencies": {
-    "jison": "git://github.com/zaach/jison.git#ef2647",
+    "jison": "git://github.com/GerHobbelt/jison.git",
     "lex-parser": "git://github.com/GerHobbelt/lex-parser.git",
     "test": ">=0.4.0"
   }
