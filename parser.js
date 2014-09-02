@@ -117,6 +117,13 @@
   }
 */
 var parser = (function(){
+var __expand__ = function (k, v, o) {
+  o = o || {};
+  for (var l = k.length; l--; ) {
+    o[k[l]] = v;
+  }
+  return o;
+};
 var parser = {trace: function trace() { },
 yy: {},
 symbols_: {"error":2,"spec":3,"declaration_list":4,"%%":5,"grammar":6,"optional_end_block":7,"EOF":8,"CODE":9,"optional_action_header_block":10,"ACTION":11,"declaration":12,"START":13,"id":14,"LEX_BLOCK":15,"operator":16,"parse_param":17,"options":18,"OPTIONS":19,"token_list":20,"PARSE_PARAM":21,"associativity":22,"LEFT":23,"RIGHT":24,"NONASSOC":25,"symbol":26,"production_list":27,"production":28,":":29,"handle_list":30,";":31,"|":32,"handle_action":33,"handle":34,"prec":35,"action":36,"expression_suffix":37,"handle_sublist":38,"expression":39,"suffix":40,"ALIAS":41,"ID":42,"STRING":43,"(":44,")":45,"*":46,"?":47,"+":48,"PREC":49,"{":50,"action_body":51,"}":52,"ARROW_ACTION":53,"action_comments_body":54,"ACTION_BODY":55,"$accept":0,"$end":1},
@@ -129,297 +136,222 @@ var $0 = $$.length - 1;
 switch (yystate) {
 case 1 : 
 /*! Production::     spec : declaration_list %% grammar optional_end_block EOF */
-
-
+ 
           this.$ = $$[$0-4];
           return extend(this.$, $$[$0-2]);
-        
-
+         
 break;
 case 2 : 
 /*! Production::     spec : declaration_list %% grammar %% CODE EOF */
-
-
+ 
           this.$ = $$[$0-5];
           yy.addDeclaration(this.$, { include: $$[$0-1] });
           return extend(this.$, $$[$0-3]);
-        
-
+         
 break;
 case 5 : 
 /*! Production::     optional_action_header_block :  */
-
-
+ 
 	  this.$ = {};
-	
-
+	 
 break;
 case 6 : 
 /*! Production::     optional_action_header_block : optional_action_header_block ACTION */
-
-
+ 
 	  this.$ = $$[$0-1]; 
 	  yy.addDeclaration(this.$, { actionInclude: $$[$0] });
-	
-
+	 
 break;
 case 7 : 
 /*! Production::     declaration_list : declaration_list declaration */
-
-this.$ = $$[$0-1]; yy.addDeclaration(this.$, $$[$0]);
-
+ this.$ = $$[$0-1]; yy.addDeclaration(this.$, $$[$0]); 
 break;
 case 8 : 
 /*! Production::     declaration_list :  */
-
-this.$ = {};
-
+ this.$ = {}; 
 break;
 case 9 : 
 /*! Production::     declaration : START id */
-
-this.$ = {start: $$[$0]};
-
+ this.$ = {start: $$[$0]}; 
 break;
 case 10 : 
 /*! Production::     declaration : LEX_BLOCK */
-
-this.$ = {lex: $$[$0]};
-
+ this.$ = {lex: $$[$0]}; 
 break;
 case 11 : 
 /*! Production::     declaration : operator */
-
-this.$ = {operator: $$[$0]};
-
+ this.$ = {operator: $$[$0]}; 
 break;
 case 12 : 
 /*! Production::     declaration : ACTION */
-
-this.$ = {include: $$[$0]};
-
+ this.$ = {include: $$[$0]}; 
 break;
 case 13 : 
 /*! Production::     declaration : parse_param */
-
-this.$ = {parseParam: $$[$0]};
-
+ this.$ = {parseParam: $$[$0]}; 
 break;
 case 14 : 
 /*! Production::     declaration : options */
-
-this.$ = {options: $$[$0]};
-
+ this.$ = {options: $$[$0]}; 
 break;
 case 15 : 
 /*! Production::     options : OPTIONS token_list */
- this.$ = $$[$0]; 
-break;
-case 16 : 
+ case 16 : 
 /*! Production::     parse_param : PARSE_PARAM token_list */
+ case 45 : 
+/*! Production::     symbol : id */
+ case 49 : 
+/*! Production::     action : ACTION */
+ case 53 : 
+/*! Production::     action_body : action_comments_body */
  this.$ = $$[$0]; 
 break;
 case 17 : 
 /*! Production::     operator : associativity token_list */
-
-this.$ = [$$[$0-1]]; this.$.push.apply(this.$, $$[$0]);
-
+ this.$ = [$$[$0-1]]; this.$.push.apply(this.$, $$[$0]); 
 break;
 case 18 : 
 /*! Production::     associativity : LEFT */
-
-this.$ = 'left';
-
+ this.$ = 'left'; 
 break;
 case 19 : 
 /*! Production::     associativity : RIGHT */
-
-this.$ = 'right';
-
+ this.$ = 'right'; 
 break;
 case 20 : 
 /*! Production::     associativity : NONASSOC */
-
-this.$ = 'nonassoc';
-
+ this.$ = 'nonassoc'; 
 break;
 case 21 : 
 /*! Production::     token_list : token_list symbol */
-
-this.$ = $$[$0-1]; this.$.push($$[$0]);
-
+ this.$ = $$[$0-1]; this.$.push($$[$0]); 
 break;
 case 22 : 
 /*! Production::     token_list : symbol */
-
-this.$ = [$$[$0]];
-
+ this.$ = [$$[$0]]; 
 break;
 case 23 : 
 /*! Production::     grammar : optional_action_header_block production_list */
-
-
+ 
 	  this.$ = $$[$0-1]; 
 	  this.$.grammar = $$[$0];
-	
-
+	 
 break;
 case 24 : 
 /*! Production::     production_list : production_list production */
-
-
+ 
             this.$ = $$[$0-1];
             if ($$[$0][0] in this.$)
                 this.$[$$[$0][0]] = this.$[$$[$0][0]].concat($$[$0][1]);
             else
                 this.$[$$[$0][0]] = $$[$0][1];
-        
-
+         
 break;
 case 25 : 
 /*! Production::     production_list : production */
-
-this.$ = {}; this.$[$$[$0][0]] = $$[$0][1];
-
+ this.$ = {}; this.$[$$[$0][0]] = $$[$0][1]; 
 break;
 case 26 : 
 /*! Production::     production : id : handle_list ; */
-
-this.$ = [$$[$0-3], $$[$0-1]];
-
+ this.$ = [$$[$0-3], $$[$0-1]]; 
 break;
 case 27 : 
 /*! Production::     handle_list : handle_list | handle_action */
-
-
+ 
 	  this.$ = $$[$0-2]; 
 	  this.$.push($$[$0]);
-	
-
+	 
 break;
 case 28 : 
 /*! Production::     handle_list : handle_action */
-
-
+ 
 	  this.$ = [$$[$0]];
-	
-
+	 
 break;
 case 29 : 
 /*! Production::     handle_action : handle prec action */
-
-
+ 
             this.$ = [($$[$0-2].length ? $$[$0-2].join(' ') : '')];
             if($$[$0]) this.$.push($$[$0]);
             if($$[$0-1]) this.$.push($$[$0-1]);
             if (this.$.length === 1) this.$ = this.$[0];
-        
-
+         
 break;
 case 30 : 
 /*! Production::     handle : handle expression_suffix */
-
-
+ 
 	  this.$ = $$[$0-1]; 
 	  this.$.push($$[$0]);
-	
-
+	 
 break;
 case 31 : 
 /*! Production::     handle :  */
-
-
+ 
 	  this.$ = [];
-	
-
+	 
 break;
 case 32 : 
 /*! Production::     handle_sublist : handle_sublist | handle */
-
-
+ 
 	  this.$ = $$[$0-2]; 
 	  this.$.push($$[$0].join(' '));
-	
-
+	 
 break;
 case 33 : 
 /*! Production::     handle_sublist : handle */
-
-
+ 
 	  this.$ = [$$[$0].join(' ')];
-	
-
+	 
 break;
 case 34 : 
 /*! Production::     expression_suffix : expression suffix ALIAS */
-
-
+ 
 	  this.$ = $$[$0-2] + $$[$0-1] + "[" + $$[$0] + "]"; 
-	
-
+	 
 break;
 case 35 : 
 /*! Production::     expression_suffix : expression suffix */
-
-
+ 
 	  this.$ = $$[$0-1] + $$[$0]; 
-	
-
+	 
 break;
 case 36 : 
 /*! Production::     expression : ID */
-
-
+ 
 	  this.$ = $$[$0]; 
-	
-
+	 
 break;
 case 37 : 
 /*! Production::     expression : STRING */
-
-
+ 
 	  this.$ = ebnf ? "'" + $$[$0] + "'" : $$[$0]; 
-	
-
+	 
 break;
 case 38 : 
 /*! Production::     expression : ( handle_sublist ) */
-
-
+ 
 	  this.$ = '(' + $$[$0-1].join(' | ') + ')'; 
-	
-
+	 
 break;
 case 39 : 
 /*! Production::     suffix :  */
-
-this.$ = ''
-
+ this.$ = '' 
 break;
 case 43 : 
 /*! Production::     prec : PREC symbol */
-
-
+ 
 	  this.$ = { prec: $$[$0] };
-	
-
+	 
 break;
 case 44 : 
 /*! Production::     prec :  */
-
-
+ 
 	  this.$ = null;
 	 
 break;
-case 45 : 
-/*! Production::     symbol : id */
- this.$ = $$[$0]; 
-break;
 case 46 : 
 /*! Production::     symbol : STRING */
- this.$ = yytext; 
-break;
-case 47 : 
+ case 47 : 
 /*! Production::     id : ID */
  this.$ = yytext; 
 break;
@@ -427,49 +359,31 @@ case 48 :
 /*! Production::     action : { action_body } */
  this.$ = $$[$0-1]; 
 break;
-case 49 : 
-/*! Production::     action : ACTION */
- this.$ = $$[$0]; 
-break;
 case 50 : 
 /*! Production::     action : ARROW_ACTION */
  this.$ = '$$ =' + $$[$0] + ';'; 
 break;
 case 51 : 
 /*! Production::     action :  */
- this.$ = ''; 
-break;
-case 52 : 
+ case 52 : 
 /*! Production::     action_body :  */
  this.$ = ''; 
 break;
-case 53 : 
-/*! Production::     action_body : action_comments_body */
- this.$ = $$[$0]; 
-break;
 case 54 : 
 /*! Production::     action_body : action_body { action_body } action_comments_body */
-
-this.$ = $$[$0-4] + $$[$0-3] + $$[$0-2] + $$[$0-1] + $$[$0];
-
+ this.$ = $$[$0-4] + $$[$0-3] + $$[$0-2] + $$[$0-1] + $$[$0]; 
 break;
 case 55 : 
 /*! Production::     action_body : action_body { action_body } */
-
-this.$ = $$[$0-3] + $$[$0-2] + $$[$0-1] + $$[$0];
-
+ this.$ = $$[$0-3] + $$[$0-2] + $$[$0-1] + $$[$0]; 
 break;
 case 56 : 
 /*! Production::     action_comments_body : ACTION_BODY */
-
- this.$ = yytext; 
-
+  this.$ = yytext;  
 break;
 case 57 : 
 /*! Production::     action_comments_body : action_comments_body ACTION_BODY */
-
- this.$ = $$[$0-1] + $$[$0]; 
-
+  this.$ = $$[$0-1] + $$[$0];  
 break;
 }
 },
@@ -1167,6 +1081,7 @@ stateStackSize:function stateStackSize() {
     },
 options: {"easy_keyword_rules":true},
 performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
+
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
 case 0 : 
@@ -1334,11 +1249,6 @@ case 32 :
 /*! Rule::       . */ 
  throw new Error("unsupported input character: " + yy_.yytext); /* b0rk on bad characters */ 
 break;
-case 33 : 
-/*! Conditions:: * */ 
-/*! Rule::       $ */ 
- return 8; 
-break;
 case 34 : 
 /*! Conditions:: action */ 
 /*! Rule::       \/\*(.|\n|\r)*?\*\/ */ 
@@ -1389,7 +1299,15 @@ case 43 :
 /*! Rule::       (.|\n|\r)+ */ 
  return 9; 
 break;
+default:
+  return this.simpleCaseActionClusters[$avoiding_name_collisions];
 }
+},
+simpleCaseActionClusters: {
+33 : 
+/*! Conditions:: * */ 
+/*! Rule::       $ */ 
+ 8
 },
 rules: [/^(?:%%)/,/^(?:\()/,/^(?:\))/,/^(?:\*)/,/^(?:\?)/,/^(?:\+)/,/^(?:\s+)/,/^(?:\/\/.*)/,/^(?:\/\*(.|\n|\r)*?\*\/)/,/^(?:\[([a-zA-Z][a-zA-Z0-9_-]*)\])/,/^(?:([a-zA-Z][a-zA-Z0-9_-]*))/,/^(?:"[^"]+")/,/^(?:'[^']+')/,/^(?::)/,/^(?:;)/,/^(?:\|)/,/^(?:%%)/,/^(?:%ebnf\b)/,/^(?:%prec\b)/,/^(?:%start\b)/,/^(?:%left\b)/,/^(?:%right\b)/,/^(?:%nonassoc\b)/,/^(?:%parse-param\b)/,/^(?:%options\b)/,/^(?:%lex[\w\W]*?(\r\n|\n|\r)\s*\/lex\b)/,/^(?:%[a-zA-Z]+[^\r\n]*)/,/^(?:<[a-zA-Z]*>)/,/^(?:\{\{[\w\W]*?\}\})/,/^(?:%\{(.|\r|\n)*?%\})/,/^(?:\{)/,/^(?:->.*)/,/^(?:.)/,/^(?:$)/,/^(?:\/\*(.|\n|\r)*?\*\/)/,/^(?:\/\/.*)/,/^(?:\/[^ /]*?['"{}'][^ ]*?\/)/,/^(?:"(\\\\|\\"|[^"])*")/,/^(?:'(\\\\|\\'|[^'])*')/,/^(?:[/"'][^{}/"']+)/,/^(?:[^{}/"']+)/,/^(?:\{)/,/^(?:\})/,/^(?:(.|\n|\r)+)/],
 conditions: {"bnf":{"rules":[0,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33],"inclusive":true},"ebnf":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33],"inclusive":true},"action":{"rules":[33,34,35,36,37,38,39,40,41,42],"inclusive":false},"code":{"rules":[33,43],"inclusive":false},"INITIAL":{"rules":[6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33],"inclusive":true}}

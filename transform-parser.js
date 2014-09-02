@@ -117,6 +117,13 @@
   }
 */
 var parser = (function(){
+var __expand__ = function (k, v, o) {
+  o = o || {};
+  for (var l = k.length; l--; ) {
+    o[k[l]] = v;
+  }
+  return o;
+};
 var parser = {trace: function trace() { },
 yy: {},
 symbols_: {"error":2,"production":3,"handle":4,"EOF":5,"handle_list":6,"|":7,"expression_suffix":8,"expression":9,"suffix":10,"ALIAS":11,"symbol":12,"(":13,")":14,"*":15,"?":16,"+":17,"$accept":0,"$end":1},
@@ -129,57 +136,39 @@ var $0 = $$.length - 1;
 switch (yystate) {
 case 1 : 
 /*! Production::     production : handle EOF */
-
- return $$[$0-1]; 
-
+  return $$[$0-1];  
 break;
 case 2 : 
 /*! Production::     handle_list : handle */
-
- this.$ = [$$[$0]]; 
-
+  this.$ = [$$[$0]];  
 break;
 case 3 : 
 /*! Production::     handle_list : handle_list | handle */
-
- $$[$0-2].push($$[$0]); 
-
+  $$[$0-2].push($$[$0]);  
 break;
 case 4 : 
 /*! Production::     handle :  */
-
- this.$ = []; 
-
+  this.$ = [];  
 break;
 case 5 : 
 /*! Production::     handle : handle expression_suffix */
-
- $$[$0-1].push($$[$0]); 
-
+  $$[$0-1].push($$[$0]);  
 break;
 case 6 : 
 /*! Production::     expression_suffix : expression suffix ALIAS */
-
- this.$ = ['xalias', $$[$0-1], $$[$0-2], $$[$0]]; 
-
+  this.$ = ['xalias', $$[$0-1], $$[$0-2], $$[$0]];  
 break;
 case 7 : 
 /*! Production::     expression_suffix : expression suffix */
-
- if ($$[$0]) this.$ = [$$[$0], $$[$0-1]]; else this.$ = $$[$0-1]; 
-
+  if ($$[$0]) this.$ = [$$[$0], $$[$0-1]]; else this.$ = $$[$0-1];  
 break;
 case 8 : 
 /*! Production::     expression : symbol */
-
- this.$ = ['symbol', $$[$0]]; 
-
+  this.$ = ['symbol', $$[$0]];  
 break;
 case 9 : 
 /*! Production::     expression : ( handle_list ) */
-
- this.$ = ['()', $$[$0-1]]; 
-
+  this.$ = ['()', $$[$0-1]];  
 break;
 }
 },
@@ -863,6 +852,7 @@ stateStackSize:function stateStackSize() {
     },
 options: {},
 performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
+
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
 case 0 : 
@@ -930,7 +920,12 @@ case 12 :
 /*! Rule::       $ */ 
  return 5; 
 break;
+default:
+  return this.simpleCaseActionClusters[$avoiding_name_collisions];
 }
+},
+simpleCaseActionClusters: {
+
 },
 rules: [/^(?:\s+)/,/^(?:([a-zA-Z][a-zA-Z0-9_-]*))/,/^(?:\[([a-zA-Z][a-zA-Z0-9_-]*)\])/,/^(?:'[^']*')/,/^(?:\.)/,/^(?:bar)/,/^(?:\()/,/^(?:\))/,/^(?:\*)/,/^(?:\?)/,/^(?:\|)/,/^(?:\+)/,/^(?:$)/],
 conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12],"inclusive":true}}
