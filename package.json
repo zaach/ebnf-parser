@@ -25,6 +25,6 @@
   "devDependencies": {
     "jison": "git://github.com/GerHobbelt/jison.git#master",
     "lex-parser": "git://github.com/GerHobbelt/lex-parser.git#master",
-    "test": ">=0.4.0"
+    "test": ">=0.6.0"
   }
 }
