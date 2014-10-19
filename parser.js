@@ -116,7 +116,7 @@
                               `this` refers to the Lexer object.
   }
 */
-var parser = (function(){
+var bnf = (function(){
 var __expand__ = function (k, v, o) {
   o = o || {};
   for (var l = k.length; l--; ) {
@@ -1425,9 +1425,9 @@ return new Parser;
 
 
 if (typeof require !== 'undefined' && typeof exports !== 'undefined') {
-exports.parser = parser;
-exports.Parser = parser.Parser;
-exports.parse = function () { return parser.parse.apply(parser, arguments); };
+exports.parser = bnf;
+exports.Parser = bnf.Parser;
+exports.parse = function () { return bnf.parse.apply(bnf, arguments); };
 exports.main = function commonjsMain(args) {
     if (!args[1]) {
         console.log('Usage: '+args[0]+' FILE');
