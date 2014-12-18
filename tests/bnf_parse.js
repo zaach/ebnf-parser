@@ -213,9 +213,16 @@ exports["test parse params"] = function () {
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };
 
-exports["test options"] = function () {
+exports["test boolean options"] = function () {
     var grammar = "%options one two\n%%hello: world;%%";
     var expected = {bnf: {hello: ["world"]}, options: {one: true, two: true}};
+
+    assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
+};
+
+exports["test key-value options"] = function () {
+    var grammar = "%options foo: bar;\nbaz\n%%hello: world;%%";
+    var expected = {bnf: {hello: ["world"]}, options: {foo: 'bar', baz: true}};
 
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };

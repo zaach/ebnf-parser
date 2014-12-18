@@ -51,8 +51,22 @@ declaration
     ;
 
 options
-    : OPTIONS token_list
+    : OPTIONS options_list
         {$$ = $2;}
+    ;
+
+options_list
+    : option options_list
+        {$$ = $2; $$[$1[0]] = $1[1];}
+    | option 
+        {$$ = {}; $$[$1[0]] = $1[1];}
+    ;
+
+option
+    : symbol 
+        {$$ = [$1, true];}
+    | production 
+        {$$ = [$1[0], $1[1][0]]}
     ;
 
 parse_param
