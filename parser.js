@@ -2625,6 +2625,7 @@ return new Parser;
 })();
 
 
+
 if (typeof require !== 'undefined' && typeof exports !== 'undefined') {
 exports.parser = bnf;
 exports.Parser = bnf.Parser;
