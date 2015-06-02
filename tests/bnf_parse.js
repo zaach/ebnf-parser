@@ -87,7 +87,8 @@ exports["test comment with nested *"] = function () {
 
 exports["test token"] = function () {
     var grammar = "%token blah\n%% test: foo bar | baz ; hello: world ;";
-    var expected = {bnf: {test: ["foo bar", "baz"], hello: ["world"]}};
+    var expected = {bnf: {test: ["foo bar", "baz"], hello: ["world"]},
+                    extra_tokens: [{id: "blah"}]};
 
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };

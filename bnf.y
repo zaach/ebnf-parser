@@ -54,6 +54,8 @@ declaration
         {$$ = {lex: $1};}
     | operator
         {$$ = {operator: $1};}
+    | token
+        {$$ = {token: $1};}
     | ACTION
         {$$ = {include: $1};}
     | parse_param
@@ -91,6 +93,24 @@ token_list
         {$$ = $1; $$.push($2);}
     | symbol
         {$$ = [$1];}
+    ;
+
+token
+    : TOKEN token_id
+        {$$ = {id: $2};}
+    | TOKEN token_id INTEGER
+        {$$ = {id: $2, value: $3};}
+    | TOKEN token_id INTEGER STRING 
+        {$$ = {id: $2, value: $3, description: $4};}
+    | TOKEN token_id STRING 
+        {$$ = {id: $2, description: $3};}
+    ;
+
+token_id
+    : TOKEN_TYPE id
+        {$$ = $id;}
+    | id
+        {$$ = $id;}
     ;
 
 grammar
