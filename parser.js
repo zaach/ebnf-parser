@@ -1642,7 +1642,7 @@ parseError: function parseError(str, hash) {
 parse: function parse(input) {
     var self = this,
         stack = [0],
-        
+
         vstack = [null],    // semantic value stack
         lstack = [],        // location stack
         table = this.table,
@@ -1650,6 +1650,7 @@ parse: function parse(input) {
         yylineno = 0,
         yyleng = 0,
 
+        error_signaled = false,
         TERROR = 2,
         EOF = 1;
 
@@ -1711,7 +1712,7 @@ parse: function parse(input) {
     var preErrorSymbol = null;
     var state, action, a, r;
     var yyval = {};
-    var p, len, newState;
+    var p, len, len1, this_production, lstack_begin, lstack_end, newState;
     var expected = [];
     var retval = false;
 
@@ -1720,6 +1721,23 @@ parse: function parse(input) {
     }
     if (sharedState.yy.pre_parse) {
         sharedState.yy.pre_parse.call(this, sharedState.yy);
+    }
+
+
+
+    function collect_expected_token_set(state) {
+        var tokenset = [];
+        for (var p in table[state]) {
+            if (p > TERROR) {
+                if (self.terminal_descriptions_ && self.terminal_descriptions_[p]) {
+                    tokenset.push(self.terminal_descriptions_[p]);
+                }
+                else if (self.terminals_[p]) {
+                    tokenset.push("'" + self.terminals_[p] + "'");
+                }
+            }
+        }
+        return tokenset;
     }
 
     try {
@@ -1740,24 +1758,20 @@ parse: function parse(input) {
 
             // handle parse error
             if (typeof action === 'undefined' || !action.length || !action[0]) {
-                var errStr = '';
+                var errStr;
 
                 // Report error
-                expected = [];
-                for (p in table[state]) {
-                    if (this.terminals_[p] && p > TERROR) {
-                        expected.push("'" + this.terminals_[p] + "'");
-                    }
-                }
+                expected = collect_expected_token_set(state);
                 if (lexer.showPosition) {
                     errStr = 'Parse error on line ' + (yylineno + 1) + ":\n" + lexer.showPosition() + "\nExpecting " + expected.join(', ') + ", got '" + (this.terminals_[symbol] || symbol) + "'";
                 } else {
                     errStr = 'Parse error on line ' + (yylineno + 1) + ": Unexpected " +
-                             (symbol == EOF ? "end of input" :
+                             (symbol === EOF ? "end of input" :
                               ("'" + (this.terminals_[symbol] || symbol) + "'"));
                 }
                 // we cannot recover from the error!
-                retval = this.parseError(errStr || 'Parsing halted. No suitable error recovery rule available.', {
+                error_signaled = true;
+                retval = this.parseError(errStr, {
                     text: lexer.match,
                     token: this.terminals_[symbol] || symbol,
                     line: lexer.yylineno,
@@ -1771,6 +1785,7 @@ parse: function parse(input) {
 
             // this shouldn't happen, unless resolve defaults are off
             if (action[0] instanceof Array && action.length > 1) {
+                error_signaled = true;
                 retval = this.parseError('Parse Error: multiple actions possible at state: ' + state + ', token: ' + symbol, {
                     text: lexer.match,
                     token: this.terminals_[symbol] || symbol,
@@ -1808,35 +1823,38 @@ parse: function parse(input) {
                 // reduce
                 //this.reductionCount++;
 
-                len = this.productions_[action[1]][1];
+                this_production = this.productions_[action[1]]; 
+                len = this_production[1];
+                lstack_end = lstack.length;
+                lstack_begin = lstack_end - (len1 || 1);
+                lstack_end--;
 
                 // perform semantic action
                 yyval.$ = vstack[vstack.length - len]; // default to $$ = $1
                 // default location, uses first token for firsts, last for lasts
                 yyval._$ = {
-                    first_line: lstack[lstack.length - (len || 1)].first_line,
-                    last_line: lstack[lstack.length - 1].last_line,
-                    first_column: lstack[lstack.length - (len || 1)].first_column,
-                    last_column: lstack[lstack.length - 1].last_column
+                    first_line: lstack[lstack_begin].first_line,
+                    last_line: lstack[lstack_end].last_line,
+                    first_column: lstack[lstack_begin].first_column,
+                    last_column: lstack[lstack_end].last_column
                 };
                 if (ranges) {
-                  yyval._$.range = [lstack[lstack.length - (len || 1)].range[0], lstack[lstack.length - 1].range[1]];
+                  yyval._$.range = [lstack[lstack_begin].range[0], lstack[lstack_end].range[1]];
                 }
                 r = this.performAction.apply(yyval, [yytext, yyleng, yylineno, sharedState.yy, action[1], vstack, lstack].concat(args));
 
                 if (typeof r !== 'undefined') {
                     retval = r;
+                    error_signaled = true;
                     break;
                 }
 
                 // pop off stack
                 if (len) {
-                    stack = stack.slice(0, -1 * len * 2);
-                    vstack = vstack.slice(0, -1 * len);
-                    lstack = lstack.slice(0, -1 * len);
+                    popStack(len);
                 }
 
-                stack.push(this.productions_[action[1]][0]);    // push nonterminal (reduce)
+                stack.push(this_production[0]);    // push nonterminal (reduce)
                 vstack.push(yyval.$);
                 lstack.push(yyval._$);
                 // goto new state = table[STATE][NONTERMINAL]
@@ -1847,10 +1865,14 @@ parse: function parse(input) {
             case 3:
                 // accept
                 retval = true;
+                error_signaled = true;
                 break;
             }
 
             // break out of loop: we accept or fail with error
+            if (!error_signaled) {
+                // b0rk b0rk b0rk!
+            }
             break;
         }
     } finally {
@@ -2287,31 +2309,6 @@ case 0 :
 /*! Rule::       %% */ 
  this.pushState('code'); return 5; 
 break;
-case 1 : 
-/*! Conditions:: ebnf */ 
-/*! Rule::       \( */ 
- return 49; 
-break;
-case 2 : 
-/*! Conditions:: ebnf */ 
-/*! Rule::       \) */ 
- return 50; 
-break;
-case 3 : 
-/*! Conditions:: ebnf */ 
-/*! Rule::       \* */ 
- return 51; 
-break;
-case 4 : 
-/*! Conditions:: ebnf */ 
-/*! Rule::       \? */ 
- return 52; 
-break;
-case 5 : 
-/*! Conditions:: ebnf */ 
-/*! Rule::       \+ */ 
- return 53; 
-break;
 case 6 : 
 /*! Conditions:: bnf ebnf INITIAL */ 
 /*! Rule::       \s+ */ 
@@ -2332,11 +2329,6 @@ case 9 :
 /*! Rule::       \[{id}\] */ 
  yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); return 47; 
 break;
-case 10 : 
-/*! Conditions:: bnf ebnf INITIAL */ 
-/*! Rule::       {id} */ 
- return 48; 
-break;
 case 11 : 
 /*! Conditions:: bnf ebnf INITIAL */ 
 /*! Rule::       "[^"]+" */ 
@@ -2347,21 +2339,6 @@ case 12 :
 /*! Rule::       '[^']+' */ 
  yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); return 31; 
 break;
-case 13 : 
-/*! Conditions:: bnf ebnf INITIAL */ 
-/*! Rule::       : */ 
- return 35; 
-break;
-case 14 : 
-/*! Conditions:: bnf ebnf INITIAL */ 
-/*! Rule::       ; */ 
- return 37; 
-break;
-case 15 : 
-/*! Conditions:: bnf ebnf INITIAL */ 
-/*! Rule::       \| */ 
- return 38; 
-break;
 case 16 : 
 /*! Conditions:: bnf ebnf INITIAL */ 
 /*! Rule::       %% */ 
@@ -2371,51 +2348,6 @@ case 17 :
 /*! Conditions:: bnf ebnf INITIAL */ 
 /*! Rule::       %ebnf\b */ 
  if (!yy.options) { yy.options = {}; } ebnf = yy.options.ebnf = true; 
-break;
-case 18 : 
-/*! Conditions:: bnf ebnf INITIAL */ 
-/*! Rule::       %prec\b */ 
- return 54; 
-break;
-case 19 : 
-/*! Conditions:: bnf ebnf INITIAL */ 
-/*! Rule::       %start\b */ 
- return 13; 
-break;
-case 20 : 
-/*! Conditions:: bnf ebnf INITIAL */ 
-/*! Rule::       %left\b */ 
- return 24; 
-break;
-case 21 : 
-/*! Conditions:: bnf ebnf INITIAL */ 
-/*! Rule::       %right\b */ 
- return 25; 
-break;
-case 22 : 
-/*! Conditions:: bnf ebnf INITIAL */ 
-/*! Rule::       %nonassoc\b */ 
- return 26; 
-break;
-case 23 : 
-/*! Conditions:: bnf ebnf INITIAL */ 
-/*! Rule::       %token\b */ 
- return 28; 
-break;
-case 24 : 
-/*! Conditions:: bnf ebnf INITIAL */ 
-/*! Rule::       %parse-param\b */ 
- return 22; 
-break;
-case 25 : 
-/*! Conditions:: bnf ebnf INITIAL */ 
-/*! Rule::       %options\b */ 
- return 20; 
-break;
-case 26 : 
-/*! Conditions:: bnf ebnf INITIAL */ 
-/*! Rule::       %lex[\w\W]*?{BR}\s*\/lex\b */ 
- return 15; 
 break;
 case 27 : 
 /*! Conditions:: bnf ebnf INITIAL */ 
@@ -2468,40 +2400,10 @@ case 35 :
                                             throw new Error("unsupported input character: " + yy_.yytext + " @ " + JSON.stringify(yyloc)); /* b0rk on bad characters */
                                          
 break;
-case 37 : 
-/*! Conditions:: action */ 
-/*! Rule::       \/\*(.|\n|\r)*?\*\/ */ 
- return 60; 
-break;
-case 38 : 
-/*! Conditions:: action */ 
-/*! Rule::       \/\/.* */ 
- return 60; 
-break;
 case 39 : 
 /*! Conditions:: action */ 
 /*! Rule::       \/[^ /]*?['"{}'][^ ]*?\/ */ 
  return 60; // regexp with braces or quotes (and no spaces) 
-break;
-case 40 : 
-/*! Conditions:: action */ 
-/*! Rule::       "(\\\\|\\"|[^"])*" */ 
- return 60; 
-break;
-case 41 : 
-/*! Conditions:: action */ 
-/*! Rule::       '(\\\\|\\'|[^'])*' */ 
- return 60; 
-break;
-case 42 : 
-/*! Conditions:: action */ 
-/*! Rule::       [/"'][^{}/"']+ */ 
- return 60; 
-break;
-case 43 : 
-/*! Conditions:: action */ 
-/*! Rule::       [^{}/"']+ */ 
- return 60; 
 break;
 case 44 : 
 /*! Conditions:: action */ 
@@ -2513,20 +2415,90 @@ case 45 :
 /*! Rule::       \} */ 
  if (yy.depth === 0) { this.popState(); } else { yy.depth--; } return 57; 
 break;
-case 46 : 
-/*! Conditions:: code */ 
-/*! Rule::       (.|\n|\r)+ */ 
- return 9; 
-break;
 default:
   return this.simpleCaseActionClusters[$avoiding_name_collisions];
 }
 },
 simpleCaseActionClusters: {
-36 : 
-/*! Conditions:: * */ 
-/*! Rule::       $ */ 
- 8
+
+  /*! Conditions:: ebnf */ 
+  /*! Rule::       \( */ 
+   1 : 49,
+  /*! Conditions:: ebnf */ 
+  /*! Rule::       \) */ 
+   2 : 50,
+  /*! Conditions:: ebnf */ 
+  /*! Rule::       \* */ 
+   3 : 51,
+  /*! Conditions:: ebnf */ 
+  /*! Rule::       \? */ 
+   4 : 52,
+  /*! Conditions:: ebnf */ 
+  /*! Rule::       \+ */ 
+   5 : 53,
+  /*! Conditions:: bnf ebnf INITIAL */ 
+  /*! Rule::       {id} */ 
+   10 : 48,
+  /*! Conditions:: bnf ebnf INITIAL */ 
+  /*! Rule::       : */ 
+   13 : 35,
+  /*! Conditions:: bnf ebnf INITIAL */ 
+  /*! Rule::       ; */ 
+   14 : 37,
+  /*! Conditions:: bnf ebnf INITIAL */ 
+  /*! Rule::       \| */ 
+   15 : 38,
+  /*! Conditions:: bnf ebnf INITIAL */ 
+  /*! Rule::       %prec\b */ 
+   18 : 54,
+  /*! Conditions:: bnf ebnf INITIAL */ 
+  /*! Rule::       %start\b */ 
+   19 : 13,
+  /*! Conditions:: bnf ebnf INITIAL */ 
+  /*! Rule::       %left\b */ 
+   20 : 24,
+  /*! Conditions:: bnf ebnf INITIAL */ 
+  /*! Rule::       %right\b */ 
+   21 : 25,
+  /*! Conditions:: bnf ebnf INITIAL */ 
+  /*! Rule::       %nonassoc\b */ 
+   22 : 26,
+  /*! Conditions:: bnf ebnf INITIAL */ 
+  /*! Rule::       %token\b */ 
+   23 : 28,
+  /*! Conditions:: bnf ebnf INITIAL */ 
+  /*! Rule::       %parse-param\b */ 
+   24 : 22,
+  /*! Conditions:: bnf ebnf INITIAL */ 
+  /*! Rule::       %options\b */ 
+   25 : 20,
+  /*! Conditions:: bnf ebnf INITIAL */ 
+  /*! Rule::       %lex[\w\W]*?{BR}\s*\/lex\b */ 
+   26 : 15,
+  /*! Conditions:: * */ 
+  /*! Rule::       $ */ 
+   36 : 8,
+  /*! Conditions:: action */ 
+  /*! Rule::       \/\*(.|\n|\r)*?\*\/ */ 
+   37 : 60,
+  /*! Conditions:: action */ 
+  /*! Rule::       \/\/.* */ 
+   38 : 60,
+  /*! Conditions:: action */ 
+  /*! Rule::       "(\\\\|\\"|[^"])*" */ 
+   40 : 60,
+  /*! Conditions:: action */ 
+  /*! Rule::       '(\\\\|\\'|[^'])*' */ 
+   41 : 60,
+  /*! Conditions:: action */ 
+  /*! Rule::       [/"'][^{}/"']+ */ 
+   42 : 60,
+  /*! Conditions:: action */ 
+  /*! Rule::       [^{}/"']+ */ 
+   43 : 60,
+  /*! Conditions:: code */ 
+  /*! Rule::       (.|\n|\r)+ */ 
+   46 : 9
 },
 rules: [
 /^(?:%%)/,
