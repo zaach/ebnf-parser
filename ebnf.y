@@ -2,17 +2,18 @@
 
 %lex
 
-id                        [a-zA-Z][a-zA-Z0-9_-]*
+id                                      [a-zA-Z_](?:[a-zA-Z0-9_-]*[a-zA-Z0-9_])?
+decimal_number                          [1-9][0-9]*
+hex_number                              "0"[xX][0-9a-fA-F]+
 
 %%
 
 \s+                       /* skip whitespace */
-{id}                      return 'symbol';
+{id}                      return 'SYMBOL';
 "["{id}"]"                yytext = yytext.substr(1, yyleng - 2); return 'ALIAS';
-"'"[^']*"'"               return 'symbol';
-"."                       return 'symbol';
+"'"[^']*"'"               return 'SYMBOL';
+"."                       return 'SYMBOL';
 
-bar                       return 'bar';
 "("                       return '(';
 ")"                       return ')';
 "*"                       return '*';
@@ -54,8 +55,8 @@ expression_suffix
   ;
 
 expression
-  : symbol
-    { $$ = ['symbol', $symbol]; }
+  : SYMBOL
+    { $$ = ['symbol', $SYMBOL]; }
   | '(' handle_list ')'
     { $$ = ['()', $handle_list]; }
   ;
