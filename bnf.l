@@ -38,6 +38,7 @@ BR                                      \r\n|\n|\r
 "|"                                     return '|';
 "%%"                                    this.pushState(ebnf ? 'ebnf' : 'bnf'); return '%%';
 "%ebnf"                                 if (!yy.options) { yy.options = {}; } ebnf = yy.options.ebnf = true;
+"%debug"                                if (!yy.options) { yy.options = {}; } yy.options.debug = true;
 "%prec"                                 return 'PREC';
 "%start"                                return 'START';
 "%left"                                 return 'LEFT';
@@ -49,7 +50,7 @@ BR                                      \r\n|\n|\r
 "%lex"[\w\W]*?{BR}\s*"/lex"\b           return 'LEX_BLOCK';
 "%"{id}[^\r\n]*                         %{ 
                                             /* ignore unrecognized decl */
-                                            if (this.DEBUG || 1) console.log('ignoring unsupported option: ', yytext);
+                                            console.log('ignoring unsupported option: ', yytext);
                                         %}
 "<"{id}">"                              yytext = yytext.substr(1, yyleng - 2); return 'TOKEN_TYPE';
 "{{"[\w\W]*?"}}"                        yytext = yytext.substr(2, yyleng - 4); return 'ACTION';

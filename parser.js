@@ -2441,55 +2441,60 @@ case 21 :
 /*! Rule::       %ebnf\b */ 
  if (!yy.options) { yy.options = {}; } ebnf = yy.options.ebnf = true; 
 break;
-case 27 : 
+case 22 : 
+/*! Conditions:: bnf ebnf token INITIAL */ 
+/*! Rule::       %debug\b */ 
+ if (!yy.options) { yy.options = {}; } yy.options.debug = true; 
+break;
+case 28 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       %token\b */ 
  this.pushState('token'); return 17; 
 break;
-case 31 : 
+case 32 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       %{id}[^\r\n]* */ 
   
                                             /* ignore unrecognized decl */
-                                            if (this.DEBUG || 1) console.log('ignoring unsupported option: ', yy_.yytext);
+                                            console.log('ignoring unsupported option: ', yy_.yytext);
                                          
 break;
-case 32 : 
+case 33 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       <{id}> */ 
  yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); return 33; 
 break;
-case 33 : 
+case 34 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       \{\{[\w\W]*?\}\} */ 
  yy_.yytext = yy_.yytext.substr(2, yy_.yyleng - 4); return 11; 
 break;
-case 34 : 
+case 35 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       %\{(.|\r|\n)*?%\} */ 
  yy_.yytext = yy_.yytext.substr(2, yy_.yytext.length - 4); return 11; 
 break;
-case 35 : 
+case 36 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       \{ */ 
  yy.depth = 0; this.pushState('action'); return 60; 
 break;
-case 36 : 
+case 37 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       ->.* */ 
  yy_.yytext = yy_.yytext.substr(2, yy_.yyleng - 2); return 63; 
 break;
-case 37 : 
+case 38 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       {hex_number} */ 
  yy_.yytext = parseInt(yy_.yytext, 16); return 34; 
 break;
-case 38 : 
+case 39 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       {decimal_number}(?![xX0-9a-fA-F]) */ 
  yy_.yytext = parseInt(yy_.yytext, 10); return 34; 
 break;
-case 39 : 
+case 40 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       . */ 
  
@@ -2497,17 +2502,17 @@ case 39 :
                                             throw new Error("unsupported input character: " + yy_.yytext + " @ " + JSON.stringify(yyloc)); /* b0rk on bad characters */
                                          
 break;
-case 43 : 
+case 44 : 
 /*! Conditions:: action */ 
 /*! Rule::       \/[^ /]*?['"{}'][^ ]*?\/ */ 
  return 65; // regexp with braces or quotes (and no spaces) 
 break;
-case 48 : 
+case 49 : 
 /*! Conditions:: action */ 
 /*! Rule::       \{ */ 
  yy.depth++; return 60; 
 break;
-case 49 : 
+case 50 : 
 /*! Conditions:: action */ 
 /*! Rule::       \} */ 
  if (yy.depth === 0) { this.popState(); } else { yy.depth--; } return 62; 
@@ -2550,52 +2555,52 @@ simpleCaseActionClusters: {
    19 : 43,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %prec\b */ 
-   22 : 59,
+   23 : 59,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %start\b */ 
-   23 : 13,
+   24 : 13,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %left\b */ 
-   24 : 25,
+   25 : 25,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %right\b */ 
-   25 : 26,
+   26 : 26,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %nonassoc\b */ 
-   26 : 27,
+   27 : 27,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %parse-param\b */ 
-   28 : 23,
+   29 : 23,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %options\b */ 
-   29 : 21,
+   30 : 21,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %lex[\w\W]*?{BR}\s*\/lex\b */ 
-   30 : 15,
+   31 : 15,
   /*! Conditions:: * */ 
   /*! Rule::       $ */ 
-   40 : 8,
+   41 : 8,
   /*! Conditions:: action */ 
   /*! Rule::       \/\*(.|\n|\r)*?\*\/ */ 
-   41 : 65,
-  /*! Conditions:: action */ 
-  /*! Rule::       \/\/.* */ 
    42 : 65,
   /*! Conditions:: action */ 
-  /*! Rule::       "(\\\\|\\"|[^"])*" */ 
-   44 : 65,
+  /*! Rule::       \/\/.* */ 
+   43 : 65,
   /*! Conditions:: action */ 
-  /*! Rule::       '(\\\\|\\'|[^'])*' */ 
+  /*! Rule::       "(\\\\|\\"|[^"])*" */ 
    45 : 65,
   /*! Conditions:: action */ 
-  /*! Rule::       [/"'][^{}/"']+ */ 
+  /*! Rule::       '(\\\\|\\'|[^'])*' */ 
    46 : 65,
   /*! Conditions:: action */ 
-  /*! Rule::       [^{}/"']+ */ 
+  /*! Rule::       [/"'][^{}/"']+ */ 
    47 : 65,
+  /*! Conditions:: action */ 
+  /*! Rule::       [^{}/"']+ */ 
+   48 : 65,
   /*! Conditions:: code */ 
   /*! Rule::       (.|\n|\r)+ */ 
-   50 : 9
+   51 : 9
 },
 rules: [
 /^(?:\r|\n)/,
@@ -2620,6 +2625,7 @@ rules: [
 /^(?:\|)/,
 /^(?:%%)/,
 /^(?:%ebnf\b)/,
+/^(?:%debug\b)/,
 /^(?:%prec\b)/,
 /^(?:%start\b)/,
 /^(?:%left\b)/,
@@ -2684,7 +2690,8 @@ conditions: {
       37,
       38,
       39,
-      40
+      40,
+      41
     ],
     "inclusive": true
   },
@@ -2726,7 +2733,8 @@ conditions: {
       37,
       38,
       39,
-      40
+      40,
+      41
     ],
     "inclusive": true
   },
@@ -2766,13 +2774,13 @@ conditions: {
       37,
       38,
       39,
-      40
+      40,
+      41
     ],
     "inclusive": true
   },
   "action": {
     "rules": [
-      40,
       41,
       42,
       43,
@@ -2781,14 +2789,15 @@ conditions: {
       46,
       47,
       48,
-      49
+      49,
+      50
     ],
     "inclusive": false
   },
   "code": {
     "rules": [
-      40,
-      50
+      41,
+      51
     ],
     "inclusive": false
   },
@@ -2824,7 +2833,8 @@ conditions: {
       37,
       38,
       39,
-      40
+      40,
+      41
     ],
     "inclusive": true
   }
