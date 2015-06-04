@@ -54,8 +54,8 @@ declaration
         {$$ = {lex: $1};}
     | operator
         {$$ = {operator: $1};}
-    | token
-        {$$ = {token: $1};}
+    | TOKEN full_token_definitions
+        {$$ = {token_list: $full_token_definitions};}
     | ACTION
         {$$ = {include: $1};}
     | parse_param
@@ -95,15 +95,53 @@ token_list
         {$$ = [$1];}
     ;
 
-token
-    : TOKEN token_id
-        {$$ = {id: $2};}
-    | TOKEN token_id INTEGER
-        {$$ = {id: $2, value: $3};}
-    | TOKEN token_id INTEGER STRING 
-        {$$ = {id: $2, value: $3, description: $4};}
-    | TOKEN token_id STRING 
-        {$$ = {id: $2, description: $3};}
+full_token_definitions
+    : full_token_definitions full_token_definition
+        { $$ = $1; $$.push($2); }
+    | full_token_definition
+        { $$ = [$1]; }
+    ;
+
+// As per http://www.gnu.org/software/bison/manual/html_node/Token-Decl.html
+full_token_definition
+    : optional_token_type id optional_token_value optional_token_description
+        {
+            $$ = {id: $id};
+            if ($optional_token_type) {
+                $$.type = $optional_token_type;
+            }
+            if ($optional_token_value) {
+                $$.value = $optional_token_value;
+            }
+            if ($optional_token_description) {
+                $$.description = $optional_token_description;
+            }
+        }
+    ;
+
+optional_token_type
+    : /* epsilon */
+        { $$ = false; }
+    | TOKEN_TYPE
+    ;
+
+optional_token_value
+    : /* epsilon */
+        { $$ = false; }
+    | INTEGER
+    ;
+
+optional_token_description
+    : /* epsilon */
+        { $$ = false; }
+    | STRING
+    ;
+
+id_list
+    : id_list id
+        {$$ = $1; $$.push($2);}
+    | id
+        {$$ = [$1];}
     ;
 
 token_id

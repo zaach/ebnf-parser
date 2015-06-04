@@ -4,13 +4,18 @@ hex_number                              "0"[xX][0-9a-fA-F]+
 BR                                      \r\n|\n|\r
 
 
-%x action code
+%x action code 
+%s token
 %s bnf ebnf
 
 %options easy_keyword_rules
 %options ranges
 
 %%
+
+<token>\r|\n                            this.popState();
+<token>"%%"                             this.popState();
+<token>";"                              this.popState();
 
 <bnf,ebnf>"%%"                          this.pushState('code'); return '%%';
 
@@ -27,6 +32,7 @@ BR                                      \r\n|\n|\r
 {id}                                    return 'ID';
 '"'[^"]+'"'                             yytext = yytext.substr(1, yyleng - 2); return 'STRING';
 "'"[^']+"'"                             yytext = yytext.substr(1, yyleng - 2); return 'STRING';
+<token>[^\s\r\n]+                       return 'TOKEN_WORD';
 ":"                                     return ':';
 ";"                                     return ';';
 "|"                                     return '|';
@@ -37,7 +43,7 @@ BR                                      \r\n|\n|\r
 "%left"                                 return 'LEFT';
 "%right"                                return 'RIGHT';
 "%nonassoc"                             return 'NONASSOC';
-"%token"                                return 'TOKEN';
+"%token"                                this.pushState('token'); return 'TOKEN';
 "%parse-param"                          return 'PARSE_PARAM';
 "%options"                              return 'OPTIONS';
 "%lex"[\w\W]*?{BR}\s*"/lex"\b           return 'LEX_BLOCK';
