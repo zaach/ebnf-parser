@@ -219,3 +219,10 @@ exports["test options"] = function () {
 
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };
+
+exports["test key-value options"] = function () {
+    var grammar = "%options foo=bar baz\n%%hello: world;%%";
+    var expected = {bnf: {hello: ["world"]}, options: {foo: 'bar', baz: true}};
+
+    assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
+};

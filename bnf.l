@@ -24,6 +24,7 @@ id                [a-zA-Z][a-zA-Z0-9_-]*
 ":"                     return ':';
 ";"                     return ';';
 "|"                     return '|';
+"="                     return '=';
 "%%"                    this.pushState(ebnf ? 'ebnf' : 'bnf'); return '%%';
 "%ebnf"                 if (!yy.options) yy.options = {}; ebnf = yy.options.ebnf = true;
 "%prec"                 return 'PREC';

@@ -27,9 +27,9 @@ bnf.yy.addDeclaration = function (grammar, decl) {
 
     } else if (decl.options) {
         if (!grammar.options) grammar.options = {};
-        for (var i=0; i < decl.options.length; i++) {
-            grammar.options[decl.options[i]] = true;
-        }
+        Object.keys(decl.options).forEach(function(option) {
+            grammar.options[option] = decl.options[option];
+        });
     }
 
 };
