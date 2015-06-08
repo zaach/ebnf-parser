@@ -12,14 +12,14 @@ var ebnf = false;
 spec
     : declaration_list '%%' grammar optional_end_block EOF
         {
-          $$ = $1;
-          return extend($$, $3);
+            $$ = $declaration_list;
+            return extend($$, $grammar);
         }
     | declaration_list '%%' grammar '%%' CODE EOF
         {
-          $$ = $1;
-          yy.addDeclaration($$, { include: $5 });
-          return extend($$, $3);
+            $$ = $declaration_list;
+            yy.addDeclaration($$, { include: $CODE });
+            return extend($$, $grammar);
         }
     ;
 
@@ -30,76 +30,74 @@ optional_end_block
 
 optional_action_header_block
     :
-        {
-	  $$ = {};
-	}
+        { $$ = {}; }
     | optional_action_header_block ACTION
         {
-	  $$ = $1; 
-	  yy.addDeclaration($$, { actionInclude: $2 });
-	}
+            $$ = $optional_action_header_block;
+            yy.addDeclaration($$, { actionInclude: $ACTION });
+        }
     ;
 
 declaration_list
     : declaration_list declaration
-        {$$ = $1; yy.addDeclaration($$, $2);}
+        { $$ = $declaration_list; yy.addDeclaration($$, $declaration); }
     |
-        {$$ = {};}
+        { $$ = {}; }
     ;
 
 declaration
     : START id
-        {$$ = {start: $2};}
+        { $$ = {start: $id}; }
     | LEX_BLOCK
-        {$$ = {lex: $1};}
+        { $$ = {lex: $LEX_BLOCK}; }
     | operator
-        {$$ = {operator: $1};}
+        { $$ = {operator: $operator}; }
     | TOKEN full_token_definitions
-        {$$ = {token_list: $full_token_definitions};}
+        { $$ = {token_list: $full_token_definitions}; }
     | ACTION
-        {$$ = {include: $1};}
+        { $$ = {include: $ACTION}; }
     | parse_param
-        {$$ = {parseParam: $1};}
+        { $$ = {parseParam: $parse_param}; }
     | options
-        {$$ = {options: $1};}
+        { $$ = {options: $options}; }
     ;
 
 options
     : OPTIONS token_list
-        {$$ = $2;}
+        { $$ = $token_list; }
     ;
 
 parse_param
     : PARSE_PARAM token_list
-        {$$ = $2;}
+        { $$ = $token_list; }
     ;
 
 operator
     : associativity token_list
-        {$$ = [$1]; $$.push.apply($$, $2);}
+        { $$ = [$associativity]; $$.push.apply($$, $token_list); }
     ;
 
 associativity
     : LEFT
-        {$$ = 'left';}
+        { $$ = 'left'; }
     | RIGHT
-        {$$ = 'right';}
+        { $$ = 'right'; }
     | NONASSOC
-        {$$ = 'nonassoc';}
+        { $$ = 'nonassoc'; }
     ;
 
 token_list
     : token_list symbol
-        {$$ = $1; $$.push($2);}
+        { $$ = $token_list; $$.push($symbol); }
     | symbol
-        {$$ = [$1];}
+        { $$ = [$symbol]; }
     ;
 
 full_token_definitions
     : full_token_definitions full_token_definition
-        { $$ = $1; $$.push($2); }
+        { $$ = $full_token_definitions; $$.push($full_token_definition); }
     | full_token_definition
-        { $$ = [$1]; }
+        { $$ = [$full_token_definition]; }
     ;
 
 // As per http://www.gnu.org/software/bison/manual/html_node/Token-Decl.html
@@ -139,118 +137,126 @@ optional_token_description
 
 id_list
     : id_list id
-        {$$ = $1; $$.push($2);}
+        { $$ = $id_list; $$.push($id); }
     | id
-        {$$ = [$1];}
+        { $$ = [$id]; }
     ;
 
 token_id
     : TOKEN_TYPE id
-        {$$ = $id;}
+        { $$ = $id; }
     | id
-        {$$ = $id;}
+        { $$ = $id; }
     ;
 
 grammar
     : optional_action_header_block production_list
         {
-	  $$ = $1; 
-	  $$.grammar = $2;
-	}
+            $$ = $optional_action_header_block;
+            $$.grammar = $production_list;
+        }
     ;
 
 production_list
     : production_list production
         {
-            $$ = $1;
-            if ($2[0] in $$)
-                $$[$2[0]] = $$[$2[0]].concat($2[1]);
-            else
-                $$[$2[0]] = $2[1];
+            $$ = $production_list;
+            if ($production[0] in $$) {
+                $$[$production[0]] = $$[$production[0]].concat($production[1]);
+            } else {
+                $$[$production[0]] = $production[1];
+            }
         }
     | production
-        {$$ = {}; $$[$1[0]] = $1[1];}
+        { $$ = {}; $$[$production[0]] = $production[1]; }
     ;
 
 production
     : id ':' handle_list ';'
-        {$$ = [$1, $3];}
+        {$$ = [$id, $handle_list];}
     ;
 
 handle_list
     : handle_list '|' handle_action
         {
-	  $$ = $1; 
-	  $$.push($3);
-	}
+            $$ = $handle_list;
+            $$.push($handle_action);
+        }
     | handle_action
         {
-	  $$ = [$1];
-	}
+            $$ = [$handle_action];
+        }
     ;
 
 handle_action
     : handle prec action
         {
-            $$ = [($1.length ? $1.join(' ') : '')];
-            if($3) $$.push($3);
-            if($2) $$.push($2);
-            if ($$.length === 1) $$ = $$[0];
+            $$ = [($handle.length ? $handle.join(' ') : '')];
+            if ($action) {
+                $$.push($action);
+            }
+            if ($prec) {
+                $$.push($prec);
+            }
+            if ($$.length === 1) {
+                $$ = $$[0];
+            }
         }
     ;
 
 handle
     : handle expression_suffix
         {
-	  $$ = $1; 
-	  $$.push($2);
-	}
+            $$ = $handle;
+            $$.push($expression_suffix);
+        }
     |
         {
-	  $$ = [];
-	}
+            $$ = [];
+        }
     ;
 
 handle_sublist
     : handle_sublist '|' handle
         {
-	  $$ = $1; 
-	  $$.push($3.join(' '));
-	}
+            $$ = $handle_sublist;
+            $$.push($handle.join(' '));
+        }
     | handle
         {
-	  $$ = [$1.join(' ')];
-	}
+            $$ = [$handle.join(' ')];
+        }
     ;
 
 expression_suffix
     : expression suffix ALIAS
         {
-	  $$ = $expression + $suffix + "[" + $ALIAS + "]"; 
-	}
+            $$ = $expression + $suffix + "[" + $ALIAS + "]";
+        }
     | expression suffix
         {
-	  $$ = $expression + $suffix; 
-	}
+            $$ = $expression + $suffix;
+        }
     ;
 
 expression
     : ID
         {
-	  $$ = $1; 
-	}
+            $$ = $ID;
+        }
     | STRING
         {
-	  $$ = ebnf ? "'" + $1 + "'" : $1; 
-	}
+            $$ = ebnf ? "'" + $STRING + "'" : $STRING;
+        }
     | '(' handle_sublist ')'
         {
-	  $$ = '(' + $handle_sublist.join(' | ') + ')'; 
-	}
+            $$ = '(' + $handle_sublist.join(' | ') + ')';
+        }
     ;
 
 suffix
-    : {$$ = ''}
+    : /* epsilon */
+        { $$ = ''; }
     | '*'
     | '?'
     | '+'
@@ -259,46 +265,46 @@ suffix
 prec
     : PREC symbol
         {
-	  $$ = { prec: $2 };
-	}
+            $$ = { prec: $symbol };
+        }
     |
         {
-	  $$ = null;
-	}
+            $$ = null;
+        }
     ;
 
 symbol
     : id
-        {$$ = $1;}
+        { $$ = $id; }
     | STRING
-        {$$ = yytext;}
+        { $$ = yytext; }
     ;
 
 id
     : ID
-        {$$ = yytext;}
+        { $$ = yytext; }
     ;
 
 action
     : '{' action_body '}'
-        {$$ = $2;}
+        { $$ = $action_body; }
     | ACTION
-        {$$ = $1;}
+        { $$ = $ACTION; }
     | ARROW_ACTION
-        {$$ = '$$ =' + $1 + ';';}
+        { $$ = '$$ =' + $ARROW_ACTION + ';'; }
     |
-        {$$ = '';}
+        { $$ = ''; }
     ;
 
 action_body
     :
-        {$$ = '';}
+        { $$ = ''; }
     | action_comments_body
-        {$$ = $1;}
+        { $$ = $action_comments_body; }
     | action_body '{' action_body '}' action_comments_body
-        {$$ = $1 + $2 + $3 + $4 + $5;}
+        { $$ = $1 + $2 + $3 + $4 + $5; }
     | action_body '{' action_body '}'
-        {$$ = $1 + $2 + $3 + $4;}
+        { $$ = $1 + $2 + $3 + $4; }
     ;
 
 action_comments_body
