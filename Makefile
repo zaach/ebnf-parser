@@ -22,6 +22,8 @@ test:
 clean:
 	-rm -f parser.js
 	-rm -f transform-parser.js
+	-rm -f bnf.js
+	-rm -f ebnf.js
 	-rm -rf node_modules/
 
 superclean: clean
