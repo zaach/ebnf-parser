@@ -618,6 +618,8 @@ case 17 :
 /*! Production::     token_id : TOKEN_TYPE id */
  case 38 : 
 /*! Production::     token_id : id */
+ case 52 : 
+/*! Production::     expression : ID */
  case 61 : 
 /*! Production::     symbol : id */
  case 65 : 
@@ -656,6 +658,8 @@ case 25 :
 /*! Production::     full_token_definitions : full_token_definition */
  case 36 : 
 /*! Production::     id_list : id */
+ case 44 : 
+/*! Production::     handle_list : handle_action */
   this.$ = [$$[$0]];  
 break;
 case 28 : 
@@ -714,12 +718,6 @@ case 43 :
             this.$.push($$[$0]);
          
 break;
-case 44 : 
-/*! Production::     handle_list : handle_action */
- 
-            this.$ = [$$[$0]];
-         
-break;
 case 45 : 
 /*! Production::     handle_action : handle prec action */
  
@@ -769,14 +767,10 @@ case 50 :
 break;
 case 51 : 
 /*! Production::     expression_suffix : expression suffix */
+ case 73 : 
+/*! Production::     action_comments_body : action_comments_body ACTION_BODY */
  
             this.$ = $$[$0-1] + $$[$0];
-         
-break;
-case 52 : 
-/*! Production::     expression : ID */
- 
-            this.$ = $$[$0];
          
 break;
 case 53 : 
@@ -834,10 +828,6 @@ break;
 case 71 : 
 /*! Production::     action_body : action_body { action_body } */
   this.$ = $$[$0-3] + $$[$0-2] + $$[$0-1] + $$[$0];  
-break;
-case 73 : 
-/*! Production::     action_comments_body : action_comments_body ACTION_BODY */
-  this.$ = $$[$0-1] + $$[$0];  
 break;
 }
 },
