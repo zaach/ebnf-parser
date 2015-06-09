@@ -58,6 +58,8 @@ declaration
         { $$ = {include: $ACTION}; }
     | parse_param
         { $$ = {parseParam: $parse_param}; }
+    | parser_type
+        { $$ = {parserType: $parser_type}; }
     | options
         { $$ = {options: $options}; }
     ;
@@ -72,6 +74,11 @@ parse_param
         { $$ = $token_list; }
     ;
 
+parser_type
+    : PARSER_TYPE symbol
+        { $$ = $symbol; }
+    ;
+    
 operator
     : associativity token_list
         { $$ = [$associativity]; $$.push.apply($$, $token_list); }

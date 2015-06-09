@@ -39,6 +39,7 @@ BR                                      \r\n|\n|\r
 "%%"                                    this.pushState(ebnf ? 'ebnf' : 'bnf'); return '%%';
 "%ebnf"                                 if (!yy.options) { yy.options = {}; } ebnf = yy.options.ebnf = true;
 "%debug"                                if (!yy.options) { yy.options = {}; } yy.options.debug = true;
+"%parser-type"                          return 'PARSER_TYPE';
 "%prec"                                 return 'PREC';
 "%start"                                return 'START';
 "%left"                                 return 'LEFT';
