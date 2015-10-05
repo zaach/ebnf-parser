@@ -34,7 +34,7 @@ id                [a-zA-Z][a-zA-Z0-9_-]*
 "%parse-param"          return 'PARSE_PARAM';
 "%options"              return 'OPTIONS';
 "%lex"[\w\W]*?"/lex"    return 'LEX_BLOCK';
-"%"[a-zA-Z]+[^\r\n]*    /* ignore unrecognized decl */
+"%"[a-zA-Z]+[^\r\n]*    return 'UNKNOWN_DECL';
 "<"[a-zA-Z]*">"         /* ignore type */
 "{{"[\w\W]*?"}}"        yytext = yytext.substr(2, yyleng-4); return 'ACTION';
 "%{"(.|\r|\n)*?"%}"     yytext = yytext.substr(2, yytext.length-4); return 'ACTION';
