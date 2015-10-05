@@ -48,6 +48,8 @@ declaration
         {$$ = {parseParam: $1};}
     | options
         {$$ = {options: $1};}
+    | UNKNOWN_DECL
+        {$$ = {unknownDecl: $1};}
     ;
 
 options
@@ -90,7 +92,7 @@ production_list
     : production_list production
         {
             $$ = $1;
-            if ($2[0] in $$) 
+            if ($2[0] in $$)
                 $$[$2[0]] = $$[$2[0]].concat($2[1]);
             else
                 $$[$2[0]] = $2[1];
@@ -213,4 +215,3 @@ function extend (json, grammar) {
     json.bnf = ebnf ? transform(grammar) : grammar;
     return json;
 }
-

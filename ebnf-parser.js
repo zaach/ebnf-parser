@@ -30,6 +30,9 @@ bnf.yy.addDeclaration = function (grammar, decl) {
         for (var i=0; i < decl.options.length; i++) {
             grammar.options[decl.options[i]] = true;
         }
+    } else if (decl.unknownDecl) {
+      if (!grammar.unknownDecls) grammar.unknownDecls = [];
+      grammar.unknownDecls.push(decl.unknownDecl);
     }
 
 };
@@ -38,4 +41,3 @@ bnf.yy.addDeclaration = function (grammar, decl) {
 var parseLex = function (text) {
     return jisonlex.parse(text.replace(/(?:^%lex)|(?:\/lex$)/g, ''));
 };
-

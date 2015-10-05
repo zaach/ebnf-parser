@@ -87,14 +87,14 @@ exports["test comment with nested *"] = function () {
 
 exports["test token"] = function () {
     var grammar = "%token blah\n%% test: foo bar | baz ; hello: world ;";
-    var expected = {bnf: {test: ["foo bar", "baz"], hello: ["world"]}};
+    var expected = {bnf: {test: ["foo bar", "baz"], hello: ["world"]}, unknownDecls: ['%token blah']};
 
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };
 
 exports["test token with type"] = function () {
     var grammar = "%type <type> blah\n%% test: foo bar | baz ; hello: world ;";
-    var expected = {bnf: {test: ["foo bar", "baz"], hello: ["world"]}};
+    var expected = {bnf: {test: ["foo bar", "baz"], hello: ["world"]}, unknownDecls: ['%type <type> blah']};
 
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };
@@ -216,6 +216,13 @@ exports["test parse params"] = function () {
 exports["test options"] = function () {
     var grammar = "%options one two\n%%hello: world;%%";
     var expected = {bnf: {hello: ["world"]}, options: {one: true, two: true}};
+
+    assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
+};
+
+exports["test unknown decls"] = function () {
+    var grammar = "%foo bar\n%foo baz\n%qux { fizzle }\n%%hello: world;%%";
+    var expected = {bnf: {hello: ["world"]}, unknownDecls: ['%foo bar', '%foo baz', '%qux { fizzle }']};
 
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };
