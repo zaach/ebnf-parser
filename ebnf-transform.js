@@ -20,7 +20,7 @@ var EBNF = (function(){
         if (type === 'symbol') {
             var n;
             if (e[1][0] === '\\') n = e[1][1];
-            else if (e[1][0] === '\'') n = e[1].substring(1, e[1].length-1);
+            else if (e[1][0] === '\'') n = e[1].substring(1, e[1].length-1).replace(/\\'/g, "'");
             else n = e[1];
             emit(n + (name ? "["+name+"]" : ""));
         } else if (type === "+") {
