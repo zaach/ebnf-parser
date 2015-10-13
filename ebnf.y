@@ -3,12 +3,14 @@
 %lex
 
 id                        [a-zA-Z][a-zA-Z0-9_-]*
+quote                     "'"
+str                       (\\{quote}|(?!{quote}).)*
 
 %%
 \s+             /* skip whitespace */
 {id}           return 'symbol';
 "["{id}"]"     yytext = yytext.substr(1, yyleng-2); return 'ALIAS';
-"'"[^']*"'"    return 'symbol';
+"'"{str}"'"    return 'symbol';
 "."            return 'symbol';
 
 bar            return 'bar';
@@ -59,7 +61,7 @@ expression
   ;
 
 suffix
-  : 
+  :
   | '*'
   | '?'
   | '+'
