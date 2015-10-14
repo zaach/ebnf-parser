@@ -148,7 +148,7 @@ expression
     : ID
         {$$ = $1; }
     | STRING
-        {$$ = ebnf ? "'" + $1 + "'" : $1; }
+        {$$ = ebnf ? "'" + $1.replace(/'/g, "\\'") + "'" : $1; }
     | '(' handle_sublist ')'
         {$$ = '(' + $handle_sublist.join(' | ') + ')'; }
     ;
