@@ -7,10 +7,11 @@ npm-install:
 	npm install
 
 build:
-	./node_modules/.bin/jison bnf.y bnf.l
+	@[ -a  node_modules/.bin/jison ] || echo "### FAILURE: Make sure you have run 'make prep' before as the jison compiler is unavailable! ###"
+	sh node_modules/.bin/jison bnf.y bnf.l
 	mv bnf.js parser.js
 
-	./node_modules/.bin/jison ebnf.y
+	sh node_modules/.bin/jison ebnf.y
 	mv ebnf.js transform-parser.js
 
 test:
