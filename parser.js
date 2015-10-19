@@ -2542,8 +2542,8 @@ case 41 :
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       . */ 
  
-                                            console.log("unsupported input character: ", yy_.yytext, yyloc);
-                                            throw new Error("unsupported input character: " + yy_.yytext + " @ " + JSON.stringify(yyloc)); /* b0rk on bad characters */
+                                            //console.log("unsupported input character: ", yy_.yytext, yyloc);
+                                            throw new Error("unsupported input character: " + yy_.yytext + " @ " + JSON.stringify(yy_.yyloc)); /* b0rk on bad characters */
                                          
 break;
 case 45 : 

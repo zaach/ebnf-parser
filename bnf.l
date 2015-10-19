@@ -61,7 +61,7 @@ BR                                      \r\n|\n|\r
 {hex_number}                            yytext = parseInt(yytext, 16); return 'INTEGER';
 {decimal_number}(?![xX0-9a-fA-F])       yytext = parseInt(yytext, 10); return 'INTEGER';
 .                                       %{
-                                            console.log("unsupported input character: ", yytext, yyloc);
+                                            //console.log("unsupported input character: ", yytext, yyloc);
                                             throw new Error("unsupported input character: " + yytext + " @ " + JSON.stringify(yyloc)); /* b0rk on bad characters */
                                         %}
 <*><<EOF>>                              return 'EOF';
