@@ -13,19 +13,17 @@ spec
     : declaration_list '%%' grammar optional_end_block EOF
         {
             $$ = $declaration_list;
-            return extend($$, $grammar);
-        }
-    | declaration_list '%%' grammar '%%' CODE EOF
-        {
-            $$ = $declaration_list;
-            yy.addDeclaration($$, { include: $CODE });
+            if ($optional_end_block && $optional_end_block.trim() !== '') {
+                yy.addDeclaration($$, { include: $optional_end_block });
+            }
             return extend($$, $grammar);
         }
     ;
 
 optional_end_block
     :
-    | '%%'
+    | '%%' extra_parser_module_code 
+        { $$ = $extra_parser_module_code; }
     ;
 
 optional_action_header_block
@@ -35,6 +33,11 @@ optional_action_header_block
         {
             $$ = $optional_action_header_block;
             yy.addDeclaration($$, { actionInclude: $ACTION });
+        }
+    | optional_action_header_block include_macro_code
+        {
+            $$ = $optional_action_header_block;
+            yy.addDeclaration($$, { actionInclude: $include_macro_code });
         }
     ;
 
@@ -49,13 +52,15 @@ declaration
     : START id
         { $$ = {start: $id}; }
     | LEX_BLOCK
-        { $$ = {lex: $LEX_BLOCK}; }
+        { console.warn("LEXER BLOCK: ", $LEX_BLOCK); $$ = {lex: $LEX_BLOCK}; }
     | operator
         { $$ = {operator: $operator}; }
     | TOKEN full_token_definitions
         { $$ = {token_list: $full_token_definitions}; }
     | ACTION
         { $$ = {include: $ACTION}; }
+    | include_macro_code
+        { $$ = {include: $include_macro_code}; }
     | parse_param
         { $$ = {parseParam: $parse_param}; }
     | parser_type
@@ -284,12 +289,12 @@ symbol
     : id
         { $$ = $id; }
     | STRING
-        { $$ = yytext; }
+        { $$ = $STRING; }
     ;
 
 id
     : ID
-        { $$ = yytext; }
+        { $$ = $ID; }
     ;
 
 action
@@ -297,6 +302,8 @@ action
         { $$ = $action_body; }
     | ACTION
         { $$ = $ACTION; }
+    | include_macro_code
+        { $$ = $include_macro_code; }
     | ARROW_ACTION
         { $$ = '$$ =' + $ARROW_ACTION + ';'; }
     |
@@ -316,9 +323,45 @@ action_body
 
 action_comments_body
     : ACTION_BODY
-        { $$ = yytext; }
+        { $$ = $ACTION_BODY; }
     | action_comments_body ACTION_BODY
-        { $$ = $1 + $2; }
+        { $$ = $action_comments_body + $ACTION_BODY; }
+    ;
+
+extra_parser_module_code
+    : optional_module_code_chunk
+        { $$ = $optional_module_code_chunk; }
+    | optional_module_code_chunk include_macro_code extra_parser_module_code
+        { $$ = $optional_module_code_chunk + $include_macro_code + $extra_parser_module_code; }
+    ;
+
+include_macro_code
+    : INCLUDE PATH
+        { 
+            console.log("load file: ", $PATH); 
+            var fs = require('fs');
+            var fileContent = fs.readFileSync($PATH, { encoding: 'utf-8' });
+            // And no, we don't support nested '%include':
+            $$ = '\n// Included by Jison: ' + $PATH + ':\n\n' + fileContent + '\n\n// End Of Include by Jison: ' + $PATH + '\n\n';
+        }
+    | INCLUDE error
+        { 
+            console.error("%include MUST be followed by a valid file path"); 
+        }
+    ;
+
+module_code_chunk
+    : CODE
+        { $$ = $CODE; }
+    | module_code_chunk CODE
+        { $$ = $module_code_chunk + $CODE; }
+    ;
+
+optional_module_code_chunk
+    : module_code_chunk
+        { $$ = $module_code_chunk; }
+    | /* nil */
+        { $$ = ''; }
     ;
 
 %%

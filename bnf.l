@@ -4,7 +4,7 @@ hex_number                              "0"[xX][0-9a-fA-F]+
 BR                                      \r\n|\n|\r
 
 
-%x action code 
+%x action code path 
 %s token
 %s bnf ebnf
 
@@ -49,9 +49,12 @@ BR                                      \r\n|\n|\r
 "%parse-param"                          return 'PARSE_PARAM';
 "%options"                              return 'OPTIONS';
 "%lex"[\w\W]*?{BR}\s*"/lex"\b           return 'LEX_BLOCK';
+
+<INITIAL,ebnf,bnf,code>"%include"       this.pushState('path'); return 'INCLUDE';
+
 "%"{id}[^\r\n]*                         %{ 
                                             /* ignore unrecognized decl */
-                                            console.log('ignoring unsupported option: ', yytext);
+                                            console.warn('ignoring unsupported parser option: ', yytext, ' while lexing in ', this.topState(), ' state');
                                         %}
 "<"{id}">"                              yytext = yytext.substr(1, yyleng - 2); return 'TOKEN_TYPE';
 "{{"[\w\W]*?"}}"                        yytext = yytext.substr(2, yyleng - 4); return 'ACTION';
@@ -76,7 +79,19 @@ BR                                      \r\n|\n|\r
 <action>"{"                             yy.depth++; return '{';
 <action>"}"                             if (yy.depth === 0) { this.popState(); } else { yy.depth--; } return '}';
 
-<code>(.|\n|\r)+                        return 'CODE';
+
+// in the trailing CODE block, only accept these `%include` macros when they appear at the start of a line
+// and make sure the rest of lexer regexes account for this one so it'll match that way only:
+<code>[^\r\n]*(\r|\n)+                  return 'CODE';
+<code>[^\r\n]+                          return 'CODE';      // the bit of CODE just before EOF...
+
+
+<path>[\r\n]                            this.popState(); this.unput(yytext);
+<path>"'"[^\r\n]+"'"                    yytext = yytext.substr(1, yyleng - 2); this.popState(); return 'PATH';
+<path>\"[^\r\n]+\"                      yytext = yytext.substr(1, yyleng - 2); this.popState(); return 'PATH';
+<path>\s+                               // skip whitespace in the line
+<path>[^\s\r\n]+                        this.popState(); return 'PATH';
+
 
 %%
 
