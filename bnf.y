@@ -52,7 +52,7 @@ declaration
     : START id
         { $$ = {start: $id}; }
     | LEX_BLOCK
-        { console.warn("LEXER BLOCK: ", $LEX_BLOCK); $$ = {lex: $LEX_BLOCK}; }
+        { $$ = {lex: $LEX_BLOCK}; }
     | operator
         { $$ = {operator: $operator}; }
     | TOKEN full_token_definitions
@@ -338,7 +338,6 @@ extra_parser_module_code
 include_macro_code
     : INCLUDE PATH
         { 
-            console.log("load file: ", $PATH); 
             var fs = require('fs');
             var fileContent = fs.readFileSync($PATH, { encoding: 'utf-8' });
             // And no, we don't support nested '%include':
