@@ -216,7 +216,7 @@ exports["test quote in rule"] = function () {
         ["'", "return \"'\""]
       ]
     },
-    bnf: {test: ["foo bar '"]}};
+    bnf: {test: ["foo bar \"'\""]}};
 
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };

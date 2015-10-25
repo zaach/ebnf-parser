@@ -258,7 +258,25 @@ expression
         }
     | STRING
         {
-            $$ = ebnf ? "'" + $STRING + "'" : $STRING;
+            if (ebnf) {
+                // Re-encode the string for perusal by the 
+                // EBNF.y rule rewrite grammar.
+                if ($STRING.indexOf("'") >= 0) {
+                    $$ = '"' + $STRING + '"';
+                } else {
+                    $$ = "'" + $STRING + "'";
+                }
+            } else {
+                // Re-encode the string *anyway* as it will
+                // be made part of the rule *string* again and we want
+                // to be able to handle all tokens, including *significant space*
+                // encoded in a grammar as `rule: A ' ' B`.
+                if ($STRING.indexOf("'") >= 0) {
+                    $$ = '"' + $STRING + '"';
+                } else {
+                    $$ = "'" + $STRING + "'";
+                }
+            }
         }
     | '(' handle_sublist ')'
         {

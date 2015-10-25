@@ -85,17 +85,17 @@ var tests = {
     "test complex expression ( *, ?, () )": testParse("(word (',' word)*)? EOF ", ["", "hi", "hi, there"]),
     "test named repeat (*)": testAlias("word*[bob] EOF",
         { top: [ 'bob EOF' ],
-        bob: [ [ '', '$$ = [];' ], [ 'bob word', '$1.push($2);' ] ] }, "word"),
+        bob: [ [ '', '$$ = [];' ], [ 'bob word', '$1.push($2);\n$$ = $1;' ] ] }, "word"),
     "test named repeat (+)": testAlias("word+[bob] EOF",
         { top: [ 'bob EOF' ],
-        bob: [ [ 'word', '$$ = [$1];' ], [ 'bob word', '$1.push($2);' ] ] }, "wordy word"),
+        bob: [ [ 'word', '$$ = [$1];' ], [ 'bob word', '$1.push($2);\n$$ = $1;' ] ] }, "wordy word"),
     "test named group ()": testAlias("word[alice] (',' word)*[bob] EOF",
-        {"top":["word[alice] bob EOF"],"bob":[["","$$ = [];"],["bob , word","$1.push($2);"]]},
+        {"top":["word[alice] bob EOF"],"bob":[["","$$ = [];"],["bob ',' word","$1.push([$2, $3]);\n$$ = $1;"]]},
         "one, two"),
-    "test named option (?)": testAlias("word[alex] word?[bob] EOF", { top: [ 'word[alex] bob EOF' ], bob: [ '', 'word' ] }, "oneor two"),
+    "test named option (?)": testAlias("word[alex] word?[bob] EOF", { top: [ 'word[alex] bob EOF' ], bob: [['', '$$ = undefined;'], ['word', '$$ = $1;']] }, "oneor two"),
     "test named complex expression (())": testAlias("word[alpha] (word[alex] (word[bob] word[carol] ',')+[david] word ',')*[enoch] EOF",
-        {"top":["word[alpha] enoch EOF"],"david":[["word[bob] word[carol] ,","$$ = [$1];"],["david word[bob] word[carol] ,","$1.push($2);"]],
-        "enoch":[["","$$ = [];"],["enoch word[alex] david word ,","$1.push($2);"]]},
+        {"top":["word[alpha] enoch EOF"],"david":[["word[bob] word[carol] ','","$$ = [[$1, $2, $3]];"],["david word[bob] word[carol] ','","$1.push([$2, $3, $4]);\n$$ = $1;"]],
+        "enoch":[["","$$ = [];"],["enoch word[alex] david word ','","$1.push([$2, $3, $4, $5]);\n$$ = $1;"]]},
         "one two three four, five,"
     )
 };
