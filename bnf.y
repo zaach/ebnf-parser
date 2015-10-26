@@ -13,7 +13,6 @@ spec
     : declaration_list '%%' grammar optional_end_block EOF
         {
             $$ = $declaration_list;
-console.log("parser options decl list: ", $$);
             if ($optional_end_block && $optional_end_block.trim() !== '') {
                 yy.addDeclaration($$, { include: $optional_end_block });
             }
@@ -67,8 +66,7 @@ declaration
     | parser_type
         { $$ = {parserType: $parser_type}; }
     | options
-        { $$ = {options: $options}; console.log("parser options decl: ", $$);
-}
+        { $$ = {options: $options}; }
     ;
 
 options

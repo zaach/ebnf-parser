@@ -650,7 +650,6 @@ case 1 :
 /*! Production::     spec : declaration_list %% grammar optional_end_block EOF */
  
             this.$ = $$[$0-4];
-console.log("parser options decl list: ", this.$);
             if ($$[$0-1] && $$[$0-1].trim() !== '') {
                 yy.addDeclaration(this.$, { include: $$[$0-1] });
             }
@@ -742,8 +741,7 @@ case 16 :
 break;
 case 17 : 
 /*! Production::     declaration : options */
-  this.$ = {options: $$[$0]}; console.log("parser options decl: ", this.$);
- 
+  this.$ = {options: $$[$0]};  
 break;
 case 18 : 
 /*! Production::     options : OPTIONS option_list OPTIONS_END */
@@ -2980,7 +2978,6 @@ case 50 :
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       . */ 
  
-                                            //console.log("unsupported input character: ", yy_.yytext, yy_.yylloc);
                                             throw new Error("unsupported input character: " + yy_.yytext + " @ " + JSON.stringify(yy_.yylloc)); /* b0rk on bad characters */
                                          
 break;

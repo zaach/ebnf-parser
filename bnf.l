@@ -74,7 +74,6 @@ BR                                      \r\n|\n|\r
 {HEX_NUMBER}                            yytext = parseInt(yytext, 16); return 'INTEGER';
 {DECIMAL_NUMBER}(?![xX0-9a-fA-F])       yytext = parseInt(yytext, 10); return 'INTEGER';
 .                                       %{
-                                            //console.log("unsupported input character: ", yytext, yylloc);
                                             throw new Error("unsupported input character: " + yytext + " @ " + JSON.stringify(yylloc)); /* b0rk on bad characters */
                                         %}
 <*><<EOF>>                              return 'EOF';
