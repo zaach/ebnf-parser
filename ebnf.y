@@ -7,6 +7,10 @@ ID                                      [a-zA-Z_][a-zA-Z0-9_]*
 DECIMAL_NUMBER                          [1-9][0-9]*
 HEX_NUMBER                              "0"[xX][0-9a-fA-F]+
 BR                                      \r\n|\n|\r
+// quoted string content: support *escaped* quotes inside strings:
+QUOTED_STRING_CONTENT                   (\\"'"|(?!"'").)*
+DOUBLEQUOTED_STRING_CONTENT             (\\'"'|(?!'"').)*
+
 
 %%
 
@@ -23,8 +27,10 @@ BR                                      \r\n|\n|\r
 //
 // And, yes, we assume that the `bnf.y` parser is our regular input source, so we may
 // be a bit stricter here in what we lex than in the userland-facing `bnf.l` lexer.
-"'"[^']+"'"               return 'SYMBOL';
-"'"[^']+"'"               return 'SYMBOL';
+"'"{QUOTED_STRING_CONTENT}"'"
+                          return 'SYMBOL';
+'"'{DOUBLEQUOTED_STRING_CONTENT}'"'               
+                          return 'SYMBOL';
 "."                       return 'SYMBOL';
 
 "("                       return '(';

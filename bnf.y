@@ -67,6 +67,8 @@ declaration
         { $$ = {parserType: $parser_type}; }
     | options
         { $$ = {options: $options}; }
+    | UNKNOWN_DECL
+        { $$ = {unknownDecl: $UNKNOWN_DECL}; }
     ;
 
 options

@@ -95,7 +95,7 @@ exports["test token"] = function () {
 
 exports["test token with type"] = function () {
     var grammar = "%type <type> blah\n%% test: foo bar | baz ; hello: world ;";
-    var expected = {bnf: {test: ["foo bar", "baz"], hello: ["world"]}};
+    var expected = {bnf: {test: ["foo bar", "baz"], hello: ["world"]}, unknownDecls: ['%type <type> blah']};
 
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };
@@ -285,6 +285,13 @@ exports["test options with string values which have embedded quotes"] = function
             s2: "s2\\\\x\\'val\"ue"
         }
     };
+
+    assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
+};
+
+exports["test unknown decls"] = function () {
+    var grammar = "%foo bar\n%foo baz\n%qux { fizzle }\n%%hello: world;%%";
+    var expected = {bnf: {hello: ["world"]}, unknownDecls: ['%foo bar', '%foo baz', '%qux { fizzle }']};
 
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };

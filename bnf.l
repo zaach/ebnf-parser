@@ -65,6 +65,7 @@ BR                                      \r\n|\n|\r
 "%"{NAME}[^\r\n]*                       %{ 
                                             /* ignore unrecognized decl */
                                             console.warn('ignoring unsupported parser option: ', yytext, ' while lexing in ', this.topState(), ' state');
+                                            return 'UNKNOWN_DECL';
                                         %}
 "<"{ID}">"                              yytext = yytext.substr(1, yyleng - 2); return 'TOKEN_TYPE';
 "{{"[\w\W]*?"}}"                        yytext = yytext.substr(2, yyleng - 4); return 'ACTION';
