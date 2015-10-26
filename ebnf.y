@@ -2,15 +2,17 @@
 
 %lex
 
-id                                      [a-zA-Z_](?:[a-zA-Z0-9_-]*[a-zA-Z0-9_])?
-decimal_number                          [1-9][0-9]*
-hex_number                              "0"[xX][0-9a-fA-F]+
+NAME                                    [a-zA-Z_](?:[a-zA-Z0-9_-]*[a-zA-Z0-9_])?
+ID                                      [a-zA-Z_][a-zA-Z0-9_]*
+DECIMAL_NUMBER                          [1-9][0-9]*
+HEX_NUMBER                              "0"[xX][0-9a-fA-F]+
+BR                                      \r\n|\n|\r
 
 %%
 
 \s+                       /* skip whitespace */
-{id}                      return 'SYMBOL';
-"["{id}"]"                yytext = yytext.substr(1, yyleng - 2); return 'ALIAS';
+{ID}                      return 'SYMBOL';
+"["{ID}"]"                yytext = yytext.substr(1, yyleng - 2); return 'ALIAS';
 
 // Stringified tokens are always `'`-surrounded by the bnf.y grammar unless the token
 // itself contain an `'`. 

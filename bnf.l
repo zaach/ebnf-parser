@@ -1,6 +1,7 @@
-id                                      [a-zA-Z_](?:[a-zA-Z0-9_-]*[a-zA-Z0-9_])?
-decimal_number                          [1-9][0-9]*
-hex_number                              "0"[xX][0-9a-fA-F]+
+NAME                                    [a-zA-Z_](?:[a-zA-Z0-9_-]*[a-zA-Z0-9_])?
+ID                                      [a-zA-Z_][a-zA-Z0-9_]*
+DECIMAL_NUMBER                          [1-9][0-9]*
+HEX_NUMBER                              "0"[xX][0-9a-fA-F]+
 BR                                      \r\n|\n|\r
 
 
@@ -28,8 +29,8 @@ BR                                      \r\n|\n|\r
 \s+                                     /* skip whitespace */
 "//".*                                  /* skip comment */
 "/*"(.|\n|\r)*?"*/"                     /* skip comment */
-"["{id}"]"                              yytext = yytext.substr(1, yyleng - 2); return 'ALIAS';
-{id}                                    return 'ID';
+"["{ID}"]"                              yytext = yytext.substr(1, yyleng - 2); return 'ALIAS';
+{ID}                                    return 'ID';
 '"'[^"]+'"'                             yytext = yytext.substr(1, yyleng - 2); return 'STRING';
 "'"[^']+"'"                             yytext = yytext.substr(1, yyleng - 2); return 'STRING';
 <token>[^\s\r\n]+                       return 'TOKEN_WORD';
@@ -52,17 +53,17 @@ BR                                      \r\n|\n|\r
 
 <INITIAL,ebnf,bnf,code>"%include"       this.pushState('path'); return 'INCLUDE';
 
-"%"{id}[^\r\n]*                         %{ 
+"%"{NAME}[^\r\n]*                       %{ 
                                             /* ignore unrecognized decl */
                                             console.warn('ignoring unsupported parser option: ', yytext, ' while lexing in ', this.topState(), ' state');
                                         %}
-"<"{id}">"                              yytext = yytext.substr(1, yyleng - 2); return 'TOKEN_TYPE';
+"<"{ID}">"                              yytext = yytext.substr(1, yyleng - 2); return 'TOKEN_TYPE';
 "{{"[\w\W]*?"}}"                        yytext = yytext.substr(2, yyleng - 4); return 'ACTION';
 "%{"(.|\r|\n)*?"%}"                     yytext = yytext.substr(2, yytext.length - 4); return 'ACTION';
 "{"                                     yy.depth = 0; this.pushState('action'); return '{';
 "->".*                                  yytext = yytext.substr(2, yyleng - 2); return 'ARROW_ACTION';
-{hex_number}                            yytext = parseInt(yytext, 16); return 'INTEGER';
-{decimal_number}(?![xX0-9a-fA-F])       yytext = parseInt(yytext, 10); return 'INTEGER';
+{HEX_NUMBER}                            yytext = parseInt(yytext, 16); return 'INTEGER';
+{DECIMAL_NUMBER}(?![xX0-9a-fA-F])       yytext = parseInt(yytext, 10); return 'INTEGER';
 .                                       %{
                                             //console.log("unsupported input character: ", yytext, yylloc);
                                             throw new Error("unsupported input character: " + yytext + " @ " + JSON.stringify(yylloc)); /* b0rk on bad characters */
