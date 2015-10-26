@@ -1164,7 +1164,7 @@ simpleCaseActionClusters: {
   /*! Rule::       '{QUOTED_STRING_CONTENT}' */ 
    3 : 12,
   /*! Conditions:: INITIAL */ 
-  /*! Rule::       '{DOUBLEQUOTED_STRING_CONTENT}' */ 
+  /*! Rule::       "{DOUBLEQUOTED_STRING_CONTENT}" */ 
    4 : 12,
   /*! Conditions:: INITIAL */ 
   /*! Rule::       \. */ 
@@ -1196,7 +1196,7 @@ rules: [
 /^(?:([a-zA-Z_][a-zA-Z0-9_]*))/,
 /^(?:\[([a-zA-Z_][a-zA-Z0-9_]*)\])/,
 /^(?:'((\\'|(?!').)*)')/,
-/^(?:'((\\"|(?!").)*)')/,
+/^(?:"((\\"|(?!").)*)")/,
 /^(?:\.)/,
 /^(?:\()/,
 /^(?:\))/,
