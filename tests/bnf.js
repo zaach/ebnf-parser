@@ -1,6 +1,6 @@
-var Jison = require("../setup").Jison,
-    Lexer = require("../setup").Lexer,
-    assert = require("assert");
+var assert = require("assert"),
+    bnf = require("../ebnf-parser");
+var Jison = require('jison');
 
 exports["test BNF parser"] = function () {
     var grammar = {
@@ -74,7 +74,7 @@ exports["test BNF parser"] = function () {
     var parser = new Jison.Parser(grammar);
     parser.yy.addDeclaration = function (grammar, decl) {
         if (decl.start) {
-            grammar.start = decl.start
+            grammar.start = decl.start;
         }
         if (decl.operator) {
             if (!grammar.operators) {
@@ -82,7 +82,6 @@ exports["test BNF parser"] = function () {
             }
             grammar.operators.push(decl.operator);
         }
-
     };
 
     var result = parser.parse('%start foo %left "+" "-" %right "*" "/" %nonassoc "=" STUFF %left UMINUS %% foo : bar baz blitz { stuff } %prec GEMINI | bar %prec UMINUS | ;\nbar: { things };\nbaz: | foo ;');
