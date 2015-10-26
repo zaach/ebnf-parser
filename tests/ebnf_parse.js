@@ -7,7 +7,7 @@ function testParse(top, strings) {
         var expected = {
             "bnf": ebnf.transform({"top": [top]})
         };
-        var grammar = "%ebnf\n%%\ntop : "+top+";";
+        var grammar = "%ebnf\n%%\ntop : " + top + ";";
         assert.deepEqual(bnf.parse(grammar), expected);
     };
 }

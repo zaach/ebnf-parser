@@ -241,3 +241,51 @@ exports["test options"] = function () {
 
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };
+
+exports["test if %options names with a hyphen are correctly recognized"] = function () {
+    var grammar = '%options bug-a-boo\n%%hello: world;%%';
+    var expected = {
+        bnf: {
+            hello: ["world"]
+        }, 
+        options: {
+            "bug-a-boo": true
+        }
+    };
+
+    assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
+};
+
+exports["test options with values"] = function () {
+    var grammar = '%options ping=666 bla=blub bool1 s1="s1value" s2=\'s2value\'\n%%hello: world;%%';
+    var expected = {
+        bnf: {
+            hello: ["world"]
+        }, 
+        options: {
+            ping: "666",
+            bla: "blub",
+            bool1: true,
+            s1: "s1value",
+            s2: "s2value"
+        }
+    };
+
+    assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
+};
+
+exports["test options with string values which have embedded quotes"] = function () {
+    var grammar = '%options s1="s1\\"val\'ue" s2=\'s2\\\\x\\\'val\"ue\'\n%%hello: world;%%';
+    var expected = {
+        bnf: {
+            hello: ["world"]
+        }, 
+        options: {
+            s1: "s1\\\"val'ue",
+            s2: "s2\\\\x\\'val\"ue"
+        }
+    };
+
+    assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
+};
+

@@ -13,6 +13,7 @@ spec
     : declaration_list '%%' grammar optional_end_block EOF
         {
             $$ = $declaration_list;
+console.log("parser options decl list: ", $$);
             if ($optional_end_block && $optional_end_block.trim() !== '') {
                 yy.addDeclaration($$, { include: $optional_end_block });
             }
@@ -66,12 +67,29 @@ declaration
     | parser_type
         { $$ = {parserType: $parser_type}; }
     | options
-        { $$ = {options: $options}; }
+        { $$ = {options: $options}; console.log("parser options decl: ", $$);
+}
     ;
 
 options
-    : OPTIONS token_list
-        { $$ = $token_list; }
+    : OPTIONS option_list OPTIONS_END
+        { $$ = $option_list; }
+    ;
+
+option_list
+    : option_list option
+        { $$ = $option_list; $$.push($option); }
+    | option
+        { $$ = [$option]; }
+    ;
+
+option
+    : NAME[option]
+        { $$ = [$option, true]; }
+    | NAME[option] '=' OPTION_VALUE[value]
+        { $$ = [$option, $value]; }
+    | NAME[option] '=' NAME[value]
+        { $$ = [$option, $value]; }
     ;
 
 parse_param

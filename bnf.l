@@ -5,7 +5,7 @@ HEX_NUMBER                              "0"[xX][0-9a-fA-F]+
 BR                                      \r\n|\n|\r
 
 
-%x action code path 
+%x action code path options
 %s token
 %s bnf ebnf
 
@@ -25,6 +25,15 @@ BR                                      \r\n|\n|\r
 <ebnf>"*"                               return '*';
 <ebnf>"?"                               return '?';
 <ebnf>"+"                               return '+';
+
+<options>{NAME}                         return 'NAME';
+<options>"="                            return '=';
+<options>\"("\\\\"|'\"'|[^"])*\"        yytext = yytext.substr(1, yytext.length - 2); return 'OPTION_VALUE';
+<options>"'"("\\\\"|"\'"|[^'])*"'"      yytext = yytext.substr(1, yytext.length - 2); return 'OPTION_VALUE';
+<options>[^\s\r\n]+                     return 'OPTION_VALUE';
+<options>{BR}+                          this.popState(); return 'OPTIONS_END';
+<options>\s+{BR}+                       this.popState(); return 'OPTIONS_END';
+<options>\s+                            /* empty */
 
 \s+                                     /* skip whitespace */
 "//".*                                  /* skip comment */
@@ -48,7 +57,7 @@ BR                                      \r\n|\n|\r
 "%nonassoc"                             return 'NONASSOC';
 "%token"                                this.pushState('token'); return 'TOKEN';
 "%parse-param"                          return 'PARSE_PARAM';
-"%options"                              return 'OPTIONS';
+"%options"                              this.pushState('options'); return 'OPTIONS';
 "%lex"[\w\W]*?{BR}\s*"/lex"\b           return 'LEX_BLOCK';
 
 <INITIAL,ebnf,bnf,code>"%include"       this.pushState('path'); return 'INCLUDE';
