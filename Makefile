@@ -18,6 +18,12 @@ test:
 	node tests/all-tests.js
 
 
+# increment the XXX <prelease> number in the package.json file: version <major>.<minor>.<patch>-<prelease>  
+bump: submodules-bump
+	npm version --no-git-tag-version prerelease
+
+
+
 
 
 clean:
@@ -32,4 +38,4 @@ superclean: clean
 
 
 
-.PHONY: all prep npm-install build test clean superclean
+.PHONY: all prep npm-install build test clean superclean bump
