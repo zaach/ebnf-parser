@@ -69,6 +69,18 @@ declaration
         { $$ = {options: $options}; }
     | UNKNOWN_DECL
         { $$ = {unknownDecl: $UNKNOWN_DECL}; }
+    | IMPORT import_name import_path
+        { $$ = {imports: {name: $import_name, path: $import_path}}; }
+    ;
+
+import_name
+    : ID
+    | STRING
+    ;
+
+import_path
+    : ID
+    | STRING
     ;
 
 options

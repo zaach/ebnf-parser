@@ -60,6 +60,7 @@ BR                                      \r\n|\n|\r
 "%options"                              this.pushState('options'); return 'OPTIONS';
 "%lex"[\w\W]*?{BR}\s*"/lex"\b           return 'LEX_BLOCK';
 
+"%import"                               this.pushState('path'); return 'IMPORT';
 <INITIAL,ebnf,bnf,code>"%include"       this.pushState('path'); return 'INCLUDE';
 
 "%"{NAME}[^\r\n]*                       %{ 
@@ -98,7 +99,7 @@ BR                                      \r\n|\n|\r
 
 <path>[\r\n]                            this.popState(); this.unput(yytext);
 <path>"'"[^\r\n]+"'"                    yytext = yytext.substr(1, yyleng - 2); this.popState(); return 'PATH';
-<path>\"[^\r\n]+\"                      yytext = yytext.substr(1, yyleng - 2); this.popState(); return 'PATH';
+<path>'"'[^\r\n]+'"'                    yytext = yytext.substr(1, yyleng - 2); this.popState(); return 'PATH';
 <path>\s+                               // skip whitespace in the line
 <path>[^\s\r\n]+                        this.popState(); return 'PATH';
 
