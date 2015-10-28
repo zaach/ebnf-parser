@@ -1008,7 +1008,7 @@ case 88 :
 break;
 case 89 : 
 /*! Production::     include_macro_code : INCLUDE PATH */
-  
+ 
             var fs = require('fs');
             var fileContent = fs.readFileSync($$[$0], { encoding: 'utf-8' });
             // And no, we don't support nested '%include':
@@ -1017,8 +1017,8 @@ case 89 :
 break;
 case 90 : 
 /*! Production::     include_macro_code : INCLUDE error */
-  
-            console.error("%include MUST be followed by a valid file path"); 
+ 
+            console.error("%include MUST be followed by a valid file path");
          
 break;
 }
@@ -3059,7 +3059,7 @@ break;
 case 43 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       %{NAME}[^\r\n]* */ 
-  
+ 
                                             /* ignore unrecognized decl */
                                             console.warn('ignoring unsupported parser option: ', yy_.yytext, ' while lexing in ', this.topState(), ' state');
                                             return 23;

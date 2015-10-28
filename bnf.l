@@ -63,7 +63,7 @@ BR                                      \r\n|\n|\r
 "%import"                               this.pushState('path'); return 'IMPORT';
 <INITIAL,ebnf,bnf,code>"%include"       this.pushState('path'); return 'INCLUDE';
 
-"%"{NAME}[^\r\n]*                       %{ 
+"%"{NAME}[^\r\n]*                       %{
                                             /* ignore unrecognized decl */
                                             console.warn('ignoring unsupported parser option: ', yytext, ' while lexing in ', this.topState(), ' state');
                                             return 'UNKNOWN_DECL';

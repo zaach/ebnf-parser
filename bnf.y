@@ -22,7 +22,7 @@ spec
 
 optional_end_block
     :
-    | '%%' extra_parser_module_code 
+    | '%%' extra_parser_module_code
         { $$ = $extra_parser_module_code; }
     ;
 
@@ -113,7 +113,7 @@ parser_type
     : PARSER_TYPE symbol
         { $$ = $symbol; }
     ;
-    
+
 operator
     : associativity token_list
         { $$ = [$associativity]; $$.push.apply($$, $token_list); }
@@ -375,15 +375,15 @@ extra_parser_module_code
 
 include_macro_code
     : INCLUDE PATH
-        { 
+        {
             var fs = require('fs');
             var fileContent = fs.readFileSync($PATH, { encoding: 'utf-8' });
             // And no, we don't support nested '%include':
             $$ = '\n// Included by Jison: ' + $PATH + ':\n\n' + fileContent + '\n\n// End Of Include by Jison: ' + $PATH + '\n\n';
         }
     | INCLUDE error
-        { 
-            console.error("%include MUST be followed by a valid file path"); 
+        {
+            console.error("%include MUST be followed by a valid file path");
         }
     ;
 
