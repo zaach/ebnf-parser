@@ -8,8 +8,8 @@ DECIMAL_NUMBER                          [1-9][0-9]*
 HEX_NUMBER                              "0"[xX][0-9a-fA-F]+
 BR                                      \r\n|\n|\r
 // quoted string content: support *escaped* quotes inside strings:
-QUOTED_STRING_CONTENT                   (\\"'"|(?!"'").)*
-DOUBLEQUOTED_STRING_CONTENT             (\\'"'|(?!'"').)*
+QUOTED_STRING_CONTENT                   (?:\\"'"|(?!"'").)*
+DOUBLEQUOTED_STRING_CONTENT             (?:\\'"'|(?!'"').)*
 
 
 %%
@@ -19,7 +19,7 @@ DOUBLEQUOTED_STRING_CONTENT             (\\'"'|(?!'"').)*
 "["{ID}"]"                yytext = yytext.substr(1, yyleng - 2); return 'ALIAS';
 
 // Stringified tokens are always `'`-surrounded by the bnf.y grammar unless the token
-// itself contain an `'`. 
+// itself contain an `'`.
 //
 // Note: EBNF grammars would barf a hairball or work in very mysterious ways if someone
 // ever decided that the combo of quotes, i.e. `'"` would be a legal token in their grammar,
@@ -29,7 +29,7 @@ DOUBLEQUOTED_STRING_CONTENT             (\\'"'|(?!'"').)*
 // be a bit stricter here in what we lex than in the userland-facing `bnf.l` lexer.
 "'"{QUOTED_STRING_CONTENT}"'"
                           return 'SYMBOL';
-'"'{DOUBLEQUOTED_STRING_CONTENT}'"'               
+'"'{DOUBLEQUOTED_STRING_CONTENT}'"'
                           return 'SYMBOL';
 "."                       return 'SYMBOL';
 
@@ -70,12 +70,12 @@ expression_suffixed
   : expression suffix ALIAS
     { $$ = ['xalias', $suffix, $expression, $ALIAS]; }
   | expression suffix
-    { 
+    {
       if ($suffix) {
-        $$ = [$suffix, $expression]; 
+        $$ = [$suffix, $expression];
       } else {
         $$ = $expression;
-      } 
+      }
     }
   ;
 
