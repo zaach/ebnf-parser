@@ -1,8 +1,12 @@
 %start spec
 
+%parse-param options
+
+
 /* grammar for parsing jison grammar files */
 
 %{
+var fs = require('fs');
 var transform = require('./ebnf-transform').transform;
 var ebnf = false;
 %}
@@ -376,7 +380,7 @@ extra_parser_module_code
 include_macro_code
     : INCLUDE PATH
         {
-            var fs = require('fs');
+console.log('options: ', options);
             var fileContent = fs.readFileSync($PATH, { encoding: 'utf-8' });
             // And no, we don't support nested '%include':
             $$ = '\n// Included by Jison: ' + $PATH + ':\n\n' + fileContent + '\n\n// End Of Include by Jison: ' + $PATH + '\n\n';

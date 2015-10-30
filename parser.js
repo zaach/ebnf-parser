@@ -689,7 +689,7 @@ productions_: [
     0
   ]
 ],
-performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */, yystack) {
+performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */, yystack, options) {
 /* this == yyval */
 
 var $0 = $$.length - 1;
@@ -1027,7 +1027,7 @@ break;
 case 89 : 
 /*! Production::     include_macro_code : INCLUDE PATH */
  
-            var fs = require('fs');
+console.log('options: ', options);
             var fileContent = fs.readFileSync($$[$0], { encoding: 'utf-8' });
             // And no, we don't support nested '%include':
             this.$ = '\n// Included by Jison: ' + $$[$0] + ':\n\n' + fileContent + '\n\n// End Of Include by Jison: ' + $$[$0] + '\n\n';
@@ -2543,6 +2543,7 @@ parse: function parse(input) {
 }
 };
 
+var fs = require('fs');
 var transform = require('./ebnf-transform').transform;
 var ebnf = false;
 
