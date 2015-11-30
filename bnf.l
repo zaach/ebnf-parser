@@ -60,7 +60,7 @@ BR                                      \r\n|\n|\r
 "%options"                              this.pushState('options'); return 'OPTIONS';
 "%lex"[\w\W]*?{BR}\s*"/lex"\b           return 'LEX_BLOCK';
 
-"%import"                               this.pushState('path'); return 'IMPORT';
+"%import"                               return 'IMPORT';
 <INITIAL,ebnf,bnf,code>"%include"       this.pushState('path'); return 'INCLUDE';
 
 "%"{NAME}[^\r\n]*                       %{

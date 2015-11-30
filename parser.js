@@ -3304,11 +3304,6 @@ case 39 :
 /*! Rule::       %options\b */ 
  this.pushState('options'); return 29; 
 break;
-case 41 : 
-/*! Conditions:: bnf ebnf token INITIAL */ 
-/*! Rule::       %import\b */ 
- this.pushState('path'); return 24; 
-break;
 case 42 : 
 /*! Conditions:: INITIAL ebnf bnf code */ 
 /*! Rule::       %include\b */ 
@@ -3479,6 +3474,9 @@ simpleCaseActionClusters: {
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %lex[\w\W]*?{BR}\s*\/lex\b */ 
    40 : 16,
+  /*! Conditions:: bnf ebnf token INITIAL */ 
+  /*! Rule::       %import\b */ 
+   41 : 24,
   /*! Conditions:: * */ 
   /*! Rule::       $ */ 
    52 : 8,
