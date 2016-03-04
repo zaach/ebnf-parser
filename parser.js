@@ -3176,28 +3176,28 @@ case 14 :
 break;
 case 15 : 
 /*! Conditions:: options */ 
-/*! Rule::       \s+{BR}+ */ 
- this.popState(); return 155; 
+/*! Rule::       {WS}+ */ 
+ /* skip whitespace */ 
 break;
 case 16 : 
-/*! Conditions:: options */ 
-/*! Rule::       \s+ */ 
- /* empty */ 
+/*! Conditions:: bnf ebnf token INITIAL */ 
+/*! Rule::       {WS}+ */ 
+ /* skip whitespace */ 
 break;
 case 17 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
-/*! Rule::       \s+ */ 
- /* skip whitespace */ 
+/*! Rule::       [\r\n]+ */ 
+ /* skip newlines */ 
 break;
 case 18 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
-/*! Rule::       \/\/.* */ 
- /* skip comment */ 
+/*! Rule::       \/\/[^\r\n]* */ 
+ /* skip single-line comment */ 
 break;
 case 19 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       \/\*(.|\n|\r)*?\*\/ */ 
- /* skip comment */ 
+ /* skip multi-line comment */ 
 break;
 case 20 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
@@ -3332,7 +3332,7 @@ case 66 :
 break;
 case 67 : 
 /*! Conditions:: path */ 
-/*! Rule::       \s+ */ 
+/*! Rule::       {WS}+ */ 
  // skip whitespace in the line 
 break;
 case 68 : 
@@ -3419,7 +3419,7 @@ simpleCaseActionClusters: {
   /*! Rule::       \/\*(.|\n|\r)*?\*\/ */ 
    53 : 191,
   /*! Conditions:: action */ 
-  /*! Rule::       \/\/.* */ 
+  /*! Rule::       \/\/[^\r\n]* */ 
    54 : 191,
   /*! Conditions:: action */ 
   /*! Rule::       "(\\\\|\\"|[^"])*" */ 
@@ -3453,10 +3453,10 @@ rules: [
 /^(?:'(\\\\|\\'|[^'])*')/,
 /^(?:[^\s\r\n]+)/,
 /^(?:(\r\n|\n|\r)+)/,
-/^(?:\s+(\r\n|\n|\r)+)/,
-/^(?:\s+)/,
-/^(?:\s+)/,
-/^(?:\/\/.*)/,
+/^(?:([^\S\r\n])+)/,
+/^(?:([^\S\r\n])+)/,
+/^(?:[\r\n]+)/,
+/^(?:\/\/[^\r\n]*)/,
 /^(?:\/\*(.|\n|\r)*?\*\/)/,
 /^(?:\[([a-zA-Z_][a-zA-Z0-9_]*)\])/,
 /^(?:([a-zA-Z_][a-zA-Z0-9_]*))/,
@@ -3492,7 +3492,7 @@ rules: [
 /^(?:.)/,
 /^(?:$)/,
 /^(?:\/\*(.|\n|\r)*?\*\/)/,
-/^(?:\/\/.*)/,
+/^(?:\/\/[^\r\n]*)/,
 /^(?:\/[^ \/]*?['"{}'][^ ]*?\/)/,
 /^(?:"(\\\\|\\"|[^"])*")/,
 /^(?:'(\\\\|\\'|[^'])*')/,
@@ -3505,13 +3505,14 @@ rules: [
 /^(?:[\r\n])/,
 /^(?:'[^\r\n]+')/,
 /^(?:"[^\r\n]+")/,
-/^(?:\s+)/,
+/^(?:([^\S\r\n])+)/,
 /^(?:[^\s\r\n]+)/
 ],
 conditions: {
   "bnf": {
     rules: [
       3,
+      16,
       17,
       18,
       19,
@@ -3558,6 +3559,7 @@ conditions: {
       6,
       7,
       8,
+      16,
       17,
       18,
       19,
@@ -3601,6 +3603,7 @@ conditions: {
       0,
       1,
       2,
+      16,
       17,
       18,
       19,
@@ -3683,13 +3686,13 @@ conditions: {
       13,
       14,
       15,
-      16,
       52
     ],
     inclusive: false
   },
   "INITIAL": {
     rules: [
+      16,
       17,
       18,
       19,
