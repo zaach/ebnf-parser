@@ -17,7 +17,7 @@ WS                                      [^\S\r\n]
 
 %%
 
-<token>\r|\n                            this.popState();
+<token>{BR}                             this.popState();
 <token>"%%"                             this.popState();
 <token>";"                              this.popState();
 
@@ -38,7 +38,7 @@ WS                                      [^\S\r\n]
 <options>{WS}+                          /* skip whitespace */
 
 {WS}+                                   /* skip whitespace */
-[\r\n]+                                 /* skip newlines */
+{BR}+                                   /* skip newlines */
 "//"[^\r\n]*                            /* skip single-line comment */
 "/*"(.|\n|\r)*?"*/"                     /* skip multi-line comment */
 "["{ID}"]"                              yytext = yytext.substr(1, yyleng - 2); return 'ALIAS';
@@ -100,7 +100,7 @@ WS                                      [^\S\r\n]
 <code>[^\r\n]+                          return 'CODE';      // the bit of CODE just before EOF...
 
 
-<path>[\r\n]                            this.popState(); this.unput(yytext);
+<path>{BR}                              this.popState(); this.unput(yytext);
 <path>"'"[^\r\n]+"'"                    yytext = yytext.substr(1, yyleng - 2); this.popState(); return 'PATH';
 <path>'"'[^\r\n]+'"'                    yytext = yytext.substr(1, yyleng - 2); this.popState(); return 'PATH';
 <path>{WS}+                             // skip whitespace in the line

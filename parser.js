@@ -3141,7 +3141,7 @@ var YYSTATE = YY_START;
 switch($avoiding_name_collisions) {
 case 0 : 
 /*! Conditions:: token */ 
-/*! Rule::       \r|\n */ 
+/*! Rule::       {BR} */ 
  this.popState(); 
 break;
 case 1 : 
@@ -3186,7 +3186,7 @@ case 16 :
 break;
 case 17 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
-/*! Rule::       [\r\n]+ */ 
+/*! Rule::       {BR}+ */ 
  /* skip newlines */ 
 break;
 case 18 : 
@@ -3317,7 +3317,7 @@ case 63 :
 break;
 case 64 : 
 /*! Conditions:: path */ 
-/*! Rule::       [\r\n] */ 
+/*! Rule::       {BR} */ 
  this.popState(); this.unput(yy_.yytext); 
 break;
 case 65 : 
@@ -3438,7 +3438,7 @@ simpleCaseActionClusters: {
    62 : 196
 },
 rules: [
-/^(?:\r|\n)/,
+/^(?:(\r\n|\n|\r))/,
 /^(?:%%)/,
 /^(?:;)/,
 /^(?:%%)/,
@@ -3455,7 +3455,7 @@ rules: [
 /^(?:(\r\n|\n|\r)+)/,
 /^(?:([^\S\r\n])+)/,
 /^(?:([^\S\r\n])+)/,
-/^(?:[\r\n]+)/,
+/^(?:(\r\n|\n|\r)+)/,
 /^(?:\/\/[^\r\n]*)/,
 /^(?:\/\*(.|\n|\r)*?\*\/)/,
 /^(?:\[([a-zA-Z_][a-zA-Z0-9_]*)\])/,
@@ -3502,7 +3502,7 @@ rules: [
 /^(?:\})/,
 /^(?:[^\r\n]*(\r|\n)+)/,
 /^(?:[^\r\n]+)/,
-/^(?:[\r\n])/,
+/^(?:(\r\n|\n|\r))/,
 /^(?:'[^\r\n]+')/,
 /^(?:"[^\r\n]+")/,
 /^(?:([^\S\r\n])+)/,
