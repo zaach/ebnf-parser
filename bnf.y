@@ -75,6 +75,8 @@ declaration
         { $$ = {unknownDecl: $UNKNOWN_DECL}; }
     | IMPORT import_name import_path
         { $$ = {imports: {name: $import_name, path: $import_path}}; }
+    | INIT_CODE import_name action_ne
+        { $$ = {initCode: {qualifier: $import_name, include: $action_ne}}; }
     ;
 
 import_name
@@ -139,27 +141,54 @@ token_list
         { $$ = [$symbol]; }
     ;
 
+// As per http://www.gnu.org/software/bison/manual/html_node/Token-Decl.html
 full_token_definitions
-    : full_token_definitions full_token_definition
-        { $$ = $full_token_definitions; $$.push($full_token_definition); }
-    | full_token_definition
-        { $$ = [$full_token_definition]; }
+    : optional_token_type id_list
+        {
+            var rv = [];
+            var lst = $id_list;
+            for (var i = 0, len = lst.length; i < len; i++) {
+                var id = lst[i];
+                var m = {id: id};
+                if ($optional_token_type) {
+                    m.type = $optional_token_type;
+                }
+                rv.push(m);
+            }
+            $$ = rv;
+        }
+    | optional_token_type one_full_token
+        {
+            var m = $one_full_token;
+            if ($optional_token_type) {
+                m.type = $optional_token_type;
+            }
+            $$ = [m];
+        }
     ;
 
-// As per http://www.gnu.org/software/bison/manual/html_node/Token-Decl.html
-full_token_definition
-    : optional_token_type id optional_token_value optional_token_description
+one_full_token
+    : id token_value token_description
         {
-            $$ = {id: $id};
-            if ($optional_token_type) {
-                $$.type = $optional_token_type;
-            }
-            if ($optional_token_value) {
-                $$.value = $optional_token_value;
-            }
-            if ($optional_token_description) {
-                $$.description = $optional_token_description;
-            }
+            $$ = {
+                id: $id,
+                value: $token_value
+            };
+        }
+    | id token_description
+        {
+            $$ = {
+                id: $id,
+                description: $token_description
+            };
+        }
+    | id token_value
+        {
+            $$ = {
+                id: $id,
+                value: $token_value,
+                description: $token_description
+            };
         }
     ;
 
@@ -169,16 +198,12 @@ optional_token_type
     | TOKEN_TYPE
     ;
 
-optional_token_value
-    : /* epsilon */
-        { $$ = false; }
-    | INTEGER
+token_value
+    : INTEGER
     ;
 
-optional_token_description
-    : /* epsilon */
-        { $$ = false; }
-    | STRING
+token_description
+    : STRING
     ;
 
 id_list
@@ -188,12 +213,12 @@ id_list
         { $$ = [$id]; }
     ;
 
-token_id
-    : TOKEN_TYPE id
-        { $$ = $id; }
-    | id
-        { $$ = $id; }
-    ;
+// token_id
+//     : TOKEN_TYPE id
+//         { $$ = $id; }
+//     | id
+//         { $$ = $id; }
+//     ;
 
 grammar
     : optional_action_header_block production_list
@@ -243,6 +268,19 @@ handle_action
             }
             if ($prec) {
                 $$.push($prec);
+            }
+            if ($$.length === 1) {
+                $$ = $$[0];
+            }
+        }
+    | EPSILON action
+        // %epsilon may only be used to signal this is an empty rule alt; 
+        // hence it can only occur by itself 
+        // (with an optional action block, but no alias what-so-ever).
+        {
+            $$ = [''];
+            if ($action) {
+                $$.push($action);
             }
             if ($$.length === 1) {
                 $$ = $$[0];
@@ -339,7 +377,7 @@ id
         { $$ = $ID; }
     ;
 
-action
+action_ne
     : '{' action_body '}'
         { $$ = $action_body; }
     | ACTION
@@ -348,6 +386,11 @@ action
         { $$ = $include_macro_code; }
     | ARROW_ACTION
         { $$ = '$$ =' + $ARROW_ACTION + ';'; }
+    ;
+
+action
+    : action_ne
+        { $$ = $action_ne; }
     |
         { $$ = ''; }
     ;

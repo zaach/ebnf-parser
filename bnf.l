@@ -23,6 +23,10 @@ WS                                      [^\S\r\n]
 
 <bnf,ebnf>"%%"                          this.pushState('code'); return '%%';
 
+// Support bison's `%empty` (and our own alias `%epsilon`) to identify an empty rule alt:
+<bnf,ebnf>"%empty"                      return 'EPSILON';
+<bnf,ebnf>"%epsilon"                    return 'EPSILON';
+
 <ebnf>"("                               return '(';
 <ebnf>")"                               return ')';
 <ebnf>"*"                               return '*';
@@ -63,8 +67,10 @@ WS                                      [^\S\r\n]
 "%options"                              this.pushState('options'); return 'OPTIONS';
 "%lex"[\w\W]*?{BR}\s*"/lex"\b           return 'LEX_BLOCK';
 
+"%code"                                 return 'INIT_CODE';
 "%import"                               return 'IMPORT';
-<INITIAL,ebnf,bnf,code>"%include"       this.pushState('path'); return 'INCLUDE';
+<INITIAL,ebnf,bnf,code>"%include"       
+                                        this.pushState('path'); return 'INCLUDE';
 
 "%"{NAME}[^\r\n]*                       %{
                                             /* ignore unrecognized decl */
