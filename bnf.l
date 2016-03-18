@@ -55,7 +55,7 @@ WS                                      [^\S\r\n]
 "|"                                     return '|';
 "%%"                                    this.pushState(ebnf ? 'ebnf' : 'bnf'); return '%%';
 "%ebnf"                                 if (!yy.options) { yy.options = {}; } ebnf = yy.options.ebnf = true;
-"%debug"                                if (!yy.options) { yy.options = {}; } yy.options.debug = true;
+"%debug"                                if (!yy.options) { yy.options = {}; } yy.options.debug = true; return 'DEBUG';
 "%parser-type"                          return 'PARSER_TYPE';
 "%prec"                                 return 'PREC';
 "%start"                                return 'START';
