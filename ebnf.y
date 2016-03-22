@@ -16,6 +16,8 @@ DOUBLEQUOTED_STRING_CONTENT             (?:\\'"'|(?!'"').)*
 
 \s+                       /* skip whitespace */
 {ID}                      return 'SYMBOL';
+"$end"                    return 'SYMBOL';
+"$eof"                    return 'SYMBOL';
 "["{ID}"]"                yytext = yytext.substr(1, yyleng - 2); return 'ALIAS';
 
 // Support bison's `%empty` (and our own alias `%epsilon`) to identify an empty rule alt:

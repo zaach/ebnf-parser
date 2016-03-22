@@ -47,6 +47,8 @@ WS                                      [^\S\r\n]
 "/*"(.|\n|\r)*?"*/"                     /* skip multi-line comment */
 "["{ID}"]"                              yytext = yytext.substr(1, yyleng - 2); return 'ALIAS';
 {ID}                                    return 'ID';
+"$end"                                  return 'ID';
+"$eof"                                  return 'ID';
 '"'[^"]+'"'                             yytext = yytext.substr(1, yyleng - 2); return 'STRING';
 "'"[^']+"'"                             yytext = yytext.substr(1, yyleng - 2); return 'STRING';
 <token>[^\s\r\n]+                       return 'TOKEN_WORD';
