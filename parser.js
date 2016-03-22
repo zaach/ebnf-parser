@@ -17,7 +17,7 @@
  *
  *    quoteName: function(name),
  *               Helper function which can be overridden by user code later on: put suitable
- *                quotes around literal IDs in a description string.
+ *               quotes around literal IDs in a description string.
  *
  *    describeSymbol: function(symbol),
  *               Return a more-or-less human-readable description of the given symbol, when
@@ -54,6 +54,8 @@
  *    yyErrOk: function(),
  *    yyClearIn: function(),
  *
+ *    options: { ... parser %options ... },
+ *
  *    parse: function(input),
  *
  *    lexer: {
@@ -80,7 +82,7 @@
  *        pushState: function(condition),
  *        stateStackSize: function(),
  *
- *        options: { ... },
+ *        options: { ... lexer %options ... },
  *
  *        performAction: function(yy, yy_, $avoiding_name_collisions, YY_START),
  *        rules: [...],
@@ -234,6 +236,8 @@ JisonParserError.prototype = Object.create(Error.prototype);
 JisonParserError.prototype.constructor = JisonParserError;
 JisonParserError.prototype.name = 'JisonParserError';
 
+
+// helper: reconstruct the productions[] table
 function bp(s) {
         var rv = [];
         var p = s.pop;
@@ -246,6 +250,8 @@ function bp(s) {
         }
         return rv;
     }
+
+// helper: reconstruct the defaultActions[] table
 function bda(s) {
         var rv = {};
         var d = s.idx;
@@ -260,6 +266,8 @@ function bda(s) {
         }
         return rv;
     }
+
+// helper: reconstruct the 'goto' table
 function bt(s) {
         var rv = [];
         var d = s.len;
@@ -296,6 +304,9 @@ function bt(s) {
         }
         return rv;
     }
+
+// helper: runlength encoding with increment step: code, length: step (default step = 0)
+// `this` references an array
 function s(c, l, a) {
         a = a || 0;
         for (var i = 0; i < l; i++) {
@@ -303,12 +314,17 @@ function s(c, l, a) {
             c += a;
         }
     }
+
+// helper: duplicate sequence from *relative* offset and length.
+// `this` references an array
 function c(i, l) {
         i = this.length - i;
         for (l += i; i < l; i++) {
             this.push(this[i]);
         }
     }
+
+// helper: unpack an array using helpers and data, all passed in an array argument 'a'.
 function u(a) {
         var rv = [];
         for (var i = 0, l = a.length; i < l; i++) {
@@ -330,6 +346,9 @@ TERROR: 2,
 trace: function no_op_trace() { },
 JisonParserError: JisonParserError,
 yy: {},
+options: {
+  type: "lalr"
+},
 symbols_: {
   "$accept": 0,
   "$end": 1,
@@ -2267,7 +2286,7 @@ parse: function parse(input) {
         vstack = [null],    // semantic value stack
 
         table = this.table;
-    this.recovering = 0;    // (only used when the grammar contains error recovery rules)
+    var recovering = 0;     // (only used when the grammar contains error recovery rules)
     var TERROR = this.TERROR,
         EOF = this.EOF;
 
@@ -2295,6 +2314,11 @@ parse: function parse(input) {
     sharedState.yy.lexer = lexer;
     sharedState.yy.parser = this;
 
+
+
+
+
+
     lexer.setInput(input, sharedState.yy);
 
 
@@ -2312,10 +2336,6 @@ parse: function parse(input) {
     }
 
 
-
-
-    var ranges = lexer.options && lexer.options.ranges;
-
     // Does the shared state override the default `parseError` that already comes with this instance?
     if (typeof sharedState.yy.parseError === 'function') {
         this.parseError = sharedState.yy.parseError;
@@ -2326,6 +2346,8 @@ parse: function parse(input) {
     }
 
     function popStack(n) {
+
+        if (!n) return;
         stack.length = stack.length - 2 * n;
         vstack.length = vstack.length - n;
 
@@ -2344,7 +2366,7 @@ parse: function parse(input) {
 
 
     var symbol = null;
-    this.preErrorSymbol = null;
+    var preErrorSymbol = null;
     var state, action, r;
     var yyval = {};
     var p, len, this_production;
@@ -2433,12 +2455,14 @@ parse: function parse(input) {
             }
 
 
+
+
             // handle parse error
             if (!action || !action.length || !action[0]) {
-                var error_rule_depth;
+                var error_rule_depth = 0;
                 var errStr = null;
 
-                if (!this.recovering) {
+                if (!recovering) {
                     // first see if there's any chance at hitting an error recovery rule:
                     error_rule_depth = locateNearestErrorRecoveryRule(state);
 
@@ -2467,17 +2491,20 @@ parse: function parse(input) {
 
                         lexer: lexer
                     });
+
                     if (!p.recoverable) {
                         retval = r;
                         break;
                     }
-                } else if (this.preErrorSymbol !== EOF) {
+                } else if (preErrorSymbol !== EOF) {
                     error_rule_depth = locateNearestErrorRecoveryRule(state);
                 }
 
+
+
                 // just recovered from another error
-                if (this.recovering === 3) {
-                    if (symbol === EOF || this.preErrorSymbol === EOF) {
+                if (recovering === 3) {
+                    if (symbol === EOF || preErrorSymbol === EOF) {
                         retval = this.parseError(errStr || 'Parsing halted while starting to recover from another error.', {
                             text: lexer.match,
                             token: this.terminals_[symbol] || symbol,
@@ -2500,6 +2527,8 @@ parse: function parse(input) {
 
 
                     symbol = lex();
+
+
                 }
 
                 // try to recover from error
@@ -2521,11 +2550,15 @@ parse: function parse(input) {
                 }
                 popStack(error_rule_depth);
 
-                this.preErrorSymbol = (symbol === TERROR ? null : symbol); // save the lookahead token
+                preErrorSymbol = (symbol === TERROR ? null : symbol); // save the lookahead token
                 symbol = TERROR;            // insert generic error symbol as new lookahead
-                this.recovering = 3;        // allow 3 real symbols to be shifted before reporting a new error
+                recovering = 3;             // allow 3 real symbols to be shifted before reporting a new error
+
+
+
                 continue;
             }
+
 
 
             switch (action[0]) {
@@ -2568,26 +2601,30 @@ parse: function parse(input) {
             // shift:
             case 1: 
                 //this.shiftCount++;
+
                 stack.push(symbol);
                 vstack.push(lexer.yytext);
 
                 stack.push(action[1]); // push state
                 symbol = null;
-                if (!this.preErrorSymbol) { // normal execution / no error
+                if (!preErrorSymbol) { // normal execution / no error
                     // Pick up the lexer details for the current symbol as that one is not 'look-ahead' any more:
 
                     yytext = lexer.yytext;
 
 
 
-                    if (this.recovering > 0) {
-                        this.recovering--;
+                    if (recovering > 0) {
+                        recovering--;
+
                     }
                 } else {
                     // error just occurred, resume old lookahead f/ before error
-                    symbol = this.preErrorSymbol;
-                    this.preErrorSymbol = null;
+                    symbol = preErrorSymbol;
+                    preErrorSymbol = null;
+
                 }
+    
                 continue;
 
             // reduce:
@@ -2596,6 +2633,8 @@ parse: function parse(input) {
                 newState = action[1];
                 this_production = this.productions_[newState - 1];  // `this.productions_[]` is zero-based indexed while states start from 1 upwards... 
                 len = this_production[1];
+
+
 
 
 
@@ -2621,9 +2660,7 @@ parse: function parse(input) {
                 }
 
                 // pop off stack
-                if (len) {
-                    popStack(len);
-                }
+                popStack(len);
 
                 stack.push(this_production[0]);    // push nonterminal (reduce)
                 vstack.push(yyval.$);
@@ -2631,6 +2668,7 @@ parse: function parse(input) {
                 // goto new state = table[STATE][NONTERMINAL]
                 newState = table[stack[stack.length - 2]][stack[stack.length - 1]];
                 stack.push(newState);
+
                 continue;
 
             // accept:
