@@ -37,9 +37,13 @@ The parser can parse its own BNF grammar, shown below:
 ```
 %start spec
 
+%parse-param options
+
+
 /* grammar for parsing jison grammar files */
 
 %{
+var fs = require('fs');
 var transform = require('./ebnf-transform').transform;
 var ebnf = false;
 %}
@@ -58,13 +62,13 @@ spec
     ;
 
 optional_end_block
-    :
-    | '%%' extra_parser_module_code 
+    : %empty
+    | '%%' extra_parser_module_code
         { $$ = $extra_parser_module_code; }
     ;
 
 optional_action_header_block
-    :
+    : %empty
         { $$ = {}; }
     | optional_action_header_block ACTION
         {
@@ -81,7 +85,7 @@ optional_action_header_block
 declaration_list
     : declaration_list declaration
         { $$ = $declaration_list; yy.addDeclaration($$, $declaration); }
-    |
+    | %epsilon
         { $$ = {}; }
     ;
 
@@ -104,11 +108,45 @@ declaration
         { $$ = {parserType: $parser_type}; }
     | options
         { $$ = {options: $options}; }
+    | DEBUG
+        { $$ = {options: [['debug', true]]}; }
+    | UNKNOWN_DECL
+        { $$ = {unknownDecl: $UNKNOWN_DECL}; }
+    | IMPORT import_name import_path
+        { $$ = {imports: {name: $import_name, path: $import_path}}; }
+    | INIT_CODE import_name action_ne
+        { $$ = {initCode: {qualifier: $import_name, include: $action_ne}}; }
+    ;
+
+import_name
+    : ID
+    | STRING
+    ;
+
+import_path
+    : ID
+    | STRING
     ;
 
 options
-    : OPTIONS token_list
-        { $$ = $token_list; }
+    : OPTIONS option_list OPTIONS_END
+        { $$ = $option_list; }
+    ;
+
+option_list
+    : option_list option
+        { $$ = $option_list; $$.push($option); }
+    | option
+        { $$ = [$option]; }
+    ;
+
+option
+    : NAME[option]
+        { $$ = [$option, true]; }
+    | NAME[option] '=' OPTION_VALUE[value]
+        { $$ = [$option, $value]; }
+    | NAME[option] '=' NAME[value]
+        { $$ = [$option, $value]; }
     ;
 
 parse_param
@@ -120,7 +158,7 @@ parser_type
     : PARSER_TYPE symbol
         { $$ = $symbol; }
     ;
-    
+
 operator
     : associativity token_list
         { $$ = [$associativity]; $$.push.apply($$, $token_list); }
@@ -142,46 +180,69 @@ token_list
         { $$ = [$symbol]; }
     ;
 
+// As per http://www.gnu.org/software/bison/manual/html_node/Token-Decl.html
 full_token_definitions
-    : full_token_definitions full_token_definition
-        { $$ = $full_token_definitions; $$.push($full_token_definition); }
-    | full_token_definition
-        { $$ = [$full_token_definition]; }
+    : optional_token_type id_list
+        {
+            var rv = [];
+            var lst = $id_list;
+            for (var i = 0, len = lst.length; i < len; i++) {
+                var id = lst[i];
+                var m = {id: id};
+                if ($optional_token_type) {
+                    m.type = $optional_token_type;
+                }
+                rv.push(m);
+            }
+            $$ = rv;
+        }
+    | optional_token_type one_full_token
+        {
+            var m = $one_full_token;
+            if ($optional_token_type) {
+                m.type = $optional_token_type;
+            }
+            $$ = [m];
+        }
     ;
 
-// As per http://www.gnu.org/software/bison/manual/html_node/Token-Decl.html
-full_token_definition
-    : optional_token_type id optional_token_value optional_token_description
+one_full_token
+    : id token_value token_description
         {
-            $$ = {id: $id};
-            if ($optional_token_type) {
-                $$.type = $optional_token_type;
-            }
-            if ($optional_token_value) {
-                $$.value = $optional_token_value;
-            }
-            if ($optional_token_description) {
-                $$.description = $optional_token_description;
-            }
+            $$ = {
+                id: $id,
+                value: $token_value
+            };
+        }
+    | id token_description
+        {
+            $$ = {
+                id: $id,
+                description: $token_description
+            };
+        }
+    | id token_value
+        {
+            $$ = {
+                id: $id,
+                value: $token_value,
+                description: $token_description
+            };
         }
     ;
 
 optional_token_type
-    : /* epsilon */
+    : %epsilon
         { $$ = false; }
     | TOKEN_TYPE
     ;
 
-optional_token_value
-    : /* epsilon */
-        { $$ = false; }
-    | INTEGER
+token_value
+    : INTEGER
     ;
 
-optional_token_description
-    : /* epsilon */
-        { $$ = false; }
-    | STRING
+token_description
+    : STRING
     ;
 
 id_list
@@ -191,12 +252,12 @@ id_list
         { $$ = [$id]; }
     ;
 
-token_id
-    : TOKEN_TYPE id
-        { $$ = $id; }
-    | id
-        { $$ = $id; }
-    ;
+// token_id
+//     : TOKEN_TYPE id
+//         { $$ = $id; }
+//     | id
+//         { $$ = $id; }
+//     ;
 
 grammar
     : optional_action_header_block production_list
@@ -251,6 +312,19 @@ handle_action
                 $$ = $$[0];
             }
         }
+    | EPSILON action
+        // %epsilon may only be used to signal this is an empty rule alt; 
+        // hence it can only occur by itself 
+        // (with an optional action block, but no alias what-so-ever).
+        {
+            $$ = [''];
+            if ($action) {
+                $$.push($action);
+            }
+            if ($$.length === 1) {
+                $$ = $$[0];
+            }
+        }
     ;
 
 handle
@@ -259,7 +333,7 @@ handle
             $$ = $handle;
             $$.push($expression_suffix);
         }
-    |
+    | %epsilon
         {
             $$ = [];
         }
@@ -295,7 +369,15 @@ expression
         }
     | STRING
         {
-            $$ = ebnf ? "'" + $STRING + "'" : $STRING;
+            // Re-encode the string *anyway* as it will
+            // be made part of the rule rhs a.k.a. production (type: *string*) again and we want
+            // to be able to handle all tokens, including *significant space*
+            // encoded as literal tokens in a grammar such as this: `rule: A ' ' B`.
+            if ($STRING.indexOf("'") >= 0) {
+                $$ = '"' + $STRING + '"';
+            } else {
+                $$ = "'" + $STRING + "'";
+            }
         }
     | '(' handle_sublist ')'
         {
@@ -304,7 +386,7 @@ expression
     ;
 
 suffix
-    : /* epsilon */
+    : %epsilon
         { $$ = ''; }
     | '*'
     | '?'
@@ -316,7 +398,7 @@ prec
         {
             $$ = { prec: $symbol };
         }
-    |
+    | %epsilon
         {
             $$ = null;
         }
@@ -334,7 +416,7 @@ id
         { $$ = $ID; }
     ;
 
-action
+action_ne
     : '{' action_body '}'
         { $$ = $action_body; }
     | ACTION
@@ -343,12 +425,17 @@ action
         { $$ = $include_macro_code; }
     | ARROW_ACTION
         { $$ = '$$ =' + $ARROW_ACTION + ';'; }
-    |
+    ;
+
+action
+    : action_ne
+        { $$ = $action_ne; }
+    | %epsilon
         { $$ = ''; }
     ;
 
 action_body
-    :
+    : %epsilon
         { $$ = ''; }
     | action_comments_body
         { $$ = $action_comments_body; }
@@ -374,15 +461,14 @@ extra_parser_module_code
 
 include_macro_code
     : INCLUDE PATH
-        { 
-            var fs = require('fs');
+        {
             var fileContent = fs.readFileSync($PATH, { encoding: 'utf-8' });
             // And no, we don't support nested '%include':
             $$ = '\n// Included by Jison: ' + $PATH + ':\n\n' + fileContent + '\n\n// End Of Include by Jison: ' + $PATH + '\n\n';
         }
     | INCLUDE error
-        { 
-            console.error("%include MUST be followed by a valid file path"); 
+        {
+            console.error("%include MUST be followed by a valid file path");
         }
     ;
 
@@ -396,7 +482,7 @@ module_code_chunk
 optional_module_code_chunk
     : module_code_chunk
         { $$ = $module_code_chunk; }
-    | /* nil */
+    | %epsilon
         { $$ = ''; }
     ;
 

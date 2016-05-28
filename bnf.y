@@ -25,13 +25,13 @@ spec
     ;
 
 optional_end_block
-    :
+    : %empty
     | '%%' extra_parser_module_code
         { $$ = $extra_parser_module_code; }
     ;
 
 optional_action_header_block
-    :
+    : %empty
         { $$ = {}; }
     | optional_action_header_block ACTION
         {
@@ -48,7 +48,7 @@ optional_action_header_block
 declaration_list
     : declaration_list declaration
         { $$ = $declaration_list; yy.addDeclaration($$, $declaration); }
-    |
+    | %epsilon
         { $$ = {}; }
     ;
 
@@ -195,7 +195,7 @@ one_full_token
     ;
 
 optional_token_type
-    : /* epsilon */
+    : %epsilon
         { $$ = false; }
     | TOKEN_TYPE
     ;
@@ -296,7 +296,7 @@ handle
             $$ = $handle;
             $$.push($expression_suffix);
         }
-    |
+    | %epsilon
         {
             $$ = [];
         }
@@ -349,7 +349,7 @@ expression
     ;
 
 suffix
-    : /* epsilon */
+    : %epsilon
         { $$ = ''; }
     | '*'
     | '?'
@@ -361,7 +361,7 @@ prec
         {
             $$ = { prec: $symbol };
         }
-    |
+    | %epsilon
         {
             $$ = null;
         }
@@ -393,12 +393,12 @@ action_ne
 action
     : action_ne
         { $$ = $action_ne; }
-    |
+    | %epsilon
         { $$ = ''; }
     ;
 
 action_body
-    :
+    : %epsilon
         { $$ = ''; }
     | action_comments_body
         { $$ = $action_comments_body; }
@@ -445,7 +445,7 @@ module_code_chunk
 optional_module_code_chunk
     : module_code_chunk
         { $$ = $module_code_chunk; }
-    | /* nil */
+    | %epsilon
         { $$ = ''; }
     ;
 
