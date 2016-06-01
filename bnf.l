@@ -34,6 +34,11 @@ WS                                      [^\S\r\n]
 // Support bison's `%empty` (and our own alias `%epsilon`) to identify an empty rule alt:
 <bnf,ebnf>"%empty"                      return 'EPSILON';
 <bnf,ebnf>"%epsilon"                    return 'EPSILON';
+// See also https://en.wikipedia.org/wiki/Epsilon#Glyph_variants
+<bnf,ebnf>"\u0190"                      return 'EPSILON';
+<bnf,ebnf>"\u025B"                      return 'EPSILON';
+<bnf,ebnf>"\u03B5"                      return 'EPSILON';
+<bnf,ebnf>"\u03F5"                      return 'EPSILON';
 
 <ebnf>"("                               return '(';
 <ebnf>")"                               return ')';

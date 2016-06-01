@@ -2,8 +2,16 @@
 
 %lex
 
-NAME                                    [a-zA-Z_](?:[a-zA-Z0-9_-]*[a-zA-Z0-9_])?
-ID                                      [a-zA-Z_][a-zA-Z0-9_]*
+
+ASCII_LETTER                            [a-zA-z]
+// \p{Alphabetic} already includes [a-zA-z], hence we don't need to merge with {UNICODE_LETTER}:
+UNICODE_LETTER                          [\p{Alphabetic}]
+ALPHA                                   [{UNICODE_LETTER}_]
+DIGIT                                   [\p{Number}]
+WHITESPACE                              [\s\r\n\p{Separator}]
+
+NAME                                    [{ALPHA}](?:[{ALPHA}{DIGIT}-]*[{ALPHA}{DIGIT}])?
+ID                                      [{ALPHA}][{ALPHA}{DIGIT}]*
 DECIMAL_NUMBER                          [1-9][0-9]*
 HEX_NUMBER                              "0"[xX][0-9a-fA-F]+
 BR                                      \r\n|\n|\r
@@ -23,6 +31,11 @@ DOUBLEQUOTED_STRING_CONTENT             (?:\\'"'|(?!'"').)*
 // Support bison's `%empty` (and our own alias `%epsilon`) to identify an empty rule alt:
 "%empty"                  return 'EPSILON';
 "%epsilon"                return 'EPSILON';
+// See also https://en.wikipedia.org/wiki/Epsilon#Glyph_variants
+"\u0190"                  return 'EPSILON';
+"\u025B"                  return 'EPSILON';
+"\u03B5"                  return 'EPSILON';
+"\u03F5"                  return 'EPSILON';
 
 // Stringified tokens are always `'`-surrounded by the bnf.y grammar unless the token
 // itself contain an `'`.
