@@ -1,5 +1,13 @@
-NAME                                    [a-zA-Z_](?:[a-zA-Z0-9_-]*[a-zA-Z0-9_])?
-ID                                      [a-zA-Z_][a-zA-Z0-9_]*
+
+ASCII_LETTER                            [a-zA-z]
+// \p{Alphabetic} already includes [a-zA-z], hence we don't need to merge with {UNICODE_LETTER}:
+UNICODE_LETTER                          [\p{Alphabetic}]
+ALPHA                                   [{UNICODE_LETTER}_]
+DIGIT                                   [\p{Number}]
+WHITESPACE                              [\s\r\n\p{Separator}]
+
+NAME                                    [{ALPHA}](?:[{ALPHA}{DIGIT}-]*[{ALPHA}{DIGIT}])?
+ID                                      [{ALPHA}][{ALPHA}{DIGIT}]*
 DECIMAL_NUMBER                          [1-9][0-9]*
 HEX_NUMBER                              "0"[xX][0-9a-fA-F]+
 BR                                      \r\n|\n|\r
