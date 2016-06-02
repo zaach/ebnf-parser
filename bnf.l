@@ -80,7 +80,7 @@ WS                                      [^\S\r\n]
 "%token"                                this.pushState('token'); return 'TOKEN';
 "%parse-param"                          return 'PARSE_PARAM';
 "%options"                              this.pushState('options'); return 'OPTIONS';
-"%lex"[\w\W]*?{BR}\s*"/lex"\b           return 'LEX_BLOCK';
+"%lex"[\w\W]*?{BR}\s*"/lex"             return 'LEX_BLOCK';
 
 "%code"                                 return 'INIT_CODE';
 "%import"                               return 'IMPORT';
