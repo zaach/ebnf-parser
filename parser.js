@@ -3302,7 +3302,7 @@ simpleCaseActionClusters: {
   /*! Rule::       %parse-param\b */ 
    46 : 161,
   /*! Conditions:: bnf ebnf token INITIAL */ 
-  /*! Rule::       %lex[\w\W]*?{BR}\s*\/lex\b */ 
+  /*! Rule::       %lex{WS}*{BR}[\w\W]*?{BR}{WS}*\/lex\b */ 
    48 : 139,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %code\b */ 
@@ -3384,7 +3384,7 @@ rules: [
 /^(?:%token\b)/,
 /^(?:%parse-param\b)/,
 /^(?:%options\b)/,
-/^(?:%lex[\w\W]*?(\r\n|\n|\r)\s*\/lex\b)/,
+/^(?:%lex([^\S\r\n])*(\r\n|\n|\r)[\w\W]*?(\r\n|\n|\r)([^\S\r\n])*\/lex\b)/,
 /^(?:%code\b)/,
 /^(?:%import\b)/,
 /^(?:%include\b)/,
