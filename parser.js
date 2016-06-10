@@ -3114,9 +3114,10 @@ case 48 :
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       %lex{LEX_CONTENT}\/lex\b */ 
   
-											console.log("lex block matched: ", yy_.yytext, this.match); 
-											return 139; 
-										 
+                                            // remove the %lex../lex wrapper and return the pure lex section:
+                                            yy_.yytext = this.matches[1];
+                                            return 139; 
+                                         
 break;
 case 51 : 
 /*! Conditions:: INITIAL ebnf bnf code */ 

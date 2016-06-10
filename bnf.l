@@ -18,7 +18,7 @@ WS                                      [^\S\r\n]
 // Regex for matching all the possible stuff which can be placed between those `%lex.../lex` markers:
 // multiple lines of arbitrary material. Use a non-gready `*?` in there to ensure that the regex
 // doesn't also consume the terminating `/lex` token!
-LEX_CONTENT								{WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*  
+LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*  
 
 
 %x action code path options
@@ -85,10 +85,11 @@ LEX_CONTENT								{WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
 "%token"                                this.pushState('token'); return 'TOKEN';
 "%parse-param"                          return 'PARSE_PARAM';
 "%options"                              this.pushState('options'); return 'OPTIONS';
-"%lex"{LEX_CONTENT}"/lex"				%{ 
-											console.log("lex block matched: ", yytext, this.match); 
-											return 'LEX_BLOCK'; 
-										%}
+"%lex"{LEX_CONTENT}"/lex"               %{ 
+                                            // remove the %lex../lex wrapper and return the pure lex section:
+                                            yytext = this.matches[1];
+                                            return 'LEX_BLOCK'; 
+                                        %}
 
 "%code"                                 return 'INIT_CODE';
 "%import"                               return 'IMPORT';
