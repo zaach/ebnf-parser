@@ -3110,6 +3110,14 @@ case 47 :
 /*! Rule::       %options\b */ 
  this.pushState('options'); return 155; 
 break;
+case 48 : 
+/*! Conditions:: bnf ebnf token INITIAL */ 
+/*! Rule::       %lex{LEX_CONTENT}\/lex\b */ 
+  
+											console.log("lex block matched: ", yy_.yytext, this.match); 
+											return 139; 
+										 
+break;
 case 51 : 
 /*! Conditions:: INITIAL ebnf bnf code */ 
 /*! Rule::       %include\b */ 
@@ -3302,9 +3310,6 @@ simpleCaseActionClusters: {
   /*! Rule::       %parse-param\b */ 
    46 : 161,
   /*! Conditions:: bnf ebnf token INITIAL */ 
-  /*! Rule::       %lex{WS}*{BR}[\w\W]*?{BR}{WS}*\/lex\b */ 
-   48 : 139,
-  /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %code\b */ 
    49 : 151,
   /*! Conditions:: bnf ebnf token INITIAL */ 
@@ -3384,7 +3389,7 @@ rules: [
 /^(?:%token\b)/,
 /^(?:%parse-param\b)/,
 /^(?:%options\b)/,
-/^(?:%lex([^\S\r\n])*(\r\n|\n|\r)[\w\W]*?(\r\n|\n|\r)([^\S\r\n])*\/lex\b)/,
+/^(?:%lex((?:[^\S\r\n])*(?:(?:\r\n|\n|\r)[\w\W]*?)?(?:\r\n|\n|\r)(?:[^\S\r\n])*)\/lex\b)/,
 /^(?:%code\b)/,
 /^(?:%import\b)/,
 /^(?:%include\b)/,
