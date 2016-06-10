@@ -12,7 +12,13 @@ A parser for BNF and EBNF grammars used by jison.
 
 To build the parser yourself, clone the git repo then run:
 
+    make prep
+    
+to install required packages and then run:
+
     make
+    
+to build the lib and run the unit tests.
 
 This will generate `parser.js`, which is required by `ebnf-parser.js`.
 
