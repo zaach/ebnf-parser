@@ -672,351 +672,407 @@ performAction: function parser__PerformAction(yytext, yy, yystate /* action[1] *
 
 var $0 = $$.length - 1;
 switch (yystate) {
-case 1 : 
-/*! Production::     spec : declaration_list '%%' grammar optional_end_block EOF */
- this.$ = $$[$0 - 4];
-            if ($$[$0 - 1] && $$[$0 - 1].trim() !== '') {
-                yy.addDeclaration(this.$, { include: $$[$0 - 1] });
-            }
-            return extend(this.$, $$[$0 - 2]); 
-break;
-case 3 : 
-/*! Production::     optional_end_block : '%%' extra_parser_module_code */
- case 32 : 
-/*! Production::     parse_param : PARSE_PARAM token_list */
- case 33 : 
-/*! Production::     parser_type : PARSER_TYPE symbol */
- case 65 : 
-/*! Production::     expression : ID */
- case 74 : 
-/*! Production::     symbol : id */
- case 75 : 
-/*! Production::     symbol : STRING */
- case 76 : 
-/*! Production::     id : ID */
- case 78 : 
-/*! Production::     action_ne : ACTION */
- case 79 : 
-/*! Production::     action_ne : include_macro_code */
- case 81 : 
-/*! Production::     action : action_ne */
- case 84 : 
-/*! Production::     action_body : action_comments_body */
- case 87 : 
-/*! Production::     action_comments_body : ACTION_BODY */
- case 89 : 
-/*! Production::     extra_parser_module_code : optional_module_code_chunk */
- case 93 : 
-/*! Production::     module_code_chunk : CODE */
- case 95 : 
-/*! Production::     optional_module_code_chunk : module_code_chunk */
- this.$ = $$[$0]; 
-break;
-case 4 : 
-/*! Production::     optional_action_header_block : ε */
- case 8 : 
-/*! Production::     declaration_list : ε */
- this.$ = {}; 
-break;
-case 5 : 
-/*! Production::     optional_action_header_block : optional_action_header_block ACTION */
- case 6 : 
-/*! Production::     optional_action_header_block : optional_action_header_block include_macro_code */
- this.$ = $$[$0 - 1];
-            yy.addDeclaration(this.$, { actionInclude: $$[$0] }); 
-break;
-case 7 : 
-/*! Production::     declaration_list : declaration_list declaration */
- this.$ = $$[$0 - 1]; yy.addDeclaration(this.$, $$[$0]); 
-break;
-case 9 : 
-/*! Production::     declaration : START id */
- this.$ = {start: $$[$0]}; 
-break;
-case 10 : 
-/*! Production::     declaration : LEX_BLOCK */
- this.$ = {lex: $$[$0]}; 
-break;
-case 11 : 
-/*! Production::     declaration : operator */
- this.$ = {operator: $$[$0]}; 
-break;
-case 12 : 
-/*! Production::     declaration : TOKEN full_token_definitions */
- this.$ = {token_list: $$[$0]}; 
-break;
-case 13 : 
-/*! Production::     declaration : ACTION */
- case 14 : 
-/*! Production::     declaration : include_macro_code */
- this.$ = {include: $$[$0]}; 
-break;
-case 15 : 
-/*! Production::     declaration : parse_param */
- this.$ = {parseParam: $$[$0]}; 
-break;
-case 16 : 
-/*! Production::     declaration : parser_type */
- this.$ = {parserType: $$[$0]}; 
-break;
-case 17 : 
-/*! Production::     declaration : options */
- this.$ = {options: $$[$0]}; 
-break;
-case 18 : 
-/*! Production::     declaration : DEBUG */
- this.$ = {options: [['debug', true]]}; 
-break;
-case 19 : 
-/*! Production::     declaration : UNKNOWN_DECL */
- this.$ = {unknownDecl: $$[$0]}; 
-break;
-case 20 : 
-/*! Production::     declaration : IMPORT import_name import_path */
- this.$ = {imports: {name: $$[$0 - 1], path: $$[$0]}}; 
-break;
-case 21 : 
-/*! Production::     declaration : INIT_CODE import_name action_ne */
- this.$ = {initCode: {qualifier: $$[$0 - 1], include: $$[$0]}}; 
-break;
-case 26 : 
-/*! Production::     options : OPTIONS option_list OPTIONS_END */
- case 77 : 
-/*! Production::     action_ne : '{' action_body '}' */
- this.$ = $$[$0 - 1]; 
-break;
-case 27 : 
-/*! Production::     option_list : option_list option */
- case 38 : 
-/*! Production::     token_list : token_list symbol */
- case 49 : 
-/*! Production::     id_list : id_list id */
- this.$ = $$[$0 - 1]; this.$.push($$[$0]); 
-break;
-case 28 : 
-/*! Production::     option_list : option */
- case 39 : 
-/*! Production::     token_list : symbol */
- case 50 : 
-/*! Production::     id_list : id */
- case 56 : 
-/*! Production::     handle_list : handle_action */
- this.$ = [$$[$0]]; 
-break;
-case 29 : 
-/*! Production::     option : NAME[option] */
- this.$ = [$$[$0], true]; 
-break;
-case 30 : 
-/*! Production::     option : NAME[option] '=' OPTION_VALUE[value] */
- case 31 : 
-/*! Production::     option : NAME[option] '=' NAME[value] */
- this.$ = [$$[$0 - 2], $$[$0]]; 
-break;
-case 34 : 
-/*! Production::     operator : associativity token_list */
- this.$ = [$$[$0 - 1]]; this.$.push.apply(this.$, $$[$0]); 
-break;
-case 35 : 
-/*! Production::     associativity : LEFT */
- this.$ = 'left'; 
-break;
-case 36 : 
-/*! Production::     associativity : RIGHT */
- this.$ = 'right'; 
-break;
-case 37 : 
-/*! Production::     associativity : NONASSOC */
- this.$ = 'nonassoc'; 
-break;
-case 40 : 
-/*! Production::     full_token_definitions : optional_token_type id_list */
- var rv = [];
-            var lst = $$[$0];
-            for (var i = 0, len = lst.length; i < len; i++) {
-                var id = lst[i];
-                var m = {id: id};
-                if ($$[$0 - 1]) {
-                    m.type = $$[$0 - 1];
-                }
-                rv.push(m);
-            }
-            this.$ = rv; 
-break;
-case 41 : 
-/*! Production::     full_token_definitions : optional_token_type one_full_token */
- var m = $$[$0];
-            if ($$[$0 - 1]) {
-                m.type = $$[$0 - 1];
-            }
-            this.$ = [m]; 
-break;
-case 42 : 
-/*! Production::     one_full_token : id token_value token_description */
- this.$ = {
-                id: $$[$0 - 2],
-                value: $$[$0 - 1]
-            }; 
-break;
-case 43 : 
-/*! Production::     one_full_token : id token_description */
- this.$ = {
-                id: $$[$0 - 1],
-                description: $$[$0]
-            }; 
-break;
-case 44 : 
-/*! Production::     one_full_token : id token_value */
- this.$ = {
-                id: $$[$0 - 1],
-                value: $$[$0],
-                description: $token_description
-            }; 
-break;
-case 45 : 
-/*! Production::     optional_token_type : ε */
- this.$ = false; 
-break;
-case 51 : 
-/*! Production::     grammar : optional_action_header_block production_list */
- this.$ = $$[$0 - 1];
-            this.$.grammar = $$[$0]; 
-break;
-case 52 : 
-/*! Production::     production_list : production_list production */
- this.$ = $$[$0 - 1];
-            if ($$[$0][0] in this.$) {
-                this.$[$$[$0][0]] = this.$[$$[$0][0]].concat($$[$0][1]);
-            } else {
-                this.$[$$[$0][0]] = $$[$0][1];
-            } 
-break;
-case 53 : 
-/*! Production::     production_list : production */
- this.$ = {}; this.$[$$[$0][0]] = $$[$0][1]; 
-break;
-case 54 : 
-/*! Production::     production : id ':' handle_list ';' */
- this.$ = [$$[$0 - 3], $$[$0 - 1]]; 
-break;
-case 55 : 
-/*! Production::     handle_list : handle_list '|' handle_action */
- this.$ = $$[$0 - 2];
-            this.$.push($$[$0]); 
-break;
-case 57 : 
-/*! Production::     handle_action : handle prec action */
- this.$ = [($$[$0 - 2].length ? $$[$0 - 2].join(' ') : '')];
-            if ($$[$0]) {
-                this.$.push($$[$0]);
-            }
-            if ($$[$0 - 1]) {
-                this.$.push($$[$0 - 1]);
-            }
-            if (this.$.length === 1) {
-                this.$ = this.$[0];
-            } 
-break;
-case 58 : 
-/*! Production::     handle_action : EPSILON action */
- this.$ = [''];
-            if ($$[$0]) {
-                this.$.push($$[$0]);
-            }
-            if (this.$.length === 1) {
-                this.$ = this.$[0];
-            } 
-break;
-case 59 : 
-/*! Production::     handle : handle expression_suffix */
- this.$ = $$[$0 - 1];
-            this.$.push($$[$0]); 
-break;
-case 60 : 
-/*! Production::     handle : ε */
- this.$ = []; 
-break;
-case 61 : 
-/*! Production::     handle_sublist : handle_sublist '|' handle */
- this.$ = $$[$0 - 2];
-            this.$.push($$[$0].join(' ')); 
-break;
-case 62 : 
-/*! Production::     handle_sublist : handle */
- this.$ = [$$[$0].join(' ')]; 
-break;
-case 63 : 
-/*! Production::     expression_suffix : expression suffix ALIAS */
- this.$ = $$[$0 - 2] + $$[$0 - 1] + "[" + $$[$0] + "]"; 
-break;
-case 64 : 
-/*! Production::     expression_suffix : expression suffix */
- case 88 : 
-/*! Production::     action_comments_body : action_comments_body ACTION_BODY */
- case 94 : 
-/*! Production::     module_code_chunk : module_code_chunk CODE */
- this.$ = $$[$0 - 1] + $$[$0]; 
-break;
-case 66 : 
-/*! Production::     expression : STRING */
- // Re-encode the string *anyway* as it will
-            // be made part of the rule rhs a.k.a. production (type: *string*) again and we want
-            // to be able to handle all tokens, including *significant space*
-            // encoded as literal tokens in a grammar such as this: `rule: A ' ' B`.
-            if ($$[$0].indexOf("'") >= 0) {
-                this.$ = '"' + $$[$0] + '"';
-            } else {
-                this.$ = "'" + $$[$0] + "'";
-            } 
-break;
-case 67 : 
-/*! Production::     expression : '(' handle_sublist ')' */
- this.$ = '(' + $$[$0 - 1].join(' | ') + ')'; 
-break;
-case 68 : 
-/*! Production::     suffix : ε */
- case 82 : 
-/*! Production::     action : ε */
- case 83 : 
-/*! Production::     action_body : ε */
- case 96 : 
-/*! Production::     optional_module_code_chunk : ε */
- this.$ = ''; 
-break;
-case 72 : 
-/*! Production::     prec : PREC symbol */
- this.$ = { prec: $$[$0] }; 
-break;
-case 73 : 
-/*! Production::     prec : ε */
- this.$ = null; 
-break;
-case 80 : 
-/*! Production::     action_ne : ARROW_ACTION */
- this.$ = '$$ =' + $$[$0] + ';'; 
-break;
-case 85 : 
-/*! Production::     action_body : action_body '{' action_body '}' action_comments_body */
- this.$ = $$[$0 - 4] + $$[$0 - 3] + $$[$0 - 2] + $$[$0 - 1] + $$[$0]; 
-break;
-case 86 : 
-/*! Production::     action_body : action_body '{' action_body '}' */
- this.$ = $$[$0 - 3] + $$[$0 - 2] + $$[$0 - 1] + $$[$0]; 
-break;
-case 90 : 
-/*! Production::     extra_parser_module_code : optional_module_code_chunk include_macro_code extra_parser_module_code */
- this.$ = $$[$0 - 2] + $$[$0 - 1] + $$[$0]; 
-break;
-case 91 : 
-/*! Production::     include_macro_code : INCLUDE PATH */
- var fileContent = fs.readFileSync($$[$0], { encoding: 'utf-8' });
-            // And no, we don't support nested '%include':
-            this.$ = '\n// Included by Jison: ' + $$[$0] + ':\n\n' + fileContent + '\n\n// End Of Include by Jison: ' + $$[$0] + '\n\n'; 
-break;
-case 92 : 
-/*! Production::     include_macro_code : INCLUDE error */
- console.error("%include MUST be followed by a valid file path"); 
-break;
+case 1:
+    /*! Production::    spec : declaration_list '%%' grammar optional_end_block EOF */
+    this.$ = $$[$0 - 4];
+    if ($$[$0 - 1] && $$[$0 - 1].trim() !== '') {
+        yy.addDeclaration(this.$, { include: $$[$0 - 1] });
+    }
+    return extend(this.$, $$[$0 - 2]);
+    break;
+
+case 3:
+    /*! Production::    optional_end_block : '%%' extra_parser_module_code */
+case 32:
+    /*! Production::    parse_param : PARSE_PARAM token_list */
+case 33:
+    /*! Production::    parser_type : PARSER_TYPE symbol */
+case 65:
+    /*! Production::    expression : ID */
+case 74:
+    /*! Production::    symbol : id */
+case 75:
+    /*! Production::    symbol : STRING */
+case 76:
+    /*! Production::    id : ID */
+case 78:
+    /*! Production::    action_ne : ACTION */
+case 79:
+    /*! Production::    action_ne : include_macro_code */
+case 81:
+    /*! Production::    action : action_ne */
+case 84:
+    /*! Production::    action_body : action_comments_body */
+case 87:
+    /*! Production::    action_comments_body : ACTION_BODY */
+case 89:
+    /*! Production::    extra_parser_module_code : optional_module_code_chunk */
+case 93:
+    /*! Production::    module_code_chunk : CODE */
+case 95:
+    /*! Production::    optional_module_code_chunk : module_code_chunk */
+    this.$ = $$[$0];
+    break;
+
+case 4:
+    /*! Production::    optional_action_header_block : ε */
+case 8:
+    /*! Production::    declaration_list : ε */
+    this.$ = {};
+    break;
+
+case 5:
+    /*! Production::    optional_action_header_block : optional_action_header_block ACTION */
+case 6:
+    /*! Production::    optional_action_header_block : optional_action_header_block include_macro_code */
+    this.$ = $$[$0 - 1];
+    yy.addDeclaration(this.$, { actionInclude: $$[$0] });
+    break;
+
+case 7:
+    /*! Production::    declaration_list : declaration_list declaration */
+    this.$ = $$[$0 - 1]; yy.addDeclaration(this.$, $$[$0]);
+    break;
+
+case 9:
+    /*! Production::    declaration : START id */
+    this.$ = {start: $$[$0]};
+    break;
+
+case 10:
+    /*! Production::    declaration : LEX_BLOCK */
+    this.$ = {lex: $$[$0]};
+    break;
+
+case 11:
+    /*! Production::    declaration : operator */
+    this.$ = {operator: $$[$0]};
+    break;
+
+case 12:
+    /*! Production::    declaration : TOKEN full_token_definitions */
+    this.$ = {token_list: $$[$0]};
+    break;
+
+case 13:
+    /*! Production::    declaration : ACTION */
+case 14:
+    /*! Production::    declaration : include_macro_code */
+    this.$ = {include: $$[$0]};
+    break;
+
+case 15:
+    /*! Production::    declaration : parse_param */
+    this.$ = {parseParam: $$[$0]};
+    break;
+
+case 16:
+    /*! Production::    declaration : parser_type */
+    this.$ = {parserType: $$[$0]};
+    break;
+
+case 17:
+    /*! Production::    declaration : options */
+    this.$ = {options: $$[$0]};
+    break;
+
+case 18:
+    /*! Production::    declaration : DEBUG */
+    this.$ = {options: [['debug', true]]};
+    break;
+
+case 19:
+    /*! Production::    declaration : UNKNOWN_DECL */
+    this.$ = {unknownDecl: $$[$0]};
+    break;
+
+case 20:
+    /*! Production::    declaration : IMPORT import_name import_path */
+    this.$ = {imports: {name: $$[$0 - 1], path: $$[$0]}};
+    break;
+
+case 21:
+    /*! Production::    declaration : INIT_CODE import_name action_ne */
+    this.$ = {initCode: {qualifier: $$[$0 - 1], include: $$[$0]}};
+    break;
+
+case 26:
+    /*! Production::    options : OPTIONS option_list OPTIONS_END */
+case 77:
+    /*! Production::    action_ne : '{' action_body '}' */
+    this.$ = $$[$0 - 1];
+    break;
+
+case 27:
+    /*! Production::    option_list : option_list option */
+case 38:
+    /*! Production::    token_list : token_list symbol */
+case 49:
+    /*! Production::    id_list : id_list id */
+    this.$ = $$[$0 - 1]; this.$.push($$[$0]);
+    break;
+
+case 28:
+    /*! Production::    option_list : option */
+case 39:
+    /*! Production::    token_list : symbol */
+case 50:
+    /*! Production::    id_list : id */
+case 56:
+    /*! Production::    handle_list : handle_action */
+    this.$ = [$$[$0]];
+    break;
+
+case 29:
+    /*! Production::    option : NAME[option] */
+    this.$ = [$$[$0], true];
+    break;
+
+case 30:
+    /*! Production::    option : NAME[option] '=' OPTION_VALUE[value] */
+case 31:
+    /*! Production::    option : NAME[option] '=' NAME[value] */
+    this.$ = [$$[$0 - 2], $$[$0]];
+    break;
+
+case 34:
+    /*! Production::    operator : associativity token_list */
+    this.$ = [$$[$0 - 1]]; this.$.push.apply(this.$, $$[$0]);
+    break;
+
+case 35:
+    /*! Production::    associativity : LEFT */
+    this.$ = 'left';
+    break;
+
+case 36:
+    /*! Production::    associativity : RIGHT */
+    this.$ = 'right';
+    break;
+
+case 37:
+    /*! Production::    associativity : NONASSOC */
+    this.$ = 'nonassoc';
+    break;
+
+case 40:
+    /*! Production::    full_token_definitions : optional_token_type id_list */
+    var rv = [];
+    var lst = $$[$0];
+    for (var i = 0, len = lst.length; i < len; i++) {
+        var id = lst[i];
+        var m = {id: id};
+        if ($$[$0 - 1]) {
+            m.type = $$[$0 - 1];
+        }
+        rv.push(m);
+    }
+    this.$ = rv;
+    break;
+
+case 41:
+    /*! Production::    full_token_definitions : optional_token_type one_full_token */
+    var m = $$[$0];
+    if ($$[$0 - 1]) {
+        m.type = $$[$0 - 1];
+    }
+    this.$ = [m];
+    break;
+
+case 42:
+    /*! Production::    one_full_token : id token_value token_description */
+    this.$ = {
+        id: $$[$0 - 2],
+        value: $$[$0 - 1]
+    };
+    break;
+
+case 43:
+    /*! Production::    one_full_token : id token_description */
+    this.$ = {
+        id: $$[$0 - 1],
+        description: $$[$0]
+    };
+    break;
+
+case 44:
+    /*! Production::    one_full_token : id token_value */
+    this.$ = {
+        id: $$[$0 - 1],
+        value: $$[$0],
+        description: $token_description
+    };
+    break;
+
+case 45:
+    /*! Production::    optional_token_type : ε */
+    this.$ = false;
+    break;
+
+case 51:
+    /*! Production::    grammar : optional_action_header_block production_list */
+    this.$ = $$[$0 - 1];
+    this.$.grammar = $$[$0];
+    break;
+
+case 52:
+    /*! Production::    production_list : production_list production */
+    this.$ = $$[$0 - 1];
+    if ($$[$0][0] in this.$) {
+        this.$[$$[$0][0]] = this.$[$$[$0][0]].concat($$[$0][1]);
+    } else {
+        this.$[$$[$0][0]] = $$[$0][1];
+    }
+    break;
+
+case 53:
+    /*! Production::    production_list : production */
+    this.$ = {}; this.$[$$[$0][0]] = $$[$0][1];
+    break;
+
+case 54:
+    /*! Production::    production : id ':' handle_list ';' */
+    this.$ = [$$[$0 - 3], $$[$0 - 1]];
+    break;
+
+case 55:
+    /*! Production::    handle_list : handle_list '|' handle_action */
+    this.$ = $$[$0 - 2];
+    this.$.push($$[$0]);
+    break;
+
+case 57:
+    /*! Production::    handle_action : handle prec action */
+    this.$ = [($$[$0 - 2].length ? $$[$0 - 2].join(' ') : '')];
+    if ($$[$0]) {
+        this.$.push($$[$0]);
+    }
+    if ($$[$0 - 1]) {
+        this.$.push($$[$0 - 1]);
+    }
+    if (this.$.length === 1) {
+        this.$ = this.$[0];
+    }
+    break;
+
+case 58:
+    /*! Production::    handle_action : EPSILON action */
+    this.$ = [''];
+    if ($$[$0]) {
+        this.$.push($$[$0]);
+    }
+    if (this.$.length === 1) {
+        this.$ = this.$[0];
+    }
+    break;
+
+case 59:
+    /*! Production::    handle : handle expression_suffix */
+    this.$ = $$[$0 - 1];
+    this.$.push($$[$0]);
+    break;
+
+case 60:
+    /*! Production::    handle : ε */
+    this.$ = [];
+    break;
+
+case 61:
+    /*! Production::    handle_sublist : handle_sublist '|' handle */
+    this.$ = $$[$0 - 2];
+    this.$.push($$[$0].join(' '));
+    break;
+
+case 62:
+    /*! Production::    handle_sublist : handle */
+    this.$ = [$$[$0].join(' ')];
+    break;
+
+case 63:
+    /*! Production::    expression_suffix : expression suffix ALIAS */
+    this.$ = $$[$0 - 2] + $$[$0 - 1] + "[" + $$[$0] + "]";
+    break;
+
+case 64:
+    /*! Production::    expression_suffix : expression suffix */
+case 88:
+    /*! Production::    action_comments_body : action_comments_body ACTION_BODY */
+case 94:
+    /*! Production::    module_code_chunk : module_code_chunk CODE */
+    this.$ = $$[$0 - 1] + $$[$0];
+    break;
+
+case 66:
+    /*! Production::    expression : STRING */
+    // Re-encode the string *anyway* as it will
+    // be made part of the rule rhs a.k.a. production (type: *string*) again and we want
+    // to be able to handle all tokens, including *significant space*
+    // encoded as literal tokens in a grammar such as this: `rule: A ' ' B`.
+    if ($$[$0].indexOf("'") >= 0) {
+        this.$ = '"' + $$[$0] + '"';
+    } else {
+        this.$ = "'" + $$[$0] + "'";
+    }
+    break;
+
+case 67:
+    /*! Production::    expression : '(' handle_sublist ')' */
+    this.$ = '(' + $$[$0 - 1].join(' | ') + ')';
+    break;
+
+case 68:
+    /*! Production::    suffix : ε */
+case 82:
+    /*! Production::    action : ε */
+case 83:
+    /*! Production::    action_body : ε */
+case 96:
+    /*! Production::    optional_module_code_chunk : ε */
+    this.$ = '';
+    break;
+
+case 72:
+    /*! Production::    prec : PREC symbol */
+    this.$ = { prec: $$[$0] };
+    break;
+
+case 73:
+    /*! Production::    prec : ε */
+    this.$ = null;
+    break;
+
+case 80:
+    /*! Production::    action_ne : ARROW_ACTION */
+    this.$ = '$$ =' + $$[$0] + ';';
+    break;
+
+case 85:
+    /*! Production::    action_body : action_body '{' action_body '}' action_comments_body */
+    this.$ = $$[$0 - 4] + $$[$0 - 3] + $$[$0 - 2] + $$[$0 - 1] + $$[$0];
+    break;
+
+case 86:
+    /*! Production::    action_body : action_body '{' action_body '}' */
+    this.$ = $$[$0 - 3] + $$[$0 - 2] + $$[$0 - 1] + $$[$0];
+    break;
+
+case 90:
+    /*! Production::    extra_parser_module_code : optional_module_code_chunk include_macro_code extra_parser_module_code */
+    this.$ = $$[$0 - 2] + $$[$0 - 1] + $$[$0];
+    break;
+
+case 91:
+    /*! Production::    include_macro_code : INCLUDE PATH */
+    var fileContent = fs.readFileSync($$[$0], { encoding: 'utf-8' });
+    // And no, we don't support nested '%include':
+    this.$ = '\n// Included by Jison: ' + $$[$0] + ':\n\n' + fileContent + '\n\n// End Of Include by Jison: ' + $$[$0] + '\n\n';
+    break;
+
+case 92:
+    /*! Production::    include_macro_code : INCLUDE error */
+    console.error("%include MUST be followed by a valid file path");
+    break;
+
 }
 },
 table: bt({
@@ -2226,6 +2282,10 @@ parse: function parse(input) {
     }
 
 
+    // SHA-1: c4ea524b22935710d98252a1d9e04ddb82555e56 :: shut up error reports about non-strict mode in Chrome in the demo pages:
+    // (NodeJS doesn't care, so this semicolon is only important for the demo web pages which run the jison *GENERATOR* in a web page...)
+    ;
+
     // Produce a (more or less) human-readable list of expected tokens at the point of failure.
     // 
     // The produced list may contain token or token set descriptions instead of the tokens
@@ -2638,27 +2698,34 @@ function JisonLexerError(msg, hash) {
 
 
 var lexer = {
+    EOF: 1,
+    ERROR: 2,
 
-EOF:1,
+    // JisonLexerError: JisonLexerError,        // <-- injected by the code generator
 
-ERROR:2,
+    // options: {},                             // <-- injected by the code generator
 
-parseError:function lexer_parseError(str, hash) {
+    // yy: ...,                                 // <-- injected by setInput()
+     
+    __currentRuleSet__: null,                   // <-- internal rule set cache for the current lexer state
+
+    parseError: function lexer_parseError(str, hash) {
         if (this.yy.parser && typeof this.yy.parser.parseError === 'function') {
             return this.yy.parser.parseError(str, hash) || this.ERROR;
         } else {
             throw new this.JisonLexerError(str);
         }
     },
-
-// resets the lexer, sets new input
-setInput:function lexer_setInput(input, yy) {
+    
+    // resets the lexer, sets new input
+    setInput: function lexer_setInput(input, yy) {
         this.yy = yy || this.yy || {};
         this._input = input;
         this._more = this._backtrack = this._signaled_error_token = this.done = false;
         this.yylineno = this.yyleng = 0;
         this.yytext = this.matched = this.match = '';
         this.conditionStack = ['INITIAL'];
+        this.__currentRuleSet__ = null;
         this.yylloc = {
             first_line: 1,
             first_column: 0,
@@ -2672,8 +2739,8 @@ setInput:function lexer_setInput(input, yy) {
         return this;
     },
 
-// consumes and returns one char from the input
-input:function lexer_input() {
+    // consumes and returns one char from the input
+    input: function lexer_input() {
         if (!this._input) {
             this.done = true;
             return null;
@@ -2722,8 +2789,8 @@ input:function lexer_input() {
         return ch;
     },
 
-// unshifts one char (or a string) into the input
-unput:function lexer_unput(ch) {
+    // unshifts one char (or a string) into the input
+    unput: function lexer_unput(ch) {
         var len = ch.length;
         var lines = ch.split(/(?:\r\n?|\n)/g);
 
@@ -2753,14 +2820,14 @@ unput:function lexer_unput(ch) {
         return this;
     },
 
-// When called from action, caches matched text and appends it on next action
-more:function lexer_more() {
+    // When called from action, caches matched text and appends it on next action
+    more: function lexer_more() {
         this._more = true;
         return this;
     },
 
-// When called from action, signals the lexer that this rule fails to match the input, so the next matching rule (regex) should be tested instead.
-reject:function lexer_reject() {
+    // When called from action, signals the lexer that this rule fails to match the input, so the next matching rule (regex) should be tested instead.
+    reject: function lexer_reject() {
         if (this.options.backtrack_lexer) {
             this._backtrack = true;
         } else {
@@ -2778,13 +2845,13 @@ reject:function lexer_reject() {
         return this;
     },
 
-// retain first n characters of the match
-less:function lexer_less(n) {
+    // retain first n characters of the match
+    less: function lexer_less(n) {
         return this.unput(this.match.slice(n));
     },
 
-// return (part of the) already matched input, i.e. for error messages
-pastInput:function lexer_pastInput(maxSize) {
+    // return (part of the) already matched input, i.e. for error messages
+    pastInput: function lexer_pastInput(maxSize) {
         var past = this.matched.substr(0, this.matched.length - this.match.length);
         if (maxSize < 0)
             maxSize = past.length;
@@ -2793,8 +2860,8 @@ pastInput:function lexer_pastInput(maxSize) {
         return (past.length > maxSize ? '...' + past.substr(-maxSize) : past);
     },
 
-// return (part of the) upcoming input, i.e. for error messages
-upcomingInput:function lexer_upcomingInput(maxSize) {
+    // return (part of the) upcoming input, i.e. for error messages
+    upcomingInput: function lexer_upcomingInput(maxSize) {
         var next = this.match;
         if (maxSize < 0)
             maxSize = next.length + this._input.length;
@@ -2806,18 +2873,30 @@ upcomingInput:function lexer_upcomingInput(maxSize) {
         return (next.length > maxSize ? next.substr(0, maxSize) + '...' : next);
     },
 
-// return a string which displays the character position where the lexing error occurred, i.e. for error messages
-showPosition:function lexer_showPosition() {
+    // return a string which displays the character position where the lexing error occurred, i.e. for error messages
+    showPosition: function lexer_showPosition() {
         var pre = this.pastInput().replace(/\s/g, ' ');
         var c = new Array(pre.length + 1).join('-');
         return pre + this.upcomingInput().replace(/\s/g, ' ') + '\n' + c + '^';
     },
 
-// test the lexed token: return FALSE when not a match, otherwise return token
-test_match:function lexer_test_match(match, indexed_rule) {
+    // test the lexed token: return FALSE when not a match, otherwise return token.
+    //
+    // `match` is supposed to be an array coming out of a regex match, i.e. `match[0]` 
+    // contains the actually matched text string.
+    //  
+    // Also move the input cursor forward and update the match collectors:
+    // - yytext
+    // - yyleng
+    // - match
+    // - matches
+    // - yylloc
+    // - offset 
+    test_match: function lexer_test_match(match, indexed_rule) {
         var token,
             lines,
-            backup;
+            backup,
+            match_str;
 
         if (this.options.backtrack_lexer) {
             // save context
@@ -2846,7 +2925,8 @@ test_match:function lexer_test_match(match, indexed_rule) {
             }
         }
 
-        lines = match[0].match(/(?:\r\n?|\n).*/g);
+        match_str = match[0];
+        lines = match_str.match(/(?:\r\n?|\n).*/g);
         if (lines) {
             this.yylineno += lines.length;
         }
@@ -2856,20 +2936,23 @@ test_match:function lexer_test_match(match, indexed_rule) {
             first_column: this.yylloc.last_column,
             last_column: lines ?
                          lines[lines.length - 1].length - lines[lines.length - 1].match(/\r?\n?/)[0].length :
-                         this.yylloc.last_column + match[0].length
+                         this.yylloc.last_column + match_str.length
         };
-        this.yytext += match[0];
-        this.match += match[0];
+        this.yytext += match_str;
+        this.match += match_str;
         this.matches = match;
         this.yyleng = this.yytext.length;
         if (this.options.ranges) {
             this.yylloc.range = [this.offset, this.offset + this.yyleng];
         }
-        this.offset += this.yyleng;
+	// previous lex rules MAY have invoked the `more()` API rather than producing a token:
+	// those rules will already have moved this `offset` forward matching their match lengths,
+	// hence we must only add our own match length now:
+        this.offset += match_str.length;
         this._more = false;
         this._backtrack = false;
-        this._input = this._input.slice(match[0].length);
-        this.matched += match[0];
+        this._input = this._input.slice(match_str.length);
+        this.matched += match_str;
         token = this.performAction.call(this, this.yy, this, indexed_rule, this.conditionStack[this.conditionStack.length - 1]);
         if (this.done && this._input) {
             this.done = false;
@@ -2881,6 +2964,7 @@ test_match:function lexer_test_match(match, indexed_rule) {
             for (var k in backup) {
                 this[k] = backup[k];
             }
+            this.__currentRuleSet__ = null;
             return false; // rule action called reject() implying the next rule should be tested instead.
         } else if (this._signaled_error_token) {
             // produce one 'error' token as .parseError() in reject() did not guarantee a failure signal by throwing an exception!
@@ -2891,8 +2975,8 @@ test_match:function lexer_test_match(match, indexed_rule) {
         return false;
     },
 
-// return next match in input
-next:function lexer_next() {
+    // return next match in input
+    next: function lexer_next() {
         function clear() {
             this.yytext = '';
             this.yyleng = 0;
@@ -2917,8 +3001,15 @@ next:function lexer_next() {
         if (!this._more) {
             clear.call(this);
         }
-        var rules = this._currentRules();
-        for (var i = 0; i < rules.length; i++) {
+        var rules = this.__currentRuleSet__;
+        if (!rules) {
+            // Update the ruleset cache as we apparently encountered a state change or just started lexing.
+            // The cache is set up for fast lookup -- we assume a lexer will switch states much less often than it will
+            // invoke the `lex()` token-producing API and related APIs, hence caching the set for direct access helps
+            // speed up those activities a tiny bit.
+            rules = this.__currentRuleSet__ = this._currentRules();
+        }
+        for (var i = 0, len = rules.length; i < len; i++) {
             tempMatch = this._input.match(this.rules[rules[i]]);
             if (tempMatch && (!match || tempMatch[0].length > match[0].length)) {
                 match = tempMatch;
@@ -2928,7 +3019,7 @@ next:function lexer_next() {
                     if (token !== false) {
                         return token;
                     } else if (this._backtrack) {
-                        match = false;
+                        match = undefined;
                         continue; // rule action called reject() implying a rule MISmatch.
                     } else {
                         // else: this is a lexer rule which consumes input without producing a token (e.g. whitespace)
@@ -2969,8 +3060,8 @@ next:function lexer_next() {
         }
     },
 
-// return next match that has a token
-lex:function lexer_lex() {
+    // return next match that has a token
+    lex: function lexer_lex() {
         var r;
         // allow the PRE/POST handlers set/modify the return token for maximum flexibility of the generated lexer:
         if (typeof this.options.pre_lex === 'function') {
@@ -2986,32 +3077,33 @@ lex:function lexer_lex() {
         return r;
     },
 
-// activates a new lexer condition state (pushes the new lexer condition state onto the condition stack)
-begin:function lexer_begin(condition) {
+    // backwards compatible alias for `pushState()`; 
+    // the latter is symmetrical with `popState()` and we advise to use 
+    // those APIs in any modern lexer code, rather than `begin()`.
+    begin: function lexer_begin(condition) {
         return this.pushState(condition);
     },
 
-// pop the previously active lexer condition state off the condition stack
-popState:function lexer_popState() {
+    // activates a new lexer condition state (pushes the new lexer condition state onto the condition stack)
+    pushState: function lexer_pushState(condition) {
+        this.conditionStack.push(condition);
+        this.__currentRuleSet__ = null;
+        return this;
+    },
+
+    // pop the previously active lexer condition state off the condition stack
+    popState: function lexer_popState() {
         var n = this.conditionStack.length - 1;
         if (n > 0) {
+            this.__currentRuleSet__ = null;
             return this.conditionStack.pop();
         } else {
             return this.conditionStack[0];
         }
     },
 
-// produce the lexer rule set which is active for the currently active lexer condition state
-_currentRules:function lexer__currentRules() {
-        if (this.conditionStack.length && this.conditionStack[this.conditionStack.length - 1]) {
-            return this.conditions[this.conditionStack[this.conditionStack.length - 1]].rules;
-        } else {
-            return this.conditions['INITIAL'].rules;
-        }
-    },
-
-// return the currently active lexer condition state; when an index argument is provided it produces the N-th previous condition state, if available
-topState:function lexer_topState(n) {
+    // return the currently active lexer condition state; when an index argument is provided it produces the N-th previous condition state, if available
+    topState: function lexer_topState(n) {
         n = this.conditionStack.length - 1 - Math.abs(n || 0);
         if (n >= 0) {
             return this.conditionStack[n];
@@ -3020,14 +3112,17 @@ topState:function lexer_topState(n) {
         }
     },
 
-// alias for begin(condition)
-pushState:function lexer_pushState(condition) {
-        this.conditionStack.push(condition);
-        return this;
+    // (internal) determine the lexer rule set which is active for the currently active lexer condition state
+    _currentRules: function lexer__currentRules() {
+        if (this.conditionStack.length && this.conditionStack[this.conditionStack.length - 1]) {
+            return this.conditions[this.conditionStack[this.conditionStack.length - 1]].rules;
+        } else {
+            return this.conditions['INITIAL'].rules;
+        }
     },
 
-// return the number of states currently on the stack
-stateStackSize:function lexer_stateStackSize() {
+    // return the number of states currently on the stack
+    stateStackSize: function lexer_stateStackSize() {
         return this.conditionStack.length;
     },
 options: {
