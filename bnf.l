@@ -11,14 +11,14 @@ ID                                      [{ALPHA}][{ALPHA}{DIGIT}]*
 DECIMAL_NUMBER                          [1-9][0-9]*
 HEX_NUMBER                              "0"[xX][0-9a-fA-F]+
 BR                                      \r\n|\n|\r
-// WhiteSpace MUST NOT match CR/LF and the regex `\s` DOES, so we cannot use that one directly. 
+// WhiteSpace MUST NOT match CR/LF and the regex `\s` DOES, so we cannot use that one directly.
 // Instead we define the {WS} macro here:
 WS                                      [^\S\r\n]
 
 // Regex for matching all the possible stuff which can be placed between those `%lex.../lex` markers:
 // multiple lines of arbitrary material. Use a non-gready `*?` in there to ensure that the regex
 // doesn't also consume the terminating `/lex` token!
-LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*  
+LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
 
 
 %x action code path options
@@ -55,14 +55,20 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
 <options>"="                            return '=';
 <options>\"("\\\\"|'\"'|[^"])*\"        yytext = yytext.substr(1, yytext.length - 2); return 'OPTION_VALUE';
 <options>"'"("\\\\"|"\'"|[^'])*"'"      yytext = yytext.substr(1, yytext.length - 2); return 'OPTION_VALUE';
+
+// Comments should be gobbled and discarded anywhere *except* the code/action blocks:
+<INITIAL,ebnf,bnf,token,path,options>"//"[^\r\n]*
+                                        /* skip single-line comment */
+<INITIAL,ebnf,bnf,token,path,options>"/*"(.|\n|\r)*?"*/"
+                                        /* skip multi-line comment */
+
 <options>[^\s\r\n]+                     return 'OPTION_VALUE';
 <options>{BR}+                          this.popState(); return 'OPTIONS_END';
 <options>{WS}+                          /* skip whitespace */
 
 {WS}+                                   /* skip whitespace */
 {BR}+                                   /* skip newlines */
-"//"[^\r\n]*                            /* skip single-line comment */
-"/*"(.|\n|\r)*?"*/"                     /* skip multi-line comment */
+
 "["{ID}"]"                              yytext = yytext.substr(1, yyleng - 2); return 'ALIAS';
 {ID}                                    return 'ID';
 "$end"                                  return 'ID';
@@ -85,15 +91,15 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
 "%token"                                this.pushState('token'); return 'TOKEN';
 "%parse-param"                          return 'PARSE_PARAM';
 "%options"                              this.pushState('options'); return 'OPTIONS';
-"%lex"{LEX_CONTENT}"/lex"               %{ 
+"%lex"{LEX_CONTENT}"/lex"               %{
                                             // remove the %lex../lex wrapper and return the pure lex section:
                                             yytext = this.matches[1];
-                                            return 'LEX_BLOCK'; 
+                                            return 'LEX_BLOCK';
                                         %}
 
 "%code"                                 return 'INIT_CODE';
 "%import"                               return 'IMPORT';
-<INITIAL,ebnf,bnf,code>"%include"       
+<INITIAL,ebnf,bnf,code>"%include"
                                         this.pushState('path'); return 'INCLUDE';
 
 "%"{NAME}[^\r\n]*                       %{
