@@ -136,7 +136,7 @@ exports["test embedded lexical block"] = function () {
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
 };
 
-exports["test lexer %option easy_keyword_rules"] = function () {
+exports["test lexer %options easy_keyword_rules"] = function () {
     var grammar = "%lex \n%options easy_keyword_rules\n%%\n'foo' return 'foo';\n'bar' {return 'bar';}\n'baz' {return 'baz';}\n'world' {return 'world';}\n/lex\
                    %% test: foo bar | baz ; hello: world ;";
     var expected = {
