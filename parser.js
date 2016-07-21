@@ -14,13 +14,19 @@
  *    EOF: 1,
  *    TERROR: 2,
  *
- *    trace: function(errorMessage, errorHash),
+ *    trace: function(errorMessage, ...),
  *
  *    JisonParserError: function(msg, hash),
  *
  *    quoteName: function(name),
  *               Helper function which can be overridden by user code later on: put suitable
  *               quotes around literal IDs in a description string.
+ *
+ *    originalQuoteName: function(name),
+ *               Helper function **which will be set up during the first invocation of the `parse()` method**.
+ *               References the original quoteName handler as it was just before the invocation of `parse()`;
+ *               `cleanupAfterParse()` will clean up and reset `parseError()` to reference this function
+ *               at the end of the `parse()`.
  *
  *    describeSymbol: function(symbol),
  *               Return a more-or-less human-readable description of the given symbol, when
@@ -35,7 +41,7 @@
  *    terminal_descriptions_: (if there are any) {associative list: number ==> description},
  *    productions_: [...],
  *
- *    performAction: function parser__performAction(yytext, yyleng, yylineno, yy, yystate, $$, _$, yystack, ...),
+ *    performAction: function parser__performAction(yytext, yyleng, yylineno, yy, yystate, $0, $$, _$, yystack, yysstack, ...),
  *               where `...` denotes the (optional) additional arguments the user passed to
  *               `parser.parse(str, ...)`
  *
@@ -59,9 +65,35 @@
  *    yyErrOk: function(),
  *    yyClearIn: function(),
  *
+ *    constructParseErrorInfo: function(error_message, exception_object, expected_token_set, is_recoverable),
+ *               Helper function **which will be set up during the first invocation of the `parse()` method**.
+ *               Produces a new errorInfo 'hash object' which can be passed into `parseError()`.
+ *               See it's use in this parser kernel in many places; example usage:
+ *
+ *                   var infoObj = parser.constructParseErrorInfo('fail!', null,
+ *                                     parser.collect_expected_token_set(state), true);
+ *                   var retVal = parser.parseError(infoObj.errStr, infoObj);
+ *
+ *    originalParseError: function(str, hash),
+ *               Helper function **which will be set up during the first invocation of the `parse()` method**.
+ *               References the original parseError handler as it was just before the invocation of `parse()`;
+ *               `cleanupAfterParse()` will clean up and reset `parseError()` to reference this function
+ *               at the end of the `parse()`.
+ *
  *    options: { ... parser %options ... },
  *
- *    parse: function(input),
+ *    parse: function(input[, args...]),
+ *               Parse the given `input` and return the parsed value (or `true` when none was provided by
+ *               the root action, in which case the parser is acting as a *matcher*).
+ *               You MAY use the additional `args...` parameters as per `%parse-param` spec of this grammar:
+ *               these extra `args...` are passed verbatim to the grammar rules' action code.
+ *
+ *    cleanupAfterParse: function(resultValue, invoke_post_methods),
+ *               Helper function **which will be set up during the first invocation of the `parse()` method**.
+ *               This helper API is invoked at the end of the `parse()` call, unless an exception was thrown
+ *               and `%options no-try-catch` has been defined for this grammar: in that case this helper MAY
+ *               be invoked by calling user code to ensure the `post_parse` callbacks are invoked and
+ *               the internal parser gets properly garbage collected under these particular circumstances.
  *
  *    lexer: {
  *        yy: {...},           A reference to the so-called "shared state" `yy` once
@@ -124,7 +156,14 @@
  *
  *  {
  *    expected:    (array describing the set of expected tokens;
- *                  may be empty when we cannot easily produce such a set)
+ *                  may be UNDEFINED when we cannot easily produce such a set)
+ *    state:       (integer (or array when the table includes grammar collisions);
+ *                  represents the current internal state of the parser kernel.
+ *                  can, for example, be used to pass to the `collect_expected_token_set()`
+ *                  API to obtain the expected token set)
+ *    action:      (integer; represents the current internal action which will be executed)
+ *    new_state:   (integer; represents the next/planned internal state, once the current
+ *                  action has executed)
  *    recoverable: (boolean: TRUE when the parser MAY have an error recovery rule
  *                  available for this particular error)
  *    state_stack: (array: the current parser LALR/LR internal state stack; this can be used,
@@ -291,21 +330,7 @@ function bp(s) {
     return rv;
 }
 
-// helper: reconstruct the defaultActions[] table
-function bda(s) {
-    var rv = {};
-    var d = s.idx;
-    var p = s.pop;
-    var r = s.rule;
-    for (var i = 0, l = d.length; i < l; i++) {
-        var j = d[i];
-        rv[j] = [
-            p[i],
-            r[i]
-        ];
-    }
-    return rv;
-}
+
 
 // helper: reconstruct the 'goto' table
 function bt(s) {
@@ -381,8 +406,6 @@ function u(a) {
 }
 
 var parser = {
-EOF: 1,
-TERROR: 2,
 trace: function no_op_trace() { },
 JisonParserError: JisonParserError,
 yy: {},
@@ -392,7 +415,7 @@ options: {
 symbols_: {
   "$accept": 0,
   "$end": 1,
-  "%%": 129,
+  "%%": 5,
   "(": 40,
   ")": 41,
   "*": 42,
@@ -401,79 +424,79 @@ symbols_: {
   ";": 59,
   "=": 61,
   "?": 63,
-  "ACTION": 134,
-  "ACTION_BODY": 193,
-  "ALIAS": 188,
-  "ARROW_ACTION": 191,
-  "CODE": 198,
-  "DEBUG": 146,
+  "ACTION": 10,
+  "ACTION_BODY": 77,
+  "ALIAS": 72,
+  "ARROW_ACTION": 75,
+  "CODE": 82,
+  "DEBUG": 22,
   "EOF": 1,
-  "EPSILON": 183,
-  "ID": 153,
-  "IMPORT": 148,
-  "INCLUDE": 195,
-  "INIT_CODE": 151,
-  "INTEGER": 175,
-  "LEFT": 166,
-  "LEX_BLOCK": 139,
-  "NAME": 159,
-  "NONASSOC": 168,
-  "OPTIONS": 155,
-  "OPTIONS_END": 157,
-  "OPTION_VALUE": 160,
-  "PARSER_TYPE": 163,
-  "PARSE_PARAM": 161,
-  "PATH": 196,
-  "PREC": 189,
-  "RIGHT": 167,
-  "START": 137,
-  "STRING": 154,
-  "TOKEN": 141,
-  "TOKEN_TYPE": 174,
-  "UNKNOWN_DECL": 147,
-  "action": 182,
-  "action_body": 190,
-  "action_comments_body": 192,
-  "action_ne": 152,
-  "associativity": 165,
-  "declaration": 136,
-  "declaration_list": 128,
+  "EPSILON": 67,
+  "ID": 29,
+  "IMPORT": 24,
+  "INCLUDE": 79,
+  "INIT_CODE": 27,
+  "INTEGER": 55,
+  "LEFT": 46,
+  "LEX_BLOCK": 15,
+  "NAME": 35,
+  "NONASSOC": 48,
+  "OPTIONS": 31,
+  "OPTIONS_END": 33,
+  "OPTION_VALUE": 36,
+  "PARSER_TYPE": 39,
+  "PARSE_PARAM": 37,
+  "PATH": 80,
+  "PREC": 73,
+  "RIGHT": 47,
+  "START": 13,
+  "STRING": 30,
+  "TOKEN": 17,
+  "TOKEN_TYPE": 54,
+  "UNKNOWN_DECL": 23,
+  "action": 66,
+  "action_body": 74,
+  "action_comments_body": 76,
+  "action_ne": 28,
+  "associativity": 45,
+  "declaration": 12,
+  "declaration_list": 4,
   "error": 2,
-  "expression": 186,
-  "expression_suffix": 184,
-  "extra_parser_module_code": 132,
-  "full_token_definitions": 142,
-  "grammar": 130,
-  "handle": 180,
-  "handle_action": 179,
-  "handle_list": 178,
-  "handle_sublist": 185,
-  "id": 138,
-  "id_list": 170,
-  "import_name": 149,
-  "import_path": 150,
-  "include_macro_code": 135,
-  "module_code_chunk": 197,
-  "one_full_token": 171,
-  "operator": 140,
-  "option": 158,
-  "option_list": 156,
-  "optional_action_header_block": 133,
-  "optional_end_block": 131,
-  "optional_module_code_chunk": 194,
-  "optional_token_type": 169,
-  "options": 145,
-  "parse_param": 143,
-  "parser_type": 144,
-  "prec": 181,
-  "production": 177,
-  "production_list": 176,
-  "spec": 127,
-  "suffix": 187,
-  "symbol": 164,
-  "token_description": 173,
-  "token_list": 162,
-  "token_value": 172,
+  "expression": 70,
+  "expression_suffix": 68,
+  "extra_parser_module_code": 8,
+  "full_token_definitions": 18,
+  "grammar": 6,
+  "handle": 64,
+  "handle_action": 62,
+  "handle_list": 60,
+  "handle_sublist": 69,
+  "id": 14,
+  "id_list": 50,
+  "import_name": 25,
+  "import_path": 26,
+  "include_macro_code": 11,
+  "module_code_chunk": 81,
+  "one_full_token": 51,
+  "operator": 16,
+  "option": 34,
+  "option_list": 32,
+  "optional_action_header_block": 9,
+  "optional_end_block": 7,
+  "optional_module_code_chunk": 78,
+  "optional_token_type": 49,
+  "options": 21,
+  "parse_param": 19,
+  "parser_type": 20,
+  "prec": 65,
+  "production": 57,
+  "production_list": 56,
+  "spec": 3,
+  "suffix": 71,
+  "symbol": 44,
+  "token_description": 53,
+  "token_list": 38,
+  "token_value": 52,
   "{": 123,
   "|": 124,
   "}": 125
@@ -481,124 +504,206 @@ symbols_: {
 terminals_: {
   1: "EOF",
   2: "error",
+  5: "%%",
+  10: "ACTION",
+  13: "START",
+  15: "LEX_BLOCK",
+  17: "TOKEN",
+  22: "DEBUG",
+  23: "UNKNOWN_DECL",
+  24: "IMPORT",
+  27: "INIT_CODE",
+  29: "ID",
+  30: "STRING",
+  31: "OPTIONS",
+  33: "OPTIONS_END",
+  35: "NAME",
+  36: "OPTION_VALUE",
+  37: "PARSE_PARAM",
+  39: "PARSER_TYPE",
   40: "(",
   41: ")",
   42: "*",
   43: "+",
+  46: "LEFT",
+  47: "RIGHT",
+  48: "NONASSOC",
+  54: "TOKEN_TYPE",
+  55: "INTEGER",
   58: ":",
   59: ";",
   61: "=",
   63: "?",
+  67: "EPSILON",
+  72: "ALIAS",
+  73: "PREC",
+  75: "ARROW_ACTION",
+  77: "ACTION_BODY",
+  79: "INCLUDE",
+  80: "PATH",
+  82: "CODE",
   123: "{",
   124: "|",
-  125: "}",
-  129: "%%",
-  134: "ACTION",
-  137: "START",
-  139: "LEX_BLOCK",
-  141: "TOKEN",
-  146: "DEBUG",
-  147: "UNKNOWN_DECL",
-  148: "IMPORT",
-  151: "INIT_CODE",
-  153: "ID",
-  154: "STRING",
-  155: "OPTIONS",
-  157: "OPTIONS_END",
-  159: "NAME",
-  160: "OPTION_VALUE",
-  161: "PARSE_PARAM",
-  163: "PARSER_TYPE",
-  166: "LEFT",
-  167: "RIGHT",
-  168: "NONASSOC",
-  174: "TOKEN_TYPE",
-  175: "INTEGER",
-  183: "EPSILON",
-  188: "ALIAS",
-  189: "PREC",
-  191: "ARROW_ACTION",
-  193: "ACTION_BODY",
-  195: "INCLUDE",
-  196: "PATH",
-  198: "CODE"
+  125: "}"
+},
+TERROR: 2,
+EOF: 1,
+
+// internals: defined here so the object *structure* doesn't get modified by parse() et al,
+// thus helping JIT compilers like Chrome V8.
+originalQuoteName: null,
+originalParseError: null,
+cleanupAfterParse: null,
+constructParseErrorInfo: null,
+
+// APIs which will be set up depending on user action code analysis:
+//yyErrOk: 0,
+//yyClearIn: 0,
+
+// Helper APIs
+// -----------
+
+// Helper function which can be overridden by user code later on: put suitable quotes around
+// literal IDs in a description string.
+quoteName: function parser_quoteName(id_str) {
+    return '"' + id_str + '"';
+},
+
+// Return a more-or-less human-readable description of the given symbol, when available,
+// or the symbol itself, serving as its own 'description' for lack of something better to serve up.
+//
+// Return NULL when the symbol is unknown to the parser.
+describeSymbol: function parser_describeSymbol(symbol) {
+    if (symbol !== this.EOF && this.terminal_descriptions_ && this.terminal_descriptions_[symbol]) {
+        return this.terminal_descriptions_[symbol];
+    }
+    else if (symbol === this.EOF) {
+        return 'end of input';
+    }
+    else if (this.terminals_[symbol]) {
+        return this.quoteName(this.terminals_[symbol]);
+    }
+    // Otherwise... this might refer to a RULE token i.e. a non-terminal: see if we can dig that one up.
+    //
+    // An example of this may be where a rule's action code contains a call like this:
+    //
+    //      parser.describeSymbol(#$)
+    //
+    // to obtain a human-readable description or name of the current grammar rule. This comes handy in
+    // error handling action code blocks, for example.
+    var s = this.symbols_;
+    for (var key in s) {
+        if (s[key] === symbol) {
+            return key;
+        }
+    }
+    return null;
+},
+
+// Produce a (more or less) human-readable list of expected tokens at the point of failure.
+//
+// The produced list may contain token or token set descriptions instead of the tokens
+// themselves to help turning this output into something that easier to read by humans.
+//
+// The returned list (array) will not contain any duplicate entries.
+collect_expected_token_set: function parser_collect_expected_token_set(state) {
+    var TERROR = this.TERROR;
+    var tokenset = [];
+    var check = {};
+    // Has this (error?) state been outfitted with a custom expectations description text for human consumption?
+    // If so, use that one instead of the less palatable token set.
+    if (this.state_descriptions_ && this.state_descriptions_[p]) {
+        return [
+            this.state_descriptions_[p]
+        ];
+    }
+    for (var p in this.table[state]) {
+        if (p !== TERROR) {
+            var d = this.describeSymbol(p);
+            if (d && !check[d]) {
+                tokenset.push(d);
+                check[d] = true;        // Mark this token description as already mentioned to prevent outputting duplicate entries.
+            }
+        }
+    }
+    return tokenset;
 },
 productions_: bp({
   pop: u([
-  127,
-  131,
-  131,
+  3,
+  7,
+  7,
   s,
-  [133, 3],
-  128,
-  128,
+  [9, 3],
+  4,
+  4,
   s,
-  [136, 13],
-  149,
-  149,
-  150,
-  150,
-  145,
-  156,
-  156,
+  [12, 13],
+  25,
+  25,
+  26,
+  26,
+  21,
+  32,
+  32,
   s,
-  [158, 3],
-  143,
-  144,
-  140,
+  [34, 3],
+  19,
+  20,
+  16,
   s,
-  [165, 3],
-  162,
-  162,
-  142,
-  142,
+  [45, 3],
+  38,
+  38,
+  18,
+  18,
   s,
-  [171, 3],
-  169,
-  169,
-  172,
-  173,
-  170,
-  170,
-  130,
-  176,
-  176,
-  177,
-  178,
-  178,
-  179,
-  179,
-  180,
-  180,
-  185,
-  185,
-  184,
-  184,
+  [51, 3],
+  49,
+  49,
+  52,
+  53,
+  50,
+  50,
+  6,
+  56,
+  56,
+  57,
+  60,
+  60,
+  62,
+  62,
+  64,
+  64,
+  69,
+  69,
+  68,
+  68,
   s,
-  [186, 3],
+  [70, 3],
   s,
-  [187, 4],
-  181,
-  181,
-  164,
-  164,
-  138,
+  [71, 4],
+  65,
+  65,
+  44,
+  44,
+  14,
   s,
-  [152, 4],
-  182,
-  182,
+  [28, 4],
+  66,
+  66,
   s,
-  [190, 4],
-  192,
-  192,
-  132,
-  132,
-  135,
-  135,
-  197,
-  197,
-  194,
-  194
+  [74, 4],
+  76,
+  76,
+  8,
+  8,
+  11,
+  11,
+  81,
+  81,
+  78,
+  78
 ]),
   rule: u([
   5,
@@ -667,10 +772,9 @@ productions_: bp({
   0
 ])
 }),
-performAction: function parser__PerformAction(yytext, yy, yystate /* action[1] */, $$ /* vstack */, options) {
+performAction: function parser__PerformAction(yytext, yy, yystate /* action[1] */, $0, $$ /* vstack */, options) {
 /* this == yyval */
 
-var $0 = $$.length - 1;
 switch (yystate) {
 case 1:
     /*! Production::    spec : declaration_list '%%' grammar optional_end_block EOF */
@@ -1182,346 +1286,343 @@ table: bt({
   7
 ]),
   symbol: u([
-  127,
-  128,
-  129,
-  134,
-  137,
-  139,
-  141,
-  146,
-  147,
-  148,
-  151,
-  155,
-  161,
-  163,
-  166,
-  167,
-  168,
-  195,
+  3,
+  4,
+  5,
+  10,
+  13,
+  15,
+  17,
+  22,
+  23,
+  24,
+  27,
+  31,
+  37,
+  39,
+  46,
+  47,
+  48,
+  79,
   1,
-  129,
+  5,
   s,
-  [134, 4, 1],
-  139,
-  140,
-  141,
+  [10, 4, 1],
+  15,
+  16,
+  17,
   s,
-  [143, 6, 1],
+  [19, 6, 1],
   c,
   [23, 4],
   s,
-  [165, 4, 1],
-  195,
-  130,
-  133,
-  134,
-  153,
-  195,
+  [45, 4, 1],
+  79,
+  6,
+  9,
+  10,
+  29,
+  79,
   c,
   [45, 16],
-  138,
-  153,
+  14,
+  29,
   c,
   [18, 16],
   c,
   [16, 16],
-  142,
-  153,
-  169,
-  174,
+  18,
+  29,
+  49,
+  54,
   c,
   [36, 32],
   c,
   [16, 80],
-  149,
-  153,
-  154,
+  25,
+  29,
+  30,
   c,
   [3, 3],
-  138,
-  153,
-  154,
-  162,
-  164,
+  14,
+  29,
+  30,
+  38,
+  44,
   2,
-  196,
+  80,
   c,
   [7, 5],
   c,
   [5, 3],
-  164,
-  156,
-  158,
-  159,
-  153,
-  154,
-  153,
-  154,
-  153,
-  154,
+  44,
+  32,
+  34,
+  35,
+  29,
+  30,
+  29,
+  30,
+  29,
+  30,
   1,
-  129,
-  131,
-  134,
-  135,
-  138,
-  153,
-  176,
-  177,
+  5,
+  7,
+  10,
+  11,
+  14,
+  29,
+  56,
+  57,
   c,
-  [57, 17],
+  [73, 26],
+  29,
+  30,
+  c,
+  [18, 6],
+  55,
   58,
   59,
+  75,
+  79,
   123,
   124,
   c,
-  [20, 9],
-  153,
-  154,
+  [247, 18],
+  50,
+  51,
+  29,
+  26,
+  29,
+  30,
+  10,
+  29,
+  30,
   c,
-  [22, 6],
-  175,
-  191,
+  [31, 3],
   c,
-  [247, 19],
-  170,
-  171,
-  153,
-  150,
-  153,
-  154,
-  123,
-  134,
-  153,
-  154,
-  191,
-  195,
+  [6, 7],
+  11,
+  28,
   c,
-  [6, 8],
-  135,
-  152,
+  [6, 3],
   c,
-  [42, 5],
-  138,
+  [42, 3],
+  14,
   c,
-  [63, 11],
-  164,
+  [67, 11],
+  44,
   c,
-  [159, 13],
+  [86, 21],
   c,
-  [82, 8],
-  195,
+  [18, 18],
   c,
-  [103, 20],
-  191,
+  [102, 14],
   c,
-  [22, 23],
-  1,
-  59,
+  [22, 13],
   c,
-  [22, 11],
+  [400, 3],
   c,
-  [64, 7],
-  198,
+  [23, 8],
   c,
-  [21, 21],
+  [22, 7],
+  79,
+  82,
+  c,
+  [21, 22],
   c,
   [124, 29],
   c,
-  [37, 7],
-  157,
-  158,
-  159,
-  157,
-  159,
+  [122, 7],
+  33,
+  34,
+  35,
+  33,
+  35,
+  33,
+  35,
   61,
-  157,
-  159,
   1,
   1,
-  132,
-  194,
-  195,
-  197,
-  198,
+  8,
+  78,
+  79,
+  81,
+  82,
   1,
-  129,
-  138,
-  153,
-  177,
+  5,
+  14,
+  29,
+  57,
   c,
   [472, 3],
   c,
   [3, 3],
   1,
-  129,
-  153,
+  5,
+  29,
   58,
   c,
   [66, 11],
   c,
   [363, 32],
   c,
-  [161, 8],
-  172,
-  173,
-  175,
+  [164, 8],
+  52,
+  53,
+  55,
   c,
   [432, 65],
+  74,
+  76,
+  77,
   123,
   125,
-  190,
-  192,
-  193,
   c,
-  [210, 11],
+  [21, 15],
+  59,
+  79,
   c,
-  [294, 8],
+  [374, 16],
   c,
-  [18, 35],
+  [18, 30],
   c,
   [348, 18],
   c,
-  [242, 17],
-  159,
-  159,
-  160,
+  [242, 8],
+  35,
+  35,
+  36,
   s,
   [1, 3],
-  135,
-  195,
+  11,
+  79,
   1,
+  79,
+  82,
   c,
-  [311, 3],
+  [3, 4],
+  5,
+  29,
   c,
-  [3, 3],
-  129,
-  153,
+  [432, 3],
   40,
+  59,
+  60,
+  62,
+  64,
+  67,
+  73,
   c,
-  [361, 3],
+  [374, 14],
   c,
-  [435, 3],
-  178,
-  179,
-  180,
-  183,
-  189,
-  c,
-  [476, 11],
-  c,
-  [243, 17],
+  [65, 16],
   c,
   [82, 7],
-  173,
+  53,
   c,
   [192, 26],
   c,
   [116, 24],
   123,
   125,
-  123,
-  125,
-  193,
+  c,
+  [209, 3],
   c,
   [3, 3],
-  157,
   c,
-  [365, 3],
+  [363, 4],
   c,
   [361, 7],
-  195,
-  198,
+  79,
+  82,
   59,
   124,
   59,
   124,
   c,
-  [123, 7],
-  181,
-  184,
-  186,
+  [123, 5],
+  65,
+  68,
+  70,
   c,
-  [122, 3],
+  [122, 5],
   c,
-  [12, 4],
-  135,
-  152,
-  182,
+  [562, 3],
+  59,
+  66,
   c,
-  [607, 18],
+  [607, 20],
   c,
   [231, 18],
   c,
   [290, 5],
   c,
-  [81, 3],
+  [3, 3],
   1,
   c,
-  [191, 10],
+  [191, 8],
   c,
-  [190, 6],
+  [190, 8],
   c,
   [68, 9],
-  40,
+  c,
+  [22, 4],
   41,
+  59,
   c,
-  [23, 6],
-  c,
-  [20, 3],
+  [20, 5],
   c,
   [749, 4],
-  s,
-  [40, 4, 1],
+  c,
+  [15, 5],
+  42,
+  43,
   59,
   63,
+  71,
+  72,
   c,
-  [18, 5],
-  187,
-  188,
+  [40, 6],
   c,
-  [20, 3],
-  c,
-  [16, 11],
+  [16, 8],
   c,
   [15, 21],
-  124,
-  153,
-  154,
-  180,
-  185,
   c,
-  [162, 4],
+  [14, 4],
+  64,
+  69,
+  c,
+  [160, 3],
+  59,
+  124,
   123,
   125,
   c,
-  [6, 4],
+  [168, 5],
   c,
-  [76, 4],
+  [635, 5],
   c,
-  [84, 10],
+  [84, 6],
   c,
-  [35, 6],
+  [50, 11],
   c,
-  [12, 34],
+  [12, 31],
   41,
-  124,
   c,
   [73, 5],
-  184,
-  186,
-  123,
-  125,
-  192,
-  193,
+  68,
+  70,
+  124,
+  c,
+  [174, 4],
   c,
   [145, 11],
   c,
-  [110, 21],
+  [110, 20],
+  124,
   c,
-  [206, 3],
+  [35, 3],
   c,
   [46, 7]
 ]),
@@ -1569,9 +1670,9 @@ table: bt({
   c,
   [64, 4],
   c,
-  [22, 17],
+  [21, 16],
   c,
-  [18, 6],
+  [17, 7],
   c,
   [24, 12],
   c,
@@ -1589,39 +1690,37 @@ table: bt({
   c,
   [326, 59],
   c,
-  [70, 81],
+  [68, 77],
   c,
-  [282, 40],
+  [282, 44],
   c,
-  [116, 8],
+  [116, 6],
   c,
-  [117, 38],
+  [117, 40],
   c,
-  [155, 64],
+  [157, 64],
   c,
-  [555, 19],
+  [555, 17],
   c,
-  [859, 11],
+  [123, 9],
   c,
-  [250, 40],
+  [581, 19],
   c,
-  [40, 17],
+  [290, 40],
   c,
-  [17, 10],
+  [924, 10],
   c,
-  [68, 16],
+  [649, 19],
   c,
-  [757, 6],
+  [180, 12],
   c,
-  [192, 49],
+  [190, 41],
   c,
-  [388, 73],
+  [389, 73],
   c,
-  [886, 7],
+  [214, 37],
   c,
-  [342, 39],
-  0,
-  0
+  [647, 12]
 ]),
   state: u([
   1,
@@ -1739,19 +1838,21 @@ table: bt({
   c,
   [122, 25],
   c,
-  [25, 4],
+  [25, 6],
   c,
-  [3, 12],
+  [6, 4],
+  c,
+  [3, 6],
   c,
   [392, 17],
   c,
   [436, 41],
   c,
-  [220, 68],
+  [220, 66],
   c,
-  [288, 91],
+  [286, 93],
   c,
-  [258, 5],
+  [233, 5],
   c,
   [228, 13],
   c,
@@ -1759,36 +1860,37 @@ table: bt({
   c,
   [518, 58],
   c,
-  [333, 17],
+  [368, 13],
   c,
-  [18, 9],
+  [122, 5],
   c,
-  [528, 6],
+  [5, 6],
   c,
-  [551, 4],
+  [543, 3],
   c,
-  [94, 37],
+  [550, 8],
   c,
-  [37, 15],
+  [93, 36],
   c,
-  [67, 6],
+  [36, 15],
   c,
-  [61, 15],
+  [15, 6],
   c,
-  [92, 5],
+  [61, 17],
   c,
-  [21, 3],
+  [14, 7],
   c,
-  [533, 68],
+  [93, 8],
   c,
-  [69, 40],
+  [533, 59],
   c,
-  [130, 5],
+  [64, 42],
   c,
-  [231, 14],
+  [816, 7],
   c,
-  [269, 29],
-  1
+  [542, 37],
+  c,
+  [42, 5]
 ]),
   goto: u([
   s,
@@ -1870,10 +1972,10 @@ table: bt({
   [22, 6],
   s,
   [23, 6],
-  62,
   63,
   65,
   19,
+  62,
   s,
   [34, 9],
   29,
@@ -1902,9 +2004,9 @@ table: bt({
   47,
   28,
   28,
+  29,
+  29,
   69,
-  29,
-  29,
   70,
   96,
   96,
@@ -1941,9 +2043,9 @@ table: bt({
   [25, 16],
   s,
   [21, 16],
-  83,
-  83,
   84,
+  83,
+  83,
   s,
   [78, 18],
   s,
@@ -1970,10 +2072,10 @@ table: bt({
   s,
   [52, 3],
   s,
-  [60, 7],
+  [60, 5],
   92,
   s,
-  [60, 3],
+  [60, 5],
   s,
   [49, 17],
   s,
@@ -1989,9 +2091,9 @@ table: bt({
   [48, 16],
   95,
   94,
-  84,
-  84,
   96,
+  84,
+  84,
   s,
   [87, 3],
   30,
@@ -2006,19 +2108,19 @@ table: bt({
   99,
   56,
   56,
-  106,
-  s,
-  [73, 4],
+  73,
   104,
   105,
+  106,
+  73,
   102,
-  73,
-  73,
-  82,
-  62,
+  s,
+  [73, 4],
+  63,
   82,
   c,
-  [536, 3],
+  [535, 3],
+  82,
   s,
   [42, 16],
   s,
@@ -2038,14 +2140,14 @@ table: bt({
   [59, 11],
   29,
   40,
-  68,
-  68,
+  s,
+  [68, 5],
   114,
   116,
   68,
   115,
   s,
-  [68, 9],
+  [68, 6],
   s,
   [65, 15],
   s,
@@ -2065,10 +2167,10 @@ table: bt({
   s,
   [72, 6],
   s,
-  [64, 8],
+  [64, 6],
   120,
   s,
-  [64, 3],
+  [64, 5],
   s,
   [69, 12],
   s,
@@ -2077,48 +2179,34 @@ table: bt({
   [71, 12],
   121,
   122,
-  106,
+  c,
+  [205, 3],
   62,
   62,
-  104,
-  105,
-  86,
-  86,
   84,
+  86,
+  86,
   s,
   [63, 11],
   s,
   [67, 15],
   s,
   [60, 5],
-  85,
-  85,
   96,
-  106,
+  85,
+  85,
+  c,
+  [42, 3],
   61,
-  61,
-  104,
-  105
+  61
 ])
 }),
-defaultActions: bda({
-  idx: u([
-  32,
-  70,
-  71,
-  97
-]),
-  pop: u([
-  s,
-  [2, 4]
-]),
-  rule: u([
-  46,
-  1,
-  3,
-  90
-])
-}),
+defaultActions: {
+  32: 46,
+  70: 1,
+  71: 3,
+  97: 90
+},
 parseError: function parseError(str, hash) {
     if (hash.recoverable) {
         this.trace(str);
@@ -2126,45 +2214,19 @@ parseError: function parseError(str, hash) {
         throw new this.JisonParserError(str, hash);
     }
 },
-quoteName: function quoteName(id_str) {
-    return '"' + id_str + '"';
-},
-describeSymbol: function describeSymbol(symbol) {
-    if (symbol !== this.EOF && this.terminal_descriptions_ && this.terminal_descriptions_[symbol]) {
-        return this.terminal_descriptions_[symbol];
-    } 
-    else if (symbol === this.EOF) {
-        return 'end of input';
-    }
-    else if (this.terminals_[symbol]) {
-        return this.quoteName(this.terminals_[symbol]);
-    } 
-    // Otherwise... this might refer to a RULE token i.e. a non-terminal: see if we can dig that one up.
-    // 
-    // An example of this may be where a rule's action code contains a call like this:
-    // 
-    //      parser.describeSymbol(#$)
-    // 
-    // to obtain a human-readable description or name of the current grammar rule. This comes handy in
-    // error handling action code blocks, for example.
-    var s = this.symbols_;
-    for (var key in s) {
-        if (s[key] === symbol) {
-            return key;
-        }
-    }
-    return null;
-},
 parse: function parse(input) {
     var self = this,
-        stack = [0],        // state stack: stores pairs of state (odd indexes) and token (even indexes)
+        stack = new Array(128),         // token stack: stores token which leads to state at the same index (column storage)
+        sstack = new Array(128),        // state stack: stores states
 
-        vstack = [null],    // semantic value stack
+        vstack = new Array(128),        // semantic value stack
 
-        table = this.table;
+        table = this.table,
+        sp = 0;                         // 'stack pointer': index into the stacks
     var recovering = 0;     // (only used when the grammar contains error recovery rules)
     var TERROR = this.TERROR,
         EOF = this.EOF;
+    var NO_ACTION = [0, table.length /* ensures that anyone using this new state will fail dramatically! */];
 
     var args = stack.slice.call(arguments, 1);
 
@@ -2202,7 +2264,11 @@ parse: function parse(input) {
 
 
 
-    
+    vstack[sp] = null;
+    sstack[sp] = 0;
+    stack[sp] = 0;
+    ++sp;
+
     if (typeof lexer.yytext === 'undefined') {
         lexer.yytext = '';
     }
@@ -2213,42 +2279,102 @@ parse: function parse(input) {
 
 
     // Does the shared state override the default `parseError` that already comes with this instance?
+    if (!this.originalParseError) {
+        this.originalParseError = this.parseError;
+    }
     if (typeof sharedState.yy.parseError === 'function') {
         this.parseError = sharedState.yy.parseError;
     }
+
     // Does the shared state override the default `quoteName` that already comes with this instance?
+    if (!this.originalQuoteName) {
+        this.originalQuoteName = this.quoteName;
+    }
     if (typeof sharedState.yy.quoteName === 'function') {
         this.quoteName = sharedState.yy.quoteName;
     }
 
-    function popStack(n) {
+    // set up the cleanup function; make it an API so that external code can re-use this one in case of
+    // calamities or when the `%options no-try-catch` option has been specified for the grammar, in which
+    // case this parse() API method doesn't come with a `finally { ... }` block any more!
+    if (typeof this.cleanupAfterParse !== 'function') {
+        this.cleanupAfterParse = function parser_cleanupAfterParse(resultValue, invoke_post_methods) {
+            var rv;
 
-        if (!n) return;
-        stack.length = stack.length - 2 * n;
-        vstack.length = vstack.length - n;
+            if (invoke_post_methods) {
+                if (sharedState.yy.post_parse) {
+                    rv = sharedState.yy.post_parse.apply(this, [sharedState.yy, resultValue].concat(args));
+                    if (typeof rv !== 'undefined') resultValue = rv;
+                }
+                if (this.post_parse) {
+                    rv = this.post_parse.apply(this, [sharedState.yy, resultValue].concat(args));
+                    if (typeof rv !== 'undefined') resultValue = rv;
+                }
+            }
 
+            // prevent lingering circular references from causing memory leaks:
+            sharedState.yy.parseError = undefined;
+            this.parseError = this.originalParseError;
+            sharedState.yy.quoteName = undefined;
+            this.quoteName = this.originalQuoteName;
+            sharedState.yy.lexer = undefined;
+            sharedState.yy.parser = undefined;
+            if (lexer.yy === sharedState.yy) {
+                lexer.yy = undefined;
+            }
+            // nuke the vstack[] array at least as that one will still reference obsoleted user values.
+            // To be safe, we nuke the other internal stack columns as well...
+            stack.length = 0;               // fastest way to nuke an array without overly bothering the GC
+            sstack.length = 0;
+
+            vstack.length = 0;
+            return resultValue;
+        };
+    }
+
+    if (typeof this.constructParseErrorInfo !== 'function') {
+        this.constructParseErrorInfo = function parser_constructParseErrorInfo(msg, ex, expected, recoverable) {
+            return {
+                errStr: msg,
+                exception: ex,
+                text: lexer.match,
+                value: lexer.yytext,
+                token: this.describeSymbol(symbol) || symbol,
+                token_id: symbol,
+                line: lexer.yylineno,
+                loc: lexer.yylloc,
+                expected: expected,
+                recoverable: recoverable,
+                state: state,
+                action: action,
+                new_state: newState,
+                state_stack: stack,
+                value_stack: vstack,
+
+                yy: sharedState.yy,
+                lexer: lexer
+            };
+        };
     }
 
 
     function lex() {
-        var token;
-        token = lexer.lex() || EOF;
+        var token = lexer.lex();
         // if token isn't its numeric value, convert
         if (typeof token !== 'number') {
             token = self.symbols_[token] || token;
         }
-        return token;
+        return token || EOF;
     }
 
 
-    var symbol = null;
-    var preErrorSymbol = null;
-    var state, action, r;
+    var symbol = 0;
+    var preErrorSymbol = 0;
+    var state, action, r, t;
     var yyval = {};
     var p, len, this_production;
 
     var newState;
-    var expected = [];
     var retval = false;
 
     if (this.pre_parse) {
@@ -2260,242 +2386,151 @@ parse: function parse(input) {
 
 
     // Return the rule stack depth where the nearest error rule can be found.
-    // Return FALSE when no error recovery rule was found.
+    // Return -1 when no error recovery rule was found.
     function locateNearestErrorRecoveryRule(state) {
-        var stack_probe = stack.length - 1;
+        var stack_probe = sp - 1;
         var depth = 0;
 
         // try to recover from error
         for (;;) {
             // check for error recovery rule in this state
-            var action = table[state][TERROR];
-            if (action && action.length && action[0]) {
+            var t = table[state][TERROR] || NO_ACTION;
+            if (t[0]) {
                 return depth;
             }
-            if (state === 0 /* $accept rule */ || stack_probe < 2) {
-                return false; // No suitable error recovery rule available.
+            if (state === 0 /* $accept rule */ || stack_probe < 1) {
+                return -1; // No suitable error recovery rule available.
             }
-            stack_probe -= 2; // popStack(1): [symbol, action]
-            state = stack[stack_probe];
+            --stack_probe; // popStack(1): [symbol, action]
+            state = sstack[stack_probe];
             ++depth;
         }
     }
 
-
-    // SHA-1: c4ea524b22935710d98252a1d9e04ddb82555e56 :: shut up error reports about non-strict mode in Chrome in the demo pages:
-    // (NodeJS doesn't care, so this semicolon is only important for the demo web pages which run the jison *GENERATOR* in a web page...)
-    ;
-
-    // Produce a (more or less) human-readable list of expected tokens at the point of failure.
-    // 
-    // The produced list may contain token or token set descriptions instead of the tokens
-    // themselves to help turning this output into something that easier to read by humans.
-    // 
-    // The returned list (array) will not contain any duplicate entries.
-    function collect_expected_token_set(state) {
-        var tokenset = [];
-        var check = {};
-        // Has this (error?) state been outfitted with a custom expectations description text for human consumption?
-        // If so, use that one instead of the less palatable token set.
-        if (self.state_descriptions_ && self.state_descriptions_[p]) {
-            return [
-                self.state_descriptions_[p]
-            ];
-        }
-        for (var p in table[state]) {
-            if (p !== TERROR) {
-                var d = self.describeSymbol(p);
-                if (d && !check[d]) {
-                    tokenset.push(d);
-                    check[d] = true;        // Mark this token description as already mentioned to prevent outputting duplicate entries.
-                }
-            }
-        }
-        return tokenset;
-    }
-
     try {
+        newState = sstack[sp - 1];
         for (;;) {
             // retrieve state number from top of stack
-            state = stack[stack.length - 1];
+            state = newState;               // sstack[sp - 1];
 
             // use default actions if available
             if (this.defaultActions[state]) {
-                action = this.defaultActions[state];
+                action = 2;
+                newState = this.defaultActions[state];
             } else {
                 // The single `==` condition below covers both these `===` comparisons in a single
                 // operation:
-                // 
+                //
                 //     if (symbol === null || typeof symbol === 'undefined') ...
-                if (symbol == null) {
+                if (!symbol) {
                     symbol = lex();
                 }
                 // read action for current state and first input
-                action = table[state] && table[state][symbol];
-            }
+                t = (table[state] && table[state][symbol]) || NO_ACTION;
+                newState = t[1];
+                action = t[0];
 
 
 
 
-            // handle parse error
-            if (!action || !action.length || !action[0]) {
-                var error_rule_depth = 0;
-                var errStr = null;
-
-                if (!recovering) {
+                // handle parse error
+                if (!action) {
                     // first see if there's any chance at hitting an error recovery rule:
-                    error_rule_depth = locateNearestErrorRecoveryRule(state);
+                    var error_rule_depth = locateNearestErrorRecoveryRule(state);
+                    var errStr = null;
+                    var errSymbolDescr = (this.describeSymbol(symbol) || symbol);
+                    var expected = this.collect_expected_token_set(state);
 
-                    // Report error
-                    expected = collect_expected_token_set(state);
-                    if (lexer.showPosition) {
-                        errStr = 'Parse error on line ' + (lexer.yylineno + 1) + ':\n' + lexer.showPosition() + '\n';
-                    } else {
-                        errStr = 'Parse error on line ' + (lexer.yylineno + 1) + ': ';
+                    if (!recovering) {
+                        // Report error
+                        if (lexer.showPosition) {
+                            errStr = 'Parse error on line ' + (lexer.yylineno + 1) + ':\n' + lexer.showPosition() + '\n';
+                        } else {
+                            errStr = 'Parse error on line ' + (lexer.yylineno + 1) + ': ';
+                        }
+                        if (expected.length) {
+                            errStr += 'Expecting ' + expected.join(', ') + ', got unexpected ' + errSymbolDescr;
+                        } else {
+                            errStr += 'Unexpected ' + errSymbolDescr;
+                        }
+                        p = this.constructParseErrorInfo(errStr, null, expected, (error_rule_depth >= 0));
+                        r = this.parseError(p.errStr, p);
+
+                        if (!p.recoverable) {
+                            retval = r;
+                            break;
+                        }
                     }
-                    if (expected.length) {
-                        errStr += 'Expecting ' + expected.join(', ') + ', got unexpected ' + (this.describeSymbol(symbol) || symbol);
-                    } else {
-                        errStr += 'Unexpected ' + (this.describeSymbol(symbol) || symbol);
+
+
+
+                    // just recovered from another error
+                    if (recovering === 3 && error_rule_depth >= 0) {
+                        // only barf a fatal hairball when we're out of look-ahead symbols and none hit a match;
+                        // this DOES discard look-ahead while recovering from an error when said look-ahead doesn't
+                        // suit the error recovery rules... The error HAS been reported already so we're fine with
+                        // throwing away a few items if that is what it takes to match the nearest recovery rule!
+                        if (symbol === EOF || preErrorSymbol === EOF) {
+                            p = this.constructParseErrorInfo((errStr || 'Parsing halted while starting to recover from another error.'), null, expected, false);
+                            retval = this.parseError(p.errStr, p);
+                            break;
+                        }
+
+                        // discard current lookahead and grab another
+
+                        yytext = lexer.yytext;
+
+
+                        symbol = lex();
+
+
                     }
-                    r = this.parseError(errStr, p = {
-                        text: lexer.match,
-                        value: lexer.yytext,
-                        token: this.describeSymbol(symbol) || symbol,
-                        token_id: symbol,
-                        line: lexer.yylineno,
-                        loc: lexer.yylloc,
-                        expected: expected,
-                        recoverable: (error_rule_depth !== false),
-                        state_stack: stack,
-                        value_stack: vstack,
 
-                        yy: sharedState.yy,
-                        lexer: lexer
-                    });
-
-                    if (!p.recoverable) {
-                        retval = r;
+                    // try to recover from error
+                    if (error_rule_depth < 0) {
+                        p = this.constructParseErrorInfo((errStr || 'Parsing halted. No suitable error recovery rule available.'), null, expected, false);
+                        retval = this.parseError(p.errStr, p);
                         break;
                     }
-                } else if (preErrorSymbol !== EOF) {
-                    error_rule_depth = locateNearestErrorRecoveryRule(state);
+                    sp -= error_rule_depth;
+
+                    preErrorSymbol = (symbol === TERROR ? 0 : symbol); // save the lookahead token
+                    symbol = TERROR;            // insert generic error symbol as new lookahead
+                    recovering = 3;             // allow 3 real symbols to be shifted before reporting a new error
+
+                    newState = sstack[sp - 1];
+
+
+
+                    continue;
                 }
-
-
-
-                // just recovered from another error
-                if (recovering === 3) {
-                    if (symbol === EOF || preErrorSymbol === EOF) {
-                        retval = this.parseError(errStr || 'Parsing halted while starting to recover from another error.', {
-                            text: lexer.match,
-                            value: lexer.yytext,
-                            token: this.describeSymbol(symbol) || symbol,
-                            token_id: symbol,
-                            line: lexer.yylineno,
-                            loc: lexer.yylloc,
-                            expected: expected,
-                            recoverable: false,
-                            state_stack: stack,
-                            value_stack: vstack,
-
-                            yy: sharedState.yy,
-                            lexer: lexer
-                        });
-                        break;
-                    }
-
-                    // discard current lookahead and grab another
-
-                    yytext = lexer.yytext;
-
-
-                    symbol = lex();
-
-
-                }
-
-                // try to recover from error
-                if (error_rule_depth === false) {
-                    retval = this.parseError(errStr || 'Parsing halted. No suitable error recovery rule available.', {
-                        text: lexer.match,
-                        value: lexer.yytext,
-                        token: this.describeSymbol(symbol) || symbol,
-                        token_id: symbol,
-                        line: lexer.yylineno,
-                        loc: lexer.yylloc,
-                        expected: expected,
-                        recoverable: false,
-                        state_stack: stack,
-                        value_stack: vstack,
-
-                        yy: sharedState.yy,
-                        lexer: lexer
-                    });
-                    break;
-                }
-                popStack(error_rule_depth);
-
-                preErrorSymbol = (symbol === TERROR ? null : symbol); // save the lookahead token
-                symbol = TERROR;            // insert generic error symbol as new lookahead
-                recovering = 3;             // allow 3 real symbols to be shifted before reporting a new error
-
-
-
-                continue;
             }
 
 
-
-            switch (action[0]) {
+            switch (action) {
             // catch misc. parse failures:
             default:
                 // this shouldn't happen, unless resolve defaults are off
-                if (action[0] instanceof Array) {
-                    retval = this.parseError('Parse Error: multiple actions possible at state: ' + state + ', token: ' + symbol, {
-                        text: lexer.match,
-                        value: lexer.yytext,
-                        token: this.describeSymbol(symbol) || symbol,
-                        token_id: symbol,
-                        line: lexer.yylineno,
-                        loc: lexer.yylloc,
-                        expected: expected,
-                        recoverable: false,
-                        state_stack: stack,
-                        value_stack: vstack,
-
-                        yy: sharedState.yy,
-                        lexer: lexer
-                    });
+                if (action instanceof Array) {
+                    p = this.constructParseErrorInfo(('Parse Error: multiple actions possible at state: ' + state + ', token: ' + symbol), null, null, false);
+                    retval = this.parseError(p.errStr, p);
                     break;
                 }
                 // Another case of better safe than sorry: in case state transitions come out of another error recovery process
                 // or a buggy LUT (LookUp Table):
-                retval = this.parseError('Parsing halted. No viable error recovery approach available due to internal system failure.', {
-                    text: lexer.match,
-                    value: lexer.yytext,
-                    token: this.describeSymbol(symbol) || symbol,
-                    token_id: symbol,
-                    line: lexer.yylineno,
-                    loc: lexer.yylloc,
-                    expected: expected,
-                    recoverable: false,
-                    state_stack: stack,
-                    value_stack: vstack,
-
-                    yy: sharedState.yy,
-                    lexer: lexer
-                });
+                p = this.constructParseErrorInfo('Parsing halted. No viable error recovery approach available due to internal system failure.', null, null, false);
+                retval = this.parseError(p.errStr, p);
                 break;
 
             // shift:
-            case 1: 
+            case 1:
                 //this.shiftCount++;
-                stack.push(symbol);
-                vstack.push(lexer.yytext);
+                stack[sp] = symbol;
+                vstack[sp] = lexer.yytext;
 
-                stack.push(action[1]); // push state
-                symbol = null;
+                sstack[sp] = newState; // push state
+                ++sp;
+                symbol = 0;
                 if (!preErrorSymbol) { // normal execution / no error
                     // Pick up the lexer details for the current symbol as that one is not 'look-ahead' any more:
 
@@ -2510,17 +2545,16 @@ parse: function parse(input) {
                 } else {
                     // error just occurred, resume old lookahead f/ before error
                     symbol = preErrorSymbol;
-                    preErrorSymbol = null;
+                    preErrorSymbol = 0;
 
                 }
-    
+
                 continue;
 
             // reduce:
             case 2:
                 //this.reductionCount++;
-                newState = action[1];
-                this_production = this.productions_[newState - 1];  // `this.productions_[]` is zero-based indexed while states start from 1 upwards... 
+                this_production = this.productions_[newState - 1];  // `this.productions_[]` is zero-based indexed while states start from 1 upwards...
                 len = this_production[1];
 
 
@@ -2528,9 +2562,15 @@ parse: function parse(input) {
 
 
 
+                // Make sure subsequent `$$ = $1` default action doesn't fail
+                // for rules where len==0 as then there's no $1 (you're reducing an epsilon rule then!)
+                //
+                // Also do this to prevent nasty action block codes to *read* `$0` or `$$`
+                // and *not* get `undefined` as a result for their efforts!
+                vstack[sp] = undefined;
+
                 // perform semantic action
-                yyval.$ = vstack[vstack.length - len]; // default to $$ = $1
-                // default location, uses first token for firsts, last for lasts
+                yyval.$ = vstack[sp - len]; // default to $$ = $1; result must produce `undefined` when len == 0, as then there's no $1
 
 
 
@@ -2541,7 +2581,7 @@ parse: function parse(input) {
 
 
 
-                r = this.performAction.apply(yyval, [yytext, sharedState.yy, newState, vstack].concat(args));
+                r = this.performAction.apply(yyval, [yytext, sharedState.yy, newState, sp - 1, vstack].concat(args));
 
                 if (typeof r !== 'undefined') {
                     retval = r;
@@ -2549,14 +2589,17 @@ parse: function parse(input) {
                 }
 
                 // pop off stack
-                popStack(len);
+                sp -= len;
 
-                stack.push(this_production[0]);    // push nonterminal (reduce)
-                vstack.push(yyval.$);
+                // don't overwrite the `symbol` variable: use a local var to speed things up:
+                var ntsymbol = this_production[0];    // push nonterminal (reduce)
+                stack[sp] = ntsymbol;
+                vstack[sp] = yyval.$;
 
                 // goto new state = table[STATE][NONTERMINAL]
-                newState = table[stack[stack.length - 2]][stack[stack.length - 1]];
-                stack.push(newState);
+                newState = table[sstack[sp - 1]][ntsymbol];
+                sstack[sp] = newState;
+                ++sp;
 
                 continue;
 
@@ -2564,19 +2607,19 @@ parse: function parse(input) {
             case 3:
                 retval = true;
                 // Return the `$accept` rule's `$$` result, if available.
-                // 
-                // Also note that JISON always adds this top-most `$accept` rule (with implicit, 
+                //
+                // Also note that JISON always adds this top-most `$accept` rule (with implicit,
                 // default, action):
-                //   
+                //
                 //     $accept: <startSymbol> $end
                 //                  %{ $$ = $1; @$ = @1; %}
-                //     
-                // which, combined with the parse kernel's `$accept` state behaviour coded below, 
-                // will produce the `$$` value output of the <startSymbol> rule as the parse result, 
+                //
+                // which, combined with the parse kernel's `$accept` state behaviour coded below,
+                // will produce the `$$` value output of the <startSymbol> rule as the parse result,
                 // IFF that result is *not* `undefined`. (See also the parser kernel code.)
-                // 
+                //
                 // In code:
-                // 
+                //
                 //                  %{
                 //                      @$ = @1;            // if location tracking support is included
                 //                      if (typeof $1 !== 'undefined')
@@ -2595,33 +2638,10 @@ parse: function parse(input) {
         }
     } catch (ex) {
         // report exceptions through the parseError callback too:
-        retval = this.parseError('Parsing aborted due to exception.', {
-            exception: ex,
-            text: lexer.match,
-            value: lexer.yytext,
-            token: this.describeSymbol(symbol) || symbol,
-            token_id: symbol,
-            line: lexer.yylineno,
-            loc: lexer.yylloc,
-            // expected: expected,
-            recoverable: false,
-            state_stack: stack,
-            value_stack: vstack,
-
-            yy: sharedState.yy,
-            lexer: lexer
-        });
+        p = this.constructParseErrorInfo('Parsing aborted due to exception.', ex, null, false);
+        retval = this.parseError(p.errStr, p);
     } finally {
-        var rv;
-
-        if (sharedState.yy.post_parse) {
-            rv = sharedState.yy.post_parse.apply(this, [sharedState.yy, retval].concat(args));
-            if (typeof rv !== 'undefined') retval = rv;
-        }
-        if (this.post_parse) {
-            rv = this.post_parse.apply(this, [sharedState.yy, retval].concat(args));
-            if (typeof rv !== 'undefined') retval = rv;
-        }
+        retval = this.cleanupAfterParse(retval, true);
     }
 
     return retval;
@@ -3152,17 +3172,17 @@ break;
 case 3 : 
 /*! Conditions:: bnf ebnf */ 
 /*! Rule::       %% */ 
- this.pushState('code'); return 129; 
+ this.pushState('code'); return 5; 
 break;
 case 17 : 
 /*! Conditions:: options */ 
 /*! Rule::       "(\\\\|\\"|[^"])*" */ 
- yy_.yytext = yy_.yytext.substr(1, yy_.yytext.length - 2); return 160; 
+ yy_.yytext = yy_.yytext.substr(1, yy_.yytext.length - 2); return 36; 
 break;
 case 18 : 
 /*! Conditions:: options */ 
 /*! Rule::       '(\\\\|\\'|[^'])*' */ 
- yy_.yytext = yy_.yytext.substr(1, yy_.yytext.length - 2); return 160; 
+ yy_.yytext = yy_.yytext.substr(1, yy_.yytext.length - 2); return 36; 
 break;
 case 19 : 
 /*! Conditions:: INITIAL ebnf bnf token path options */ 
@@ -3177,7 +3197,7 @@ break;
 case 22 : 
 /*! Conditions:: options */ 
 /*! Rule::       {BR}+ */ 
- this.popState(); return 157; 
+ this.popState(); return 33; 
 break;
 case 23 : 
 /*! Conditions:: options */ 
@@ -3197,22 +3217,22 @@ break;
 case 26 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       \[{ID}\] */ 
- yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); return 188; 
+ yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); return 72; 
 break;
 case 30 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       "[^"]+" */ 
- yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); return 154; 
+ yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); return 30; 
 break;
 case 31 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       '[^']+' */ 
- yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); return 154; 
+ yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); return 30; 
 break;
 case 36 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       %% */ 
- this.pushState(ebnf ? 'ebnf' : 'bnf'); return 129; 
+ this.pushState(ebnf ? 'ebnf' : 'bnf'); return 5; 
 break;
 case 37 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
@@ -3222,17 +3242,17 @@ break;
 case 38 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       %debug\b */ 
- if (!yy.options) { yy.options = {}; } yy.options.debug = true; return 146; 
+ if (!yy.options) { yy.options = {}; } yy.options.debug = true; return 22; 
 break;
 case 45 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       %token\b */ 
- this.pushState('token'); return 141; 
+ this.pushState('token'); return 17; 
 break;
 case 47 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       %options\b */ 
- this.pushState('options'); return 155; 
+ this.pushState('options'); return 31; 
 break;
 case 48 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
@@ -3240,13 +3260,13 @@ case 48 :
  
                                             // remove the %lex../lex wrapper and return the pure lex section:
                                             yy_.yytext = this.matches[1];
-                                            return 139;
+                                            return 15;
                                          
 break;
 case 51 : 
 /*! Conditions:: INITIAL ebnf bnf code */ 
 /*! Rule::       %include\b */ 
- this.pushState('path'); return 195; 
+ this.pushState('path'); return 79; 
 break;
 case 52 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
@@ -3254,23 +3274,23 @@ case 52 :
  
                                             /* ignore unrecognized decl */
                                             console.warn('ignoring unsupported parser option: ', yy_.yytext, ' while lexing in ', this.topState(), ' state');
-                                            return 147;
+                                            return 23;
                                          
 break;
 case 53 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       <{ID}> */ 
- yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); return 174; 
+ yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); return 54; 
 break;
 case 54 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       \{\{[\w\W]*?\}\} */ 
- yy_.yytext = yy_.yytext.substr(2, yy_.yyleng - 4); return 134; 
+ yy_.yytext = yy_.yytext.substr(2, yy_.yyleng - 4); return 10; 
 break;
 case 55 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       %\{(.|\r|\n)*?%\} */ 
- yy_.yytext = yy_.yytext.substr(2, yy_.yytext.length - 4); return 134; 
+ yy_.yytext = yy_.yytext.substr(2, yy_.yytext.length - 4); return 10; 
 break;
 case 56 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
@@ -3280,17 +3300,17 @@ break;
 case 57 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       ->.* */ 
- yy_.yytext = yy_.yytext.substr(2, yy_.yyleng - 2); return 191; 
+ yy_.yytext = yy_.yytext.substr(2, yy_.yyleng - 2); return 75; 
 break;
 case 58 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       {HEX_NUMBER} */ 
- yy_.yytext = parseInt(yy_.yytext, 16); return 175; 
+ yy_.yytext = parseInt(yy_.yytext, 16); return 55; 
 break;
 case 59 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       {DECIMAL_NUMBER}(?![xX0-9a-fA-F]) */ 
- yy_.yytext = parseInt(yy_.yytext, 10); return 175; 
+ yy_.yytext = parseInt(yy_.yytext, 10); return 55; 
 break;
 case 60 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
@@ -3302,7 +3322,7 @@ break;
 case 64 : 
 /*! Conditions:: action */ 
 /*! Rule::       \/[^ /]*?['"{}'][^ ]*?\/ */ 
- return 193; // regexp with braces or quotes (and no spaces) 
+ return 77; // regexp with braces or quotes (and no spaces) 
 break;
 case 69 : 
 /*! Conditions:: action */ 
@@ -3317,7 +3337,7 @@ break;
 case 72 : 
 /*! Conditions:: code */ 
 /*! Rule::       [^\r\n]+ */ 
- return 198;      // the bit of CODE just before EOF... 
+ return 82;      // the bit of CODE just before EOF... 
 break;
 case 73 : 
 /*! Conditions:: path */ 
@@ -3327,12 +3347,12 @@ break;
 case 74 : 
 /*! Conditions:: path */ 
 /*! Rule::       '[^\r\n]+' */ 
- yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); this.popState(); return 196; 
+ yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); this.popState(); return 80; 
 break;
 case 75 : 
 /*! Conditions:: path */ 
 /*! Rule::       "[^\r\n]+" */ 
- yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); this.popState(); return 196; 
+ yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); this.popState(); return 80; 
 break;
 case 76 : 
 /*! Conditions:: path */ 
@@ -3342,7 +3362,7 @@ break;
 case 77 : 
 /*! Conditions:: path */ 
 /*! Rule::       [^\s\r\n]+ */ 
- this.popState(); return 196; 
+ this.popState(); return 80; 
 break;
 default:
   return this.simpleCaseActionClusters[$avoiding_name_collisions];
@@ -3352,22 +3372,22 @@ simpleCaseActionClusters: {
 
   /*! Conditions:: bnf ebnf */ 
   /*! Rule::       %empty\b */ 
-   4 : 183,
+   4 : 67,
   /*! Conditions:: bnf ebnf */ 
   /*! Rule::       %epsilon\b */ 
-   5 : 183,
+   5 : 67,
   /*! Conditions:: bnf ebnf */ 
   /*! Rule::       \u0190 */ 
-   6 : 183,
+   6 : 67,
   /*! Conditions:: bnf ebnf */ 
   /*! Rule::       \u025B */ 
-   7 : 183,
+   7 : 67,
   /*! Conditions:: bnf ebnf */ 
   /*! Rule::       \u03B5 */ 
-   8 : 183,
+   8 : 67,
   /*! Conditions:: bnf ebnf */ 
   /*! Rule::       \u03F5 */ 
-   9 : 183,
+   9 : 67,
   /*! Conditions:: ebnf */ 
   /*! Rule::       \( */ 
    10 : 40,
@@ -3385,22 +3405,22 @@ simpleCaseActionClusters: {
    14 : 43,
   /*! Conditions:: options */ 
   /*! Rule::       {NAME} */ 
-   15 : 159,
+   15 : 35,
   /*! Conditions:: options */ 
   /*! Rule::       = */ 
    16 : 61,
   /*! Conditions:: options */ 
   /*! Rule::       [^\s\r\n]+ */ 
-   21 : 160,
+   21 : 36,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       {ID} */ 
-   27 : 153,
+   27 : 29,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       \$end\b */ 
-   28 : 153,
+   28 : 29,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       \$eof\b */ 
-   29 : 153,
+   29 : 29,
   /*! Conditions:: token */ 
   /*! Rule::       [^\s\r\n]+ */ 
    32 : 'TOKEN_WORD',
@@ -3415,55 +3435,55 @@ simpleCaseActionClusters: {
    35 : 124,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %parser-type\b */ 
-   39 : 163,
+   39 : 39,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %prec\b */ 
-   40 : 189,
+   40 : 73,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %start\b */ 
-   41 : 137,
+   41 : 13,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %left\b */ 
-   42 : 166,
+   42 : 46,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %right\b */ 
-   43 : 167,
+   43 : 47,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %nonassoc\b */ 
-   44 : 168,
+   44 : 48,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %parse-param\b */ 
-   46 : 161,
+   46 : 37,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %code\b */ 
-   49 : 151,
+   49 : 27,
   /*! Conditions:: bnf ebnf token INITIAL */ 
   /*! Rule::       %import\b */ 
-   50 : 148,
+   50 : 24,
   /*! Conditions:: * */ 
   /*! Rule::       $ */ 
    61 : 1,
   /*! Conditions:: action */ 
   /*! Rule::       \/\*(.|\n|\r)*?\*\/ */ 
-   62 : 193,
+   62 : 77,
   /*! Conditions:: action */ 
   /*! Rule::       \/\/[^\r\n]* */ 
-   63 : 193,
+   63 : 77,
   /*! Conditions:: action */ 
   /*! Rule::       "(\\\\|\\"|[^"])*" */ 
-   65 : 193,
+   65 : 77,
   /*! Conditions:: action */ 
   /*! Rule::       '(\\\\|\\'|[^'])*' */ 
-   66 : 193,
+   66 : 77,
   /*! Conditions:: action */ 
   /*! Rule::       [/"'][^{}/"']+ */ 
-   67 : 193,
+   67 : 77,
   /*! Conditions:: action */ 
   /*! Rule::       [^{}/"']+ */ 
-   68 : 193,
+   68 : 77,
   /*! Conditions:: code */ 
   /*! Rule::       [^\r\n]*(\r|\n)+ */ 
-   71 : 198
+   71 : 82
 },
 rules: [
 /^(?:(\r\n|\n|\r))/,
