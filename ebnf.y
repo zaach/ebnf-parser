@@ -11,7 +11,6 @@ id                        [a-zA-Z][a-zA-Z0-9_-]*
 "'"[^']*"'"    return 'symbol';
 "."            return 'symbol';
 
-bar            return 'bar';
 "("            return '(';
 ")"            return ')';
 "*"            return '*';
