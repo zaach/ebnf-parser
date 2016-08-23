@@ -56,7 +56,7 @@ declaration
     : START id
         { $$ = {start: $id}; }
     | LEX_BLOCK
-        { $$ = {lex: $LEX_BLOCK}; }
+        { $$ = {lex: {text: $LEX_BLOCK, position: @LEX_BLOCK}}; }
     | operator
         { $$ = {operator: $operator}; }
     | TOKEN full_token_definitions
