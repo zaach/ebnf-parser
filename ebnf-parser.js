@@ -62,8 +62,7 @@ bnf.yy.addDeclaration = function bnfAddDeclaration(grammar, decl) {
 // parse an embedded lex section
 var parseLex = function bnfParseLex(text, position) {
     text = text.replace(/(?:^%lex)|(?:\/lex$)/g, '');
-    console.warn('parseLex:', position);
-    // Now we want the lex input to start at the given 'position', if any, 
+    // We want the lex input to start at the given 'position', if any, 
     // so that error reports will produce a line number and character index
     // which matches the original input file:
     position = position || {};
