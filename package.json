@@ -27,7 +27,7 @@
     "node": ">=4.0"
   },
   "devDependencies": {
-    "jison": "GerHobbelt/jison#master",
+    "jison": "GerHobbelt/jison#travis-ci",
     "lex-parser": "GerHobbelt/lex-parser#master",
     "test": ">=0.6.0"
   }
