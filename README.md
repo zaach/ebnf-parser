@@ -99,7 +99,7 @@ declaration
     : START id
         { $$ = {start: $id}; }
     | LEX_BLOCK
-        { $$ = {lex: $LEX_BLOCK}; }
+        { $$ = {lex: {text: $LEX_BLOCK, position: @LEX_BLOCK}}; }
     | operator
         { $$ = {operator: $operator}; }
     | TOKEN full_token_definitions
@@ -108,8 +108,8 @@ declaration
         { $$ = {include: $ACTION}; }
     | include_macro_code
         { $$ = {include: $include_macro_code}; }
-    | parse_param
-        { $$ = {parseParam: $parse_param}; }
+    | parse_params
+        { $$ = {parseParams: $parse_params}; }
     | parser_type
         { $$ = {parserType: $parser_type}; }
     | options
@@ -155,7 +155,7 @@ option
         { $$ = [$option, $value]; }
     ;
 
-parse_param
+parse_params
     : PARSE_PARAM token_list
         { $$ = $token_list; }
     ;
