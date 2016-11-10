@@ -5,9 +5,10 @@ UNICODE_LETTER                          [\p{Alphabetic}]
 ALPHA                                   [{UNICODE_LETTER}_]
 DIGIT                                   [\p{Number}]
 WHITESPACE                              [\s\r\n\p{Separator}]
+ALNUM                                   [{ALPHA}{DIGIT}]
 
-NAME                                    [{ALPHA}](?:[{ALPHA}{DIGIT}-]*[{ALPHA}{DIGIT}])?
-ID                                      [{ALPHA}][{ALPHA}{DIGIT}]*
+NAME                                    [{ALPHA}](?:[{ALNUM}-]*{ALNUM})?
+ID                                      [{ALPHA}]{ALNUM}*
 DECIMAL_NUMBER                          [1-9][0-9]*
 HEX_NUMBER                              "0"[xX][0-9a-fA-F]+
 BR                                      \r\n|\n|\r
