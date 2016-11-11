@@ -26,8 +26,12 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
 %s token
 %s bnf ebnf
 
+
 %options easy_keyword_rules
 %options ranges
+%options xregexp
+
+
 
 %%
 
