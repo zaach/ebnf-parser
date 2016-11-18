@@ -388,7 +388,7 @@ action_ne
     | include_macro_code
         { $$ = $include_macro_code; }
     | ARROW_ACTION
-        { $$ = '$$ =' + $ARROW_ACTION + ';'; }
+        { $$ = '$$ = ' + $ARROW_ACTION; }
     ;
 
 action
