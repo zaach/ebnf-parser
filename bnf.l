@@ -1,6 +1,8 @@
 
 ASCII_LETTER                            [a-zA-z]
-// \p{Alphabetic} already includes [a-zA-z], hence we don't need to merge with {UNICODE_LETTER}:
+// \p{Alphabetic} already includes [a-zA-z], hence we don't need to merge 
+// with {UNICODE_LETTER} (though jison has code to optimize if you *did* 
+// include the `[a-zA-Z]` anyway):
 UNICODE_LETTER                          [\p{Alphabetic}]
 ALPHA                                   [{UNICODE_LETTER}_]
 DIGIT                                   [\p{Number}]
@@ -12,9 +14,13 @@ ID                                      [{ALPHA}]{ALNUM}*
 DECIMAL_NUMBER                          [1-9][0-9]*
 HEX_NUMBER                              "0"[xX][0-9a-fA-F]+
 BR                                      \r\n|\n|\r
-// WhiteSpace MUST NOT match CR/LF and the regex `\s` DOES, so we cannot use that one directly.
-// Instead we define the {WS} macro here:
+// WhiteSpace MUST NOT match CR/LF and the regex `\s` DOES, so we cannot use
+// that one directly. Instead we define the {WS} macro here:
 WS                                      [^\S\r\n]
+
+// Quoted string content: support *escaped* quotes inside strings:
+QUOTED_STRING_CONTENT                   (?:\\\'|\\[^\']|[^\\\'])*
+DOUBLEQUOTED_STRING_CONTENT             (?:\\\"|\\[^\"]|[^\\\"])*
 
 // Regex for matching all the possible stuff which can be placed between those `%lex.../lex` markers:
 // multiple lines of arbitrary material. Use a non-gready `*?` in there to ensure that the regex
@@ -58,8 +64,10 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
 
 <options>{NAME}                         return 'NAME';
 <options>"="                            return '=';
-<options>\"("\\\\"|'\"'|[^"])*\"        yytext = yytext.substr(1, yytext.length - 2); return 'OPTION_VALUE';
-<options>"'"("\\\\"|"\'"|[^'])*"'"      yytext = yytext.substr(1, yytext.length - 2); return 'OPTION_VALUE';
+<options>\"{DOUBLEQUOTED_STRING_CONTENT}\"
+                                        yytext = yytext.substr(1, yyleng - 2); return 'OPTION_VALUE';
+<options>\'{QUOTED_STRING_CONTENT}\'
+                                        yytext = yytext.substr(1, yyleng - 2); return 'OPTION_VALUE';
 
 // Comments should be gobbled and discarded anywhere *except* the code/action blocks:
 <INITIAL,ebnf,bnf,token,path,options>"//"[^\r\n]*
@@ -78,8 +86,10 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
 {ID}                                    return 'ID';
 "$end"                                  return 'ID';
 "$eof"                                  return 'ID';
-'"'[^"]+'"'                             yytext = yytext.substr(1, yyleng - 2); return 'STRING';
-"'"[^']+"'"                             yytext = yytext.substr(1, yyleng - 2); return 'STRING';
+\"{DOUBLEQUOTED_STRING_CONTENT}\"
+                                        yytext = yytext.substr(1, yyleng - 2); return 'STRING';
+\'{QUOTED_STRING_CONTENT}\'
+                                        yytext = yytext.substr(1, yyleng - 2); return 'STRING';
 <token>[^\s\r\n]+                       return 'TOKEN_WORD';
 ":"                                     return ':';
 ";"                                     return ';';
@@ -114,39 +124,54 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
                                         %}
 "<"{ID}">"                              yytext = yytext.substr(1, yyleng - 2); return 'TOKEN_TYPE';
 "{{"[\w\W]*?"}}"                        yytext = yytext.substr(2, yyleng - 4); return 'ACTION';
-"%{"(.|\r|\n)*?"%}"                     yytext = yytext.substr(2, yytext.length - 4); return 'ACTION';
+"%{"(.|\r|\n)*?"%}"                     yytext = yytext.substr(2, yyleng - 4); return 'ACTION';
 "{"                                     yy.depth = 0; this.pushState('action'); return '{';
 "->".*                                  yytext = yytext.substr(2, yyleng - 2).trim(); return 'ARROW_ACTION';
 {HEX_NUMBER}                            yytext = parseInt(yytext, 16); return 'INTEGER';
 {DECIMAL_NUMBER}(?![xX0-9a-fA-F])       yytext = parseInt(yytext, 10); return 'INTEGER';
-.                                       %{
-                                            throw new Error("unsupported input character: " + yytext + " @ " + JSON.stringify(yylloc)); /* b0rk on bad characters */
-                                        %}
-<*><<EOF>>                              return 'EOF';
 
 <action>"/*"(.|\n|\r)*?"*/"             return 'ACTION_BODY';
 <action>"//"[^\r\n]*                    return 'ACTION_BODY';
 <action>"/"[^ /]*?['"{}'][^ ]*?"/"      return 'ACTION_BODY'; // regexp with braces or quotes (and no spaces)
-<action>\"("\\\\"|'\"'|[^"])*\"         return 'ACTION_BODY';
-<action>"'"("\\\\"|"\'"|[^'])*"'"       return 'ACTION_BODY';
+<action>\"{DOUBLEQUOTED_STRING_CONTENT}\"
+                                        return 'ACTION_BODY';
+<action>\'{QUOTED_STRING_CONTENT}\'
+                                        return 'ACTION_BODY';
 <action>[/"'][^{}/"']+                  return 'ACTION_BODY';
 <action>[^{}/"']+                       return 'ACTION_BODY';
 <action>"{"                             yy.depth++; return '{';
 <action>"}"                             if (yy.depth === 0) { this.popState(); } else { yy.depth--; } return '}';
 
 
-// in the trailing CODE block, only accept these `%include` macros when they appear at the start of a line
-// and make sure the rest of lexer regexes account for this one so it'll match that way only:
+// in the trailing CODE block, only accept these `%include` macros when 
+// they appear at the start of a line and make sure the rest of lexer 
+// regexes account for this one so it'll match that way only:
 <code>[^\r\n]*(\r|\n)+                  return 'CODE';
 <code>[^\r\n]+                          return 'CODE';      // the bit of CODE just before EOF...
 
 
 <path>{BR}                              this.popState(); this.unput(yytext);
-<path>"'"[^\r\n]+"'"                    yytext = yytext.substr(1, yyleng - 2); this.popState(); return 'PATH';
-<path>'"'[^\r\n]+'"'                    yytext = yytext.substr(1, yyleng - 2); this.popState(); return 'PATH';
+<path>\"{DOUBLEQUOTED_STRING_CONTENT}\"
+                                        yytext = yytext.substr(1, yyleng - 2); this.popState(); return 'PATH';
+<path>\'{QUOTED_STRING_CONTENT}\'
+                                        yytext = yytext.substr(1, yyleng - 2); this.popState(); return 'PATH';
 <path>{WS}+                             // skip whitespace in the line
 <path>[^\s\r\n]+                        this.popState(); return 'PATH';
 
+<*>.                                    %{
+                                            /* b0rk on bad characters */
+                                            var l0 = Math.max(0, yylloc.last_column - yylloc.first_column);
+                                            var l2 = 3;
+                                            var l1 = Math.min(79 - 4 - l0 - l2, yylloc.first_column, 0);
+                                            throw new Error('unsupported parser input: ', yytext, ' @ ' + this.describeYYLLOC(yylloc) + ' while lexing in ' + this.topState() + ' state:\n', indent(this.showPosition(l1, l2), 4));
+                                        %}
+
+<*><<EOF>>                              return 'EOF';
 
 %%
 
+function indent(s, i) {
+    var a = s.split('\n');
+    var pf = (new Array(i + 1)).join(' ');
+    return pf + a.join('\n' + pf);
+}
