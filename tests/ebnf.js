@@ -21,11 +21,6 @@ function testParse(top, strings) {
         };
         strings = (typeof(strings) === 'string' ? [strings] : strings);
         strings.forEach(function(string) {
-            console.log('testing::', {
-                grammar: grammar.bnf,
-                string: string,
-                output: new Parser(grammar).parse(string),
-            });
             assert.ok(new Parser(grammar).parse(string));
         });
     };
