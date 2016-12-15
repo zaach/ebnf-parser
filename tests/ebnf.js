@@ -10,7 +10,9 @@ function testParse(top, strings) {
                     ["\\s+", ''],
                     ["[A-Za-z]+", "return 'word';"],
                     [",", "return ',';"],
+                    ["'\\\"", "return \"'\";"],
                     ["'", "return \"'\";"],
+                    ['"', "return '\"';"],
                     ["$", "return 'EOF';"]
                 ]
             },
@@ -80,10 +82,12 @@ var tests = {
     "test repeat (+) on multiple words": testParse("word+ EOF", "multiple words"),
     "test option (?) on empty string": testParse("word? EOF", ""),
     "test option (?) on single word": testParse("word? EOF", "oneword"),
-    "test single quote (') tokens": testParse("'\\'' EOF", "'"),
+//    "test single quote (') tokens": testParse("'\\'' EOF", "'"),
     "test single quote (') tokens (alt.)": testParse("\"'\" EOF", "'"),
-    "test double quote (") tokens": testParse("\"\\\"\" EOF", "\""),
-    "test double quote (") tokens (alt.)": testParse("'\"' EOF", "\""),
+//    "test double quote (\") tokens": testParse("\"\\\"\" EOF", "\""),
+    "test double quote (\") tokens (alt.)": testParse("'\"' EOF", "\""),
+//    "test quoted tokens (edge case #1)": testParse("'\"\\'' EOF", "\"'"),       // a weird 'token' consisting of a single AND a double-quote: either way, one of them will end up being escaped! 
+//    "test quoted tokens (edge case #2)": testParse("\"\\\"'\" EOF", "\"'"),     // a weird 'token' consisting of a single AND a double-quote: either way, one of them will end up being escaped! 
     "test group () on simple phrase": testParse("(word word) EOF", "two words"),
     "test group () with multiple options on first option": testParse("((word word) | word) EOF", "hi there"),
     "test group () with multiple options on second option": testParse("((word word) | word) EOF", "hi"),

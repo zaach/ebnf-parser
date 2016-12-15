@@ -16,8 +16,8 @@ DECIMAL_NUMBER                          [1-9][0-9]*
 HEX_NUMBER                              "0"[xX][0-9a-fA-F]+
 BR                                      \r\n|\n|\r
 // quoted string content: support *escaped* quotes inside strings:
-QUOTED_STRING_CONTENT                   (?:\\"'"|(?!"'").)*
-DOUBLEQUOTED_STRING_CONTENT             (?:\\'"'|(?!'"').)*
+QUOTED_STRING_CONTENT                   (?:\\"'"|\\[^']|[^\\'])*
+DOUBLEQUOTED_STRING_CONTENT             (?:\\'"'|\\[^"]|[^\\"])*
 
 
 %%
