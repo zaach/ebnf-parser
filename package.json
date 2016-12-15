@@ -26,9 +26,12 @@
   "engines": {
     "node": ">=4.0"
   },
+  "dependencies": {
+    "lex-parser": "GerHobbelt/lex-parser#master",
+    "xregexp": "GerHobbelt/xregexp#master"
+  },
   "devDependencies": {
     "jison": "GerHobbelt/jison#master",
-    "lex-parser": "GerHobbelt/lex-parser#master",
     "test": ">=0.6.0"
   }
 }
