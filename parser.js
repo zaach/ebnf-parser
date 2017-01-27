@@ -867,7 +867,7 @@ productions_: bp({
   0
 ])
 }),
-performAction: function parser__PerformAction(yytext, yyloc, yystate /* action[1] */, $0, yyvstack, yylstack, options) {
+performAction: function parser__PerformAction(yytext, yyloc, yystate /* action[1] */, $0, yyvstack, yylstack) {
 /* this == yyval */
 var yy = this.yy;
 
@@ -2442,7 +2442,7 @@ parseError: function parseError(str, hash) {
         throw new this.JisonParserError(str, hash);
     }
 },
-parse: function parse(input, options) {
+parse: function parse(input) {
     var self = this,
         stack = new Array(128),         // token stack: stores token which leads to state at the same index (column storage)
         sstack = new Array(128),        // state stack: stores states (column storage)
@@ -2540,11 +2540,11 @@ parse: function parse(input, options) {
 
         if (invoke_post_methods) {
             if (sharedState_yy.post_parse) {
-                rv = sharedState_yy.post_parse.call(this, sharedState_yy, resultValue, options);
+                rv = sharedState_yy.post_parse.call(this, sharedState_yy, resultValue);
                 if (typeof rv !== 'undefined') resultValue = rv;
             }
             if (this.post_parse) {
-                rv = this.post_parse.call(this, sharedState_yy, resultValue, options);
+                rv = this.post_parse.call(this, sharedState_yy, resultValue);
                 if (typeof rv !== 'undefined') resultValue = rv;
             }
         }
@@ -2727,10 +2727,10 @@ parse: function parse(input, options) {
         this.__reentrant_call_depth++;
 
         if (this.pre_parse) {
-            this.pre_parse.call(this, sharedState_yy, options);
+            this.pre_parse.call(this, sharedState_yy);
         }
         if (sharedState_yy.pre_parse) {
-            sharedState_yy.pre_parse.call(this, sharedState_yy, options);
+            sharedState_yy.pre_parse.call(this, sharedState_yy);
         }
 
         newState = sstack[sp - 1];
@@ -2927,7 +2927,7 @@ parse: function parse(input, options) {
                   yyval._$.range = [lstack[lstack_begin].range[0], lstack[lstack_end].range[1]];
                 }
 
-                r = this.performAction.call(yyval, yytext, yyloc, newState, sp - 1, vstack, lstack, options);
+                r = this.performAction.call(yyval, yytext, yyloc, newState, sp - 1, vstack, lstack);
 
                 if (typeof r !== 'undefined') {
                     retval = r;

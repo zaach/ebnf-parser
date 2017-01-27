@@ -1,6 +1,6 @@
 %start spec
 
-%parse-param options
+// %parse-param options
 
 
 /* grammar for parsing jison grammar files */
