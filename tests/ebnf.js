@@ -1,6 +1,6 @@
 var assert = require("assert"),
     ebnf = require("../ebnf-transform");
-var Parser = require('jison').Parser;
+var Parser = require('jison-gho').Parser;
 
 function testParse(top, strings) {
     return function() {

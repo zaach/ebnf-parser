@@ -1,6 +1,6 @@
 var assert = require("assert"),
     bnf = require("../ebnf-parser");
-var Jison = require('jison');
+var Jison = require('jison-gho');
 
 exports["test BNF parser"] = function () {
     var grammar = {

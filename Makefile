@@ -5,6 +5,7 @@ prep: npm-install
 
 npm-install:
 	npm install
+	npm install --only=dev
 
 build:
 	@[ -a  node_modules/.bin/jison ] || echo "### FAILURE: Make sure you have run 'make prep' before as the jison compiler is unavailable! ###"
