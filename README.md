@@ -43,7 +43,7 @@ The parser can parse its own BNF grammar, shown below:
 ```
 %start spec
 
-%parse-param options
+// %parse-param options
 
 
 /* grammar for parsing jison grammar files */
@@ -52,6 +52,7 @@ The parser can parse its own BNF grammar, shown below:
 var fs = require('fs');
 var transform = require('./ebnf-transform').transform;
 var ebnf = false;
+var XRegExp = require('xregexp');       // for helping out the `%options xregexp` in the lexer
 %}
 
 %%
@@ -430,7 +431,7 @@ action_ne
     | include_macro_code
         { $$ = $include_macro_code; }
     | ARROW_ACTION
-        { $$ = '$$ =' + $ARROW_ACTION + ';'; }
+        { $$ = '$$ = ' + $ARROW_ACTION; }
     ;
 
 action

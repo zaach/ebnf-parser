@@ -1,7 +1,7 @@
 
 ASCII_LETTER                            [a-zA-z]
-// \p{Alphabetic} already includes [a-zA-z], hence we don't need to merge 
-// with {UNICODE_LETTER} (though jison has code to optimize if you *did* 
+// \p{Alphabetic} already includes [a-zA-z], hence we don't need to merge
+// with {UNICODE_LETTER} (though jison has code to optimize if you *did*
 // include the `[a-zA-Z]` anyway):
 UNICODE_LETTER                          [\p{Alphabetic}]
 ALPHA                                   [{UNICODE_LETTER}_]
@@ -117,9 +117,14 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
 <INITIAL,ebnf,bnf,code>"%include"
                                         this.pushState('path'); return 'INCLUDE';
 
-"%"{NAME}[^\r\n]*                       %{
+"%"{NAME}([^\r\n]*)                     %{
                                             /* ignore unrecognized decl */
-                                            console.warn('ignoring unsupported parser option: ', yytext, ' while lexing in ', this.topState(), ' state');
+                                            console.warn('EBNF: ignoring unsupported parser option: ', yytext, ' while lexing in ', this.topState(), ' state');
+                                            // this.pushState('options');
+                                            yytext = [
+                                                this.matches[1],            // {NAME}
+                                                this.matches[2].trim()      // optional value/parameters
+                                            ];
                                             return 'UNKNOWN_DECL';
                                         %}
 "<"{ID}">"                              yytext = yytext.substr(1, yyleng - 2); return 'TOKEN_TYPE';
@@ -143,8 +148,8 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
 <action>"}"                             if (yy.depth === 0) { this.popState(); } else { yy.depth--; } return '}';
 
 
-// in the trailing CODE block, only accept these `%include` macros when 
-// they appear at the start of a line and make sure the rest of lexer 
+// in the trailing CODE block, only accept these `%include` macros when
+// they appear at the start of a line and make sure the rest of lexer
 // regexes account for this one so it'll match that way only:
 <code>[^\r\n]*(\r|\n)+                  return 'CODE';
 <code>[^\r\n]+                          return 'CODE';      // the bit of CODE just before EOF...
