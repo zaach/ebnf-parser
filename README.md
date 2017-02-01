@@ -1,5 +1,9 @@
 # ebnf-parser
 
+
+[![build status](https://secure.travis-ci.org/GerHobbelt/ebnf-parser.png)](http://travis-ci.org/GerHobbelt/ebnf-parser)
+
+
 A parser for BNF and EBNF grammars used by jison.
 
 
