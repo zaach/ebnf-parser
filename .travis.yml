@@ -19,5 +19,8 @@ node_js:
 git:
     submodules: false
 
-install:
-  npm install --force
+# Use sed to replace the jison package
+before_install:
+    - sed -i 's/github:GerHobbelt\/jison#master/jison-gho@latest/' package.json
+    - cat package.json
+
