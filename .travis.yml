@@ -9,3 +9,13 @@ node_js:
   - 4.0
   - stable
 
+# http://stackoverflow.com/questions/15674064/github-submodule-access-rights-travis-ci
+# 
+# This can (thankfully) be easily solved by modifying the .gitmodules file on-the-fly on Travis, 
+# so that the SSH URL is replaced with the public URL, before initializing submodules. 
+# To accomplish this, add the following to .travis.yml:
+
+# Handle git submodules yourself
+git:
+    submodules: false
+
