@@ -168,7 +168,7 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
                                             var l0 = Math.max(0, yylloc.last_column - yylloc.first_column);
                                             var l2 = 3;
                                             var l1 = Math.min(79 - 4 - l0 - l2, yylloc.first_column, 0);
-                                            throw new Error('unsupported parser input: ', yytext, ' @ ' + this.describeYYLLOC(yylloc) + ' while lexing in ' + this.topState() + ' state:\n', indent(this.showPosition(l1, l2), 4));
+                                            throw new Error('unsupported parser input: "' + yytext + '" @ ' + this.describeYYLLOC(yylloc) + ' while lexing in ' + this.topState() + ' state:\n' + indent(this.showPosition(l1, l2), 4));
                                         %}
 
 <*><<EOF>>                              return 'EOF';
