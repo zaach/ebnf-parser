@@ -132,6 +132,7 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
 "%{"(.|\r|\n)*?"%}"                     yytext = yytext.substr(2, yyleng - 4); return 'ACTION';
 "{"                                     yy.depth = 0; this.pushState('action'); return '{';
 "->".*                                  yytext = yytext.substr(2, yyleng - 2).trim(); return 'ARROW_ACTION';
+"→".*                                   yytext = yytext.substr(2, yyleng - 2).trim(); return 'ARROW_ACTION';
 {HEX_NUMBER}                            yytext = parseInt(yytext, 16); return 'INTEGER';
 {DECIMAL_NUMBER}(?![xX0-9a-fA-F])       yytext = parseInt(yytext, 10); return 'INTEGER';
 
