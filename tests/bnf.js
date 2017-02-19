@@ -1,8 +1,9 @@
-var assert = require("assert"),
-    bnf = require("../ebnf-parser");
+var assert = require("chai").assert;
+var bnf = require("../ebnf-parser");
 var Jison = require('jison-gho');
 
-exports["test BNF parser"] = function () {
+describe("BNF parser", function () {
+  it("test BNF production", function () {
     var grammar = {
         "lex": {
             "rules": [
@@ -86,5 +87,6 @@ exports["test BNF parser"] = function () {
 
     var result = parser.parse('%start foo %left "+" "-" %right "*" "/" %nonassoc "=" STUFF %left UMINUS %% foo : bar baz blitz { stuff } %prec GEMINI | bar %prec UMINUS | ;\nbar: { things };\nbaz: | foo ;');
     assert.ok(result, "parse bnf production");
-};
+  });
+});
 

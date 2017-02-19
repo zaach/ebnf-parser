@@ -1,6 +1,6 @@
-var assert = require("assert"),
-    bnf = require("../ebnf-parser"),
-    ebnf = require("../ebnf-transform");
+var assert = require("chai").assert;
+var bnf = require("../ebnf-parser");
+var ebnf = require("../ebnf-transform");
 
 function testParse(top, strings) {
     return function() {
@@ -33,6 +33,8 @@ var tests = {
     "test complex expression ( *, ?, () )": testParse("(word (',' word)*)? EOF", ["", "hi", "hi, there"])
 };
 
-for (var test in tests) {
-    exports[test] = tests[test];
-}
+describe("EBNF parser", function () {
+    for (var test in tests) {
+        it(test, tests[test]);
+    }
+});

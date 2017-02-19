@@ -1,5 +1,5 @@
-var assert = require("assert"),
-    ebnf = require("../ebnf-transform");
+var assert = require("chai").assert;
+var ebnf = require("../ebnf-transform");
 var Parser = require('jison-gho').Parser;
 
 function testParse(top, strings) {
@@ -136,6 +136,8 @@ var tests = {
     )
 };
 
-for (var test in tests) {
-    exports[test] = tests[test];
-}
+describe("EBNF", function () {
+    for (var test in tests) {
+        it(test, tests[test]);
+    }
+});
