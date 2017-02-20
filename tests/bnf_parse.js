@@ -124,12 +124,15 @@ describe("BNF parser", function () {
                    %% test: foo bar | baz ; hello: world ;";
     var expected = {
                         lex: {
+                            macros: {},
                             rules: [
                                ["foo", "return 'foo';"],
                                ["bar", "return 'bar';"],
                                ["baz", "return 'baz';"],
                                ["world", "return 'world';"]
-                            ]
+                            ],
+                            startConditions: {},
+                            unknownDecls: []
                         },
                         bnf: {test: ["foo bar", "baz"], hello: ["world"]}
                     };
@@ -142,6 +145,7 @@ describe("BNF parser", function () {
                    %% test: foo bar | baz ; hello: world ;";
     var expected = {
                         lex: {
+                            macros: {},
                             rules: [
                                ["foo\\b", "return 'foo';"],
                                ["bar\\b", "return 'bar';"],
@@ -150,7 +154,9 @@ describe("BNF parser", function () {
                             ],
                             options: {
                                 easy_keyword_rules: true
-                            }
+                            },
+                            startConditions: {},
+                            unknownDecls: []
                         },
                         bnf: {test: ["foo bar", "baz"], hello: ["world"]}
                     };
@@ -231,9 +237,12 @@ describe("BNF parser", function () {
   it("test quote in rule", function () {
     var grammar = "%lex\n%%\n\\' return \"'\"\n/lex\n%% test: foo bar \"'\";";
     var expected = {lex: {
+      macros: {},
       rules: [
         ["'", "return \"'\""]
-      ]
+      ],
+      startConditions: {},
+      unknownDecls: []
     },
     bnf: {test: ["foo bar \"'\""]}};
 
