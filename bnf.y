@@ -107,10 +107,12 @@ option_list
 option
     : NAME[option]
         { $$ = [$option, true]; }
+    | NAME[option] '=' OPTION_STRING_VALUE[value]
+        { $$ = [$option, $value]; }
     | NAME[option] '=' OPTION_VALUE[value]
-        { $$ = [$option, $value]; }
+        { $$ = [$option, parseValue($value)]; }
     | NAME[option] '=' NAME[value]
-        { $$ = [$option, $value]; }
+        { $$ = [$option, parseValue($value)]; }
     ;
 
 parse_params
@@ -459,5 +461,26 @@ function extend(json, grammar) {
         json.actionInclude = grammar.actionInclude;
     }
     return json;
+}
+
+// convert string value to number or boolean value, when possible
+// (and when this is more or less obviously the intent)
+// otherwise produce the string itself as value.
+function parseValue(v) {
+    if (v === 'false') {
+        return false;
+    }
+    if (v === 'true') {
+        return true;
+    }
+    // http://stackoverflow.com/questions/175739/is-there-a-built-in-way-in-javascript-to-check-if-a-string-is-a-valid-number
+    // Note that the `v` check ensures that we do not convert `undefined`, `null` and `''` (empty string!)
+    if (v && !isNaN(v)) {
+        var rv = +v;
+        if (isFinite(rv)) {
+            return rv;
+        }
+    }
+    return v;
 }
 

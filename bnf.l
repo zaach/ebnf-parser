@@ -65,9 +65,9 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
 <options>{NAME}                         return 'NAME';
 <options>"="                            return '=';
 <options>\"{DOUBLEQUOTED_STRING_CONTENT}\"
-                                        yytext = yytext.substr(1, yyleng - 2); return 'OPTION_VALUE';
+                                        yytext = yytext.substr(1, yyleng - 2); return 'OPTION_STRING_VALUE';   // value is always a string type
 <options>\'{QUOTED_STRING_CONTENT}\'
-                                        yytext = yytext.substr(1, yyleng - 2); return 'OPTION_VALUE';
+                                        yytext = yytext.substr(1, yyleng - 2); return 'OPTION_STRING_VALUE';   // value is always a string type
 
 // Comments should be gobbled and discarded anywhere *except* the code/action blocks:
 <INITIAL,ebnf,bnf,token,path,options>"//"[^\r\n]*
@@ -76,7 +76,8 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
                                         /* skip multi-line comment */
 
 <options>[^\s\r\n]+                     return 'OPTION_VALUE';
-<options>{BR}+                          this.popState(); return 'OPTIONS_END';
+<options>{BR}{WS}+(?=\S)                /* skip leading whitespace on the next line of input, when followed by more options */
+<options>{BR}                           this.popState(); return 'OPTIONS_END';
 <options>{WS}+                          /* skip whitespace */
 
 {WS}+                                   /* skip whitespace */

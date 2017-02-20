@@ -276,17 +276,39 @@ describe("BNF parser", function () {
   });
 
   it("test options with values", function () {
-    var grammar = '%options ping=666 bla=blub bool1 s1="s1value" s2=\'s2value\'\n%%hello: world;%%';
+    var grammar = '%options ping=666 bla=blub bool1 s1="s1value" s2=\'s2value\' s3=false s4="false"\n%%hello: world;%%';
     var expected = {
         bnf: {
             hello: ["world"]
         }, 
         options: {
-            ping: "666",
+            ping: 666,
             bla: "blub",
             bool1: true,
             s1: "s1value",
-            s2: "s2value"
+            s2: "s2value",
+            s3: false,
+            s4: "false"
+        }
+    };
+
+    assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
+  });
+
+  it("test options spread across multiple lines", function () {
+    var grammar = '%options ping=666\n  bla=blub\n  bool1\n  s1="s1value"\n  s2=\'s2value\'\n  s3=false\n  s4="false"\n%%hello: world;%%';
+    var expected = {
+        bnf: {
+            hello: ["world"]
+        }, 
+        options: {
+            ping: 666,
+            bla: "blub",
+            bool1: true,
+            s1: "s1value",
+            s2: "s2value",
+            s3: false,
+            s4: "false"
         }
     };
 
