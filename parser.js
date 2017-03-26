@@ -556,7 +556,6 @@ symbols_: {
   "declaration_list": 48,
   "error": 2,
   "expression": 74,
-  "expression_suffix": 73,
   "extra_parser_module_code": 83,
   "full_token_definitions": 60,
   "grammar": 66,
@@ -586,6 +585,7 @@ symbols_: {
   "production_list": 67,
   "spec": 45,
   "suffix": 75,
+  "suffixed_expression": 73,
   "symbol": 77,
   "token_description": 64,
   "token_list": 59,
@@ -1174,7 +1174,7 @@ case 59:
     break;
 
 case 60:
-    /*! Production::    handle : handle expression_suffix */
+    /*! Production::    handle : handle suffixed_expression */
     this.$ = yyvstack[yysp - 1];
     this.$.push(yyvstack[yysp]);
     break;
@@ -1196,12 +1196,12 @@ case 63:
     break;
 
 case 64:
-    /*! Production::    expression_suffix : expression suffix ALIAS */
+    /*! Production::    suffixed_expression : expression suffix ALIAS */
     this.$ = yyvstack[yysp - 2] + yyvstack[yysp - 1] + "[" + yyvstack[yysp] + "]";
     break;
 
 case 65:
-    /*! Production::    expression_suffix : expression suffix */
+    /*! Production::    suffixed_expression : expression suffix */
 case 89:
     /*! Production::    action_comments_body : action_comments_body ACTION_BODY */
 case 95:
@@ -3989,12 +3989,12 @@ break;
 case 17 : 
 /*! Conditions:: options */ 
 /*! Rule::       "{DOUBLEQUOTED_STRING_CONTENT}" */ 
- yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); return 28;   // value is always a string type 
+ yy_.yytext = this.matches[1]; return 28;   // value is always a string type 
 break;
 case 18 : 
 /*! Conditions:: options */ 
 /*! Rule::       '{QUOTED_STRING_CONTENT}' */ 
- yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); return 28;   // value is always a string type 
+ yy_.yytext = this.matches[1]; return 28;   // value is always a string type 
 break;
 case 19 : 
 /*! Conditions:: INITIAL ebnf bnf token path options */ 
@@ -4034,17 +4034,17 @@ break;
 case 27 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       \[{ID}\] */ 
- yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); return 38; 
+ yy_.yytext = this.matches[1]; return 38; 
 break;
 case 31 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       "{DOUBLEQUOTED_STRING_CONTENT}" */ 
- yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); return 24; 
+ yy_.yytext = this.matches[1]; return 24; 
 break;
 case 32 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       '{QUOTED_STRING_CONTENT}' */ 
- yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); return 24; 
+ yy_.yytext = this.matches[1]; return 24; 
 break;
 case 37 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
@@ -4102,7 +4102,7 @@ break;
 case 54 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       <{ID}> */ 
- yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); return 35; 
+ yy_.yytext = this.matches[1]; return 35; 
 break;
 case 55 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
@@ -4111,7 +4111,7 @@ case 55 :
 break;
 case 56 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
-/*! Rule::       %\{(.|\r|\n)*?%\} */ 
+/*! Rule::       %\{(?:.|\r|\n)*?%\} */ 
  yy_.yytext = yy_.yytext.substr(2, yy_.yyleng - 4); return 15; 
 break;
 case 57 : 
@@ -4127,7 +4127,7 @@ break;
 case 59 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
 /*! Rule::       →.* */ 
- yy_.yytext = yy_.yytext.substr(2, yy_.yyleng - 2).trim(); return 40; 
+ yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 1).trim(); return 40; 
 break;
 case 60 : 
 /*! Conditions:: bnf ebnf token INITIAL */ 
@@ -4167,12 +4167,12 @@ break;
 case 74 : 
 /*! Conditions:: path */ 
 /*! Rule::       "{DOUBLEQUOTED_STRING_CONTENT}" */ 
- yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); this.popState(); return 43; 
+ yy_.yytext = this.matches[1]; this.popState(); return 43; 
 break;
 case 75 : 
 /*! Conditions:: path */ 
 /*! Rule::       '{QUOTED_STRING_CONTENT}' */ 
- yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); this.popState(); return 43; 
+ yy_.yytext = this.matches[1]; this.popState(); return 43; 
 break;
 case 76 : 
 /*! Conditions:: path */ 
@@ -4373,7 +4373,7 @@ new XRegExp("^(?:([\\p{Alphabetic}_](?:[\\p{Alphabetic}\\p{Number}_])*))", ""),
 new XRegExp("^(?:%([\\p{Alphabetic}_](?:[\\p{Alphabetic}\\p{Number}\\-_]*(?:[\\p{Alphabetic}\\p{Number}_]))?)([^\\n\\r]*))", ""),
 new XRegExp("^(?:<([\\p{Alphabetic}_](?:[\\p{Alphabetic}\\p{Number}_])*)>)", ""),
 /^(?:\{\{[\w\W]*?\}\})/,
-/^(?:%\{(.|\r|\n)*?%\})/,
+/^(?:%\{(?:.|\r|\n)*?%\})/,
 /^(?:\{)/,
 /^(?:->.*)/,
 /^(?:→.*)/,

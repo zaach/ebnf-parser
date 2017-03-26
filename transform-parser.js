@@ -518,12 +518,12 @@ symbols_: {
   "SYMBOL": 11,
   "error": 2,
   "expression": 17,
-  "expression_suffixed": 16,
   "handle": 14,
   "handle_list": 13,
   "production": 12,
   "rule": 15,
   "suffix": 18,
+  "suffixed_expression": 16,
   "|": 3
 },
 terminals_: {
@@ -669,7 +669,7 @@ case 1:
 case 2:
     /*! Production::    handle_list : handle */
 case 7:
-    /*! Production::    rule : expression_suffixed */
+    /*! Production::    rule : suffixed_expression */
     this.$ = [yyvstack[yysp]];
     break;
 
@@ -691,17 +691,17 @@ case 6:
     break;
 
 case 8:
-    /*! Production::    rule : rule expression_suffixed */
+    /*! Production::    rule : rule suffixed_expression */
     yyvstack[yysp - 1].push(yyvstack[yysp]);
     break;
 
 case 9:
-    /*! Production::    expression_suffixed : expression suffix ALIAS */
+    /*! Production::    suffixed_expression : expression suffix ALIAS */
     this.$ = ['xalias', yyvstack[yysp - 1], yyvstack[yysp - 2], yyvstack[yysp]];
     break;
 
 case 10:
-    /*! Production::    expression_suffixed : expression suffix */
+    /*! Production::    suffixed_expression : expression suffix */
     if (yyvstack[yysp]) {
       this.$ = [yyvstack[yysp], yyvstack[yysp - 1]];
     } else {
@@ -2308,7 +2308,7 @@ break;
 case 4 : 
 /*! Conditions:: INITIAL */ 
 /*! Rule::       \[{ID}\] */ 
- yy_.yytext = yy_.yytext.substr(1, yy_.yyleng - 2); return 10; 
+ yy_.yytext = this.matches[1]; return 10; 
 break;
 default:
   return this.simpleCaseActionClusters[$avoiding_name_collisions];
