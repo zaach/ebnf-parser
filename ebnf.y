@@ -101,7 +101,7 @@ handle_list
   ;
 
 handle
-  :
+  : %epsilon
     { $$ = []; }
   | EPSILON                       
     // %epsilon may only be used to signal this is an empty rule alt; 
@@ -113,13 +113,13 @@ handle
   ;
 
 rule
-  : expression_suffixed
-    { $$ = [$expression_suffixed]; }
-  | rule expression_suffixed
-    { $rule.push($expression_suffixed); }
+  : suffixed_expression
+    { $$ = [$suffixed_expression]; }
+  | rule suffixed_expression
+    { $rule.push($suffixed_expression); }
   ;
 
-expression_suffixed
+suffixed_expression
   : expression suffix ALIAS
     { $$ = ['xalias', $suffix, $expression, $ALIAS]; }
   | expression suffix
@@ -140,7 +140,7 @@ expression
   ;
 
 suffix
-  :
+  : %epsilon
   | '*'
   | '?'
   | '+'

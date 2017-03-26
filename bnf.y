@@ -294,10 +294,10 @@ handle_action
     ;
 
 handle
-    : handle expression_suffix
+    : handle suffixed_expression
         {
             $$ = $handle;
-            $$.push($expression_suffix);
+            $$.push($suffixed_expression);
         }
     | %epsilon
         {
@@ -317,7 +317,7 @@ handle_sublist
         }
     ;
 
-expression_suffix
+suffixed_expression
     : expression suffix ALIAS
         {
             $$ = $expression + $suffix + "[" + $ALIAS + "]";
