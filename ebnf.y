@@ -1,5 +1,11 @@
 /* EBNF grammar spec */
 
+
+%{
+var XRegExp = require('xregexp');       // for helping out the `%options xregexp` in the lexer
+%}
+
+
 %lex
 
 
@@ -25,6 +31,15 @@ WS                                      [^\S\r\n]
 // Quoted string content: support *escaped* quotes inside strings:
 QUOTED_STRING_CONTENT                   (?:\\\'|\\[^\']|[^\\\'])*
 DOUBLEQUOTED_STRING_CONTENT             (?:\\\"|\\[^\"]|[^\\\"])*
+
+
+
+
+
+%options easy_keyword_rules
+%options ranges
+%options xregexp
+
 
 
 %%
