@@ -65,9 +65,9 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
 <options>{NAME}                         return 'NAME';
 <options>"="                            return '=';
 <options>\"{DOUBLEQUOTED_STRING_CONTENT}\"
-                                        yytext = yytext.substr(1, yyleng - 2); return 'OPTION_STRING_VALUE';   // value is always a string type
+                                        yytext = this.matches[1]; return 'OPTION_STRING_VALUE';   // value is always a string type
 <options>\'{QUOTED_STRING_CONTENT}\'
-                                        yytext = yytext.substr(1, yyleng - 2); return 'OPTION_STRING_VALUE';   // value is always a string type
+                                        yytext = this.matches[1]; return 'OPTION_STRING_VALUE';   // value is always a string type
 
 // Comments should be gobbled and discarded anywhere *except* the code/action blocks:
 <INITIAL,ebnf,bnf,token,path,options>"//"[^\r\n]*
@@ -83,14 +83,14 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
 {WS}+                                   /* skip whitespace */
 {BR}+                                   /* skip newlines */
 
-"["{ID}"]"                              yytext = yytext.substr(1, yyleng - 2); return 'ALIAS';
+"["{ID}"]"                              yytext = this.matches[1]; return 'ALIAS';
 {ID}                                    return 'ID';
 "$end"                                  return 'ID';
 "$eof"                                  return 'ID';
 \"{DOUBLEQUOTED_STRING_CONTENT}\"
-                                        yytext = yytext.substr(1, yyleng - 2); return 'STRING';
+                                        yytext = this.matches[1]; return 'STRING';
 \'{QUOTED_STRING_CONTENT}\'
-                                        yytext = yytext.substr(1, yyleng - 2); return 'STRING';
+                                        yytext = this.matches[1]; return 'STRING';
 <token>[^\s\r\n]+                       return 'TOKEN_WORD';
 ":"                                     return ':';
 ";"                                     return ';';
@@ -128,7 +128,7 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
                                             ];
                                             return 'UNKNOWN_DECL';
                                         %}
-"<"{ID}">"                              yytext = yytext.substr(1, yyleng - 2); return 'TOKEN_TYPE';
+"<"{ID}">"                              yytext = this.matches[1]; return 'TOKEN_TYPE';
 "{{"[\w\W]*?"}}"                        yytext = yytext.substr(2, yyleng - 4); return 'ACTION';
 "%{"(.|\r|\n)*?"%}"                     yytext = yytext.substr(2, yyleng - 4); return 'ACTION';
 "{"                                     yy.depth = 0; this.pushState('action'); return '{';
@@ -159,9 +159,9 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
 
 <path>{BR}                              this.popState(); this.unput(yytext);
 <path>\"{DOUBLEQUOTED_STRING_CONTENT}\"
-                                        yytext = yytext.substr(1, yyleng - 2); this.popState(); return 'PATH';
+                                        yytext = this.matches[1]; this.popState(); return 'PATH';
 <path>\'{QUOTED_STRING_CONTENT}\'
-                                        yytext = yytext.substr(1, yyleng - 2); this.popState(); return 'PATH';
+                                        yytext = this.matches[1]; this.popState(); return 'PATH';
 <path>{WS}+                             // skip whitespace in the line
 <path>[^\s\r\n]+                        this.popState(); return 'PATH';
 

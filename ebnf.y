@@ -48,7 +48,7 @@ DOUBLEQUOTED_STRING_CONTENT             (?:\\\"|\\[^\"]|[^\\\"])*
 {ID}                      return 'SYMBOL';
 "$end"                    return 'SYMBOL';
 "$eof"                    return 'SYMBOL';
-"["{ID}"]"                yytext = yytext.substr(1, yyleng - 2); return 'ALIAS';
+"["{ID}"]"                yytext = this.matches[1]; return 'ALIAS';
 
 // Support bison's `%empty` (and our own alias `%epsilon`) to identify an empty rule alt:
 "%empty"                  return 'EPSILON';
