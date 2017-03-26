@@ -130,7 +130,7 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
                                         %}
 "<"{ID}">"                              yytext = this.matches[1]; return 'TOKEN_TYPE';
 "{{"[\w\W]*?"}}"                        yytext = yytext.substr(2, yyleng - 4); return 'ACTION';
-"%{"(.|\r|\n)*?"%}"                     yytext = yytext.substr(2, yyleng - 4); return 'ACTION';
+"%{"(?:.|\r|\n)*?"%}"                   yytext = yytext.substr(2, yyleng - 4); return 'ACTION';
 "{"                                     yy.depth = 0; this.pushState('action'); return '{';
 "->".*                                  yytext = yytext.substr(2, yyleng - 2).trim(); return 'ARROW_ACTION';
 "→".*                                   yytext = yytext.substr(2, yyleng - 2).trim(); return 'ARROW_ACTION';
