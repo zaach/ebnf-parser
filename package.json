@@ -21,7 +21,7 @@
   "license": "MIT",
   "devDependencies": {
     "jison": "git://github.com/zaach/jison.git#ef2647",
-    "lex-parser": "0.1.0",
+    "lex-parser": "0.1.4",
     "test": "*"
   }
 }
