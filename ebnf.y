@@ -10,8 +10,8 @@ var XRegExp = require('xregexp');       // for helping out the `%options xregexp
 
 
 ASCII_LETTER                            [a-zA-z]
-// \p{Alphabetic} already includes [a-zA-z], hence we don't need to merge 
-// with {UNICODE_LETTER} (though jison has code to optimize if you *did* 
+// \p{Alphabetic} already includes [a-zA-z], hence we don't need to merge
+// with {UNICODE_LETTER} (though jison has code to optimize if you *did*
 // include the `[a-zA-Z]` anyway):
 UNICODE_LETTER                          [\p{Alphabetic}]
 ALPHA                                   [{UNICODE_LETTER}_]
@@ -103,9 +103,9 @@ handle_list
 handle
   : %epsilon
     { $$ = []; }
-  | EPSILON                       
-    // %epsilon may only be used to signal this is an empty rule alt; 
-    // hence it can only occur by itself 
+  | EPSILON
+    // %epsilon may only be used to signal this is an empty rule alt;
+    // hence it can only occur by itself
     // (with an optional action block, but no alias what-so-ever).
     { $$ = []; }
   | rule

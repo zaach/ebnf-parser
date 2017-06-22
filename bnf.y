@@ -279,8 +279,8 @@ handle_action
             }
         }
     | EPSILON action
-        // %epsilon may only be used to signal this is an empty rule alt; 
-        // hence it can only occur by itself 
+        // %epsilon may only be used to signal this is an empty rule alt;
+        // hence it can only occur by itself
         // (with an optional action block, but no alias what-so-ever).
         {
             $$ = [''];
