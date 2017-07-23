@@ -241,12 +241,14 @@ var EBNF = (function () {
                             alias_cnt[s]++;
                             if (!dna) {
                                 good_aliases[s + alias_cnt[s]] = i + 1;
+                                alias_cnt[s + alias_cnt[s]] = 1;
                             }
                         } else {
                             good_aliases[s] = i + 1;
                             alias_cnt[s] = 1;
                             if (!dna) {
                                 good_aliases[s + alias_cnt[s]] = i + 1;
+                                alias_cnt[s + alias_cnt[s]] = 1;
                             }
                         }
                     };
@@ -319,6 +321,15 @@ console.warn('named_spot: ', {
                             throw new Error('The action block references the named alias "' + n + '" ' +
                                             'which is not available in production "' + handle + '"; ' +
                                             'it probably got removed by the EBNF rule rewrite process.\n' +
+                                            'Be reminded that you cannot reference sub-elements within EBNF */+/? groups, ' +
+                                            'only the outer-most EBNF group alias will remain available at all times ' +
+                                            'due to the EBNF-to-BNF rewrite process.');
+                        }
+
+                        if (alias_cnt[n] !== 1) {
+                            throw new Error('The action block references the ambiguous named alias or term reference "' + n + '" ' +
+                                            'which is mentioned ' + alias_cnt[n] + ' times in production "' + handle + '", implicit and explicit aliases included.\n' +
+                                            'You should either provide unambiguous = uniquely named aliases for these terms or use numeric index references (e.g. `$3`) as a stop-gap in your action code.\n' +
                                             'Be reminded that you cannot reference sub-elements within EBNF */+/? groups, ' +
                                             'only the outer-most EBNF group alias will remain available at all times ' +
                                             'due to the EBNF-to-BNF rewrite process.');
