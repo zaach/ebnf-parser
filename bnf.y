@@ -23,6 +23,14 @@ spec
             }
             return extend($$, $grammar);
         }
+    | declaration_list '%%' grammar error EOF
+        {
+            yyerror("Maybe you did not correctly separate trailing code from the grammar rule set with a '%%' marker on an otherwise empty line?");
+        }
+    | declaration_list error EOF
+        {
+            yyerror("Maybe you did not correctly separate the parse 'header section' (token definitions, options, lexer spec, etc.) from the grammar rule set with a '%%' on an otherwise empty line?");
+        }
     ;
 
 optional_end_block
@@ -78,8 +86,20 @@ declaration
         { $$ = {unknownDecl: $UNKNOWN_DECL}; }
     | IMPORT import_name import_path
         { $$ = {imports: {name: $import_name, path: $import_path}}; }
+    | IMPORT import_name error
+        {
+            yyerror("You did not specify a legal file path for the '%import' initialization code statement, which must have the format: '%import qualifier_name file_path'.");
+        }
+    | IMPORT error import_path
+        {
+            yyerror("Each '%import'-ed initialization code section must be qualified by a name, e.g. 'required' before the import path itself: '%import qualifier_name file_path'.");
+        }
     | INIT_CODE import_name action_ne
         { $$ = {initCode: {qualifier: $import_name, include: $action_ne}}; }
+    | INIT_CODE error action_ne
+        {
+            yyerror("Each '%code' initialization code section must be qualified by a name, e.g. 'required' before the action code itself: '%code qualifier_name {action code}'.");
+        }
     ;
 
 import_name
@@ -272,6 +292,9 @@ handle_action
                 $$.push($action);
             }
             if ($prec) {
+                if ($handle.length === 0) {
+                    yyerror('You cannot specify a precedence override for an epsilon (a.k.a. empty) rule!');
+                }
                 $$.push($prec);
             }
             if ($$.length === 1) {
@@ -281,7 +304,7 @@ handle_action
     | EPSILON action
         // %epsilon may only be used to signal this is an empty rule alt;
         // hence it can only occur by itself
-        // (with an optional action block, but no alias what-so-ever).
+        // (with an optional action block, but no alias what-so-ever nor any precedence override).
         {
             $$ = [''];
             if ($action) {
@@ -349,6 +372,12 @@ expression
         {
             $$ = '(' + $handle_sublist.join(' | ') + ')';
         }
+    | '(' handle_sublist error
+        {
+            var l = $handle_sublist;
+            var ab = l.slice(0, 10).join(' | ');
+            yyerror("Seems you did not correctly bracket a grammar rule sublist in '( ... )' brackets. Offending handle sublist:\n" + ab);
+        }
     ;
 
 suffix
@@ -385,6 +414,12 @@ id
 action_ne
     : '{' action_body '}'
         { $$ = $action_body; }
+    | '{' action_body error
+        {
+            var l = $action_body.split('\n');
+            var ab = l.slice(0, 10).join('\n');
+            yyerror("Seems you did not correctly bracket a parser rule action block in curly braces: '{ ... }'. Offending action body:\n" + ab);
+        }
     | ACTION
         { $$ = $ACTION; }
     | include_macro_code
@@ -409,6 +444,12 @@ action_body
         { $$ = $1 + $2 + $3 + $4 + $5; }
     | action_body '{' action_body '}'
         { $$ = $1 + $2 + $3 + $4; }
+    | action_body '{' action_body error
+        {
+            var l = $action_body2.split('\n');
+            var ab = l.slice(0, 10).join('\n');
+            yyerror("Seems you did not correctly match curly braces '{ ... }' in a parser rule action block. Offending action body part:\n" + ab);
+        }
     ;
 
 action_comments_body
@@ -435,7 +476,7 @@ include_macro_code
         }
     | INCLUDE error
         {
-            console.error("%include MUST be followed by a valid file path");
+            yyerror("%include MUST be followed by a valid file path");
         }
     ;
 
