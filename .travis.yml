@@ -1,26 +1,11 @@
-sudo: false
 language: node_js
+sudo: false
+
 node_js:
+  - 8
+  - 7
   - 6
-  - 6.0
   - 5
-  - 5.0
   - 4
-  - 4.0
-  - stable
-
-# http://stackoverflow.com/questions/15674064/github-submodule-access-rights-travis-ci
-# 
-# This can (thankfully) be easily solved by modifying the .gitmodules file on-the-fly on Travis, 
-# so that the SSH URL is replaced with the public URL, before initializing submodules. 
-# To accomplish this, add the following to .travis.yml:
-
-# Handle git submodules yourself
-git:
-    submodules: false
-
-# Use sed to replace the jison package
-before_install:
-    - sed -i 's/github:GerHobbelt\/jison#master/latest/' package.json
-    - cat package.json
+  - node
 
