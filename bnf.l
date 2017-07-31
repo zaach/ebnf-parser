@@ -168,9 +168,13 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
 <*>.                                    %{
                                             /* b0rk on bad characters */
                                             var l0 = Math.max(0, yylloc.last_column - yylloc.first_column);
-                                            var l2 = 3;
+                                            var l2 = 39;
                                             var l1 = Math.min(79 - 4 - l0 - l2, yylloc.first_column, 0);
-                                            throw new Error('unsupported parser input: "' + yytext + '" @ ' + this.describeYYLLOC(yylloc) + ' while lexing in ' + this.topState() + ' state:\n' + indent(this.showPosition(l1, l2), 4));
+                                            var pos_str = this.showPosition(l1, l2);
+                                            if (pos_str && pos_str[0] !== '\n') {
+                                                pos_str = '\n\n       Offending input:\n' + indent(pos_str, 4);
+                                            }
+                                            yyerror('unsupported parser input: ' + dquote(yytext) + ' @ ' + this.describeYYLLOC(yylloc) + ' while lexing in ' + dquote(this.topState()) + ' state.' + pos_str);
                                         %}
 
 <*><<EOF>>                              return 'EOF';
@@ -181,4 +185,21 @@ function indent(s, i) {
     var a = s.split('\n');
     var pf = (new Array(i + 1)).join(' ');
     return pf + a.join('\n' + pf);
+}
+
+// properly quote and escape the given input string
+function dquote(s) {
+    var sq = (s.indexOf('\'') >= 0);
+    var dq = (s.indexOf('"') >= 0);
+    if (sq && dq) {
+        s = s.replace(/"/g, '\\"');
+        dq = false;
+    }
+    if (dq) {
+        s = '\'' + s + '\'';
+    }
+    else {
+        s = '"' + s + '"';
+    }
+    return s;
 }
