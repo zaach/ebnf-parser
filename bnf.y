@@ -35,6 +35,7 @@ spec
 
 optional_end_block
     : %empty
+        { $$ = undefined; }
     | '%%' extra_parser_module_code
         { $$ = $extra_parser_module_code; }
     ;
@@ -104,12 +105,16 @@ declaration
 
 import_name
     : ID
+        { $$ = $ID; }
     | STRING
+        { $$ = $STRING; }
     ;
 
 import_path
     : ID
+        { $$ = $ID; }
     | STRING
+        { $$ = $STRING; }
     ;
 
 options
@@ -197,7 +202,8 @@ one_full_token
         {
             $$ = {
                 id: $id,
-                value: $token_value
+                value: $token_value,
+                description: $token_description
             };
         }
     | id token_description
@@ -211,8 +217,7 @@ one_full_token
         {
             $$ = {
                 id: $id,
-                value: $token_value,
-                description: $token_description
+                value: $token_value
             };
         }
     ;
@@ -221,14 +226,17 @@ optional_token_type
     : %epsilon
         { $$ = false; }
     | TOKEN_TYPE
+        { $$ = $TOKEN_TYPE; }
     ;
 
 token_value
     : INTEGER
+        { $$ = $INTEGER; }
     ;
 
 token_description
     : STRING
+        { $$ = $STRING; }
     ;
 
 id_list
@@ -356,17 +364,17 @@ expression
         {
             $$ = $ID;
         }
+    | EOF_ID
+        {
+            $$ = '$end';
+        }
     | STRING
         {
             // Re-encode the string *anyway* as it will
             // be made part of the rule rhs a.k.a. production (type: *string*) again and we want
             // to be able to handle all tokens, including *significant space*
             // encoded as literal tokens in a grammar such as this: `rule: A ' ' B`.
-            if ($STRING.indexOf("'") >= 0) {
-                $$ = '"' + $STRING + '"';
-            } else {
-                $$ = "'" + $STRING + "'";
-            }
+            $$ = dquote($STRING);
         }
     | '(' handle_sublist ')'
         {
@@ -384,8 +392,11 @@ suffix
     : %epsilon
         { $$ = ''; }
     | '*'
+        { $$ = $1; }
     | '?'
+        { $$ = $1; }
     | '+'
+        { $$ = $1; }
     ;
 
 prec
@@ -495,6 +506,23 @@ optional_module_code_chunk
     ;
 
 %%
+
+// properly quote and escape the given input string
+function dquote(s) {
+    var sq = (s.indexOf('\'') >= 0);
+    var dq = (s.indexOf('"') >= 0);
+    if (sq && dq) {
+        s = s.replace(/"/g, '\\"');
+        dq = false;
+    }
+    if (dq) {
+        s = '\'' + s + '\'';
+    }
+    else {
+        s = '"' + s + '"';
+    }
+    return s;
+}
 
 // transform ebnf to bnf if necessary
 function extend(json, grammar) {
