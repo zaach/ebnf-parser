@@ -719,7 +719,8 @@ case 6:
 
 case 3:
     /*! Production::    handle_list : handle_list "|" handle */
-    yyvstack[yysp - 2].push(yyvstack[yysp]);
+    yyvstack[yysp - 2].push(yyvstack[yysp]); 
+    this.$ = yyvstack[yysp - 2];
     break;
 
 case 4:
@@ -740,7 +741,8 @@ case 15:
 
 case 7:
     /*! Production::    rule : rule suffixed_expression */
-    yyvstack[yysp - 1].push(yyvstack[yysp]);
+    yyvstack[yysp - 1].push(yyvstack[yysp]); 
+    this.$ = yyvstack[yysp - 1];
     break;
 
 case 8:

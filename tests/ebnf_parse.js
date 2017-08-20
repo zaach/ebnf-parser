@@ -30,7 +30,7 @@ var tests = {
     "test group () on simple phrase": testParse("(word word) EOF", "two words"),
     "test group () with multiple options on first option": testParse("((word word) | word) EOF", "hi there"),
     "test group () with multiple options on second option": testParse("((word word) | word) EOF", "hi"),
-    "test complex expression ( *, ?, () )": testParse("(word (',' word)*)? EOF", ["", "hi", "hi, there"])
+    "test complex expression ( *, ?, () )": testParse("(word (\",\" word)*)? EOF", ["", "hi", "hi, there"])
 };
 
 describe("EBNF parser", function () {
