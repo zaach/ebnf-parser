@@ -90,7 +90,10 @@ handle_list
   : handle
     { $$ = [$handle]; }
   | handle_list '|' handle
-    { $handle_list.push($handle); }
+    { 
+      $handle_list.push($handle); 
+      $$ = $handle_list;
+    }
   ;
 
 handle
@@ -104,7 +107,10 @@ rule
   : suffixed_expression
     { $$ = [$suffixed_expression]; }
   | rule suffixed_expression
-    { $rule.push($suffixed_expression); }
+    { 
+      $rule.push($suffixed_expression); 
+      $$ = $rule;
+    }
   ;
 
 suffixed_expression
