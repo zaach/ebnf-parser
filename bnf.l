@@ -85,8 +85,12 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
 
 "["{ID}"]"                              yytext = this.matches[1]; return 'ALIAS';
 {ID}                                    return 'ID';
-"$end"                                  return 'ID';
-"$eof"                                  return 'ID';
+"$end"                                  return 'EOF_ID';
+// `$eof` and `EOF` are synonyms of `$end` ('$eof' is for bison compatibility);
+// this is the only place where two symbol names may map to a single symbol ID number
+// and we do not want `$eof`/`EOF` to show up in the symbol tables of generated parsers
+// as we use `$end` for that one!
+"$eof"                                  return 'EOF_ID';
 \"{DOUBLEQUOTED_STRING_CONTENT}\"
                                         yytext = this.matches[1]; return 'STRING';
 \'{QUOTED_STRING_CONTENT}\'
