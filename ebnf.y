@@ -6,6 +6,7 @@ var XRegExp = require('xregexp');       // for helping out the `%options xregexp
 %}
 
 
+
 %lex
 
 
@@ -47,17 +48,7 @@ DOUBLEQUOTED_STRING_CONTENT             (?:\\\"|\\[^\"]|[^\\\"])*
 \s+                       /* skip whitespace */
 {ID}                      return 'SYMBOL';
 "$end"                    return 'SYMBOL';
-"$eof"                    return 'SYMBOL';
 "["{ID}"]"                yytext = this.matches[1]; return 'ALIAS';
-
-// Support bison's `%empty` (and our own alias `%epsilon`) to identify an empty rule alt:
-"%empty"                  return 'EPSILON';
-"%epsilon"                return 'EPSILON';
-// See also https://en.wikipedia.org/wiki/Epsilon#Glyph_variants
-"\u0190"                  return 'EPSILON';
-"\u025B"                  return 'EPSILON';
-"\u03B5"                  return 'EPSILON';
-"\u03F5"                  return 'EPSILON';
 
 // Stringified tokens are always `'`-surrounded by the bnf.y grammar unless the token
 // itself contain an `'`.
@@ -84,6 +75,8 @@ DOUBLEQUOTED_STRING_CONTENT             (?:\\\"|\\[^\"]|[^\\\"])*
 
 /lex
 
+
+
 %start production
 
 %%
@@ -102,11 +95,6 @@ handle_list
 
 handle
   : %epsilon
-    { $$ = []; }
-  | EPSILON
-    // %epsilon may only be used to signal this is an empty rule alt;
-    // hence it can only occur by itself
-    // (with an optional action block, but no alias what-so-ever).
     { $$ = []; }
   | rule
     { $$ = $rule; }
@@ -141,7 +129,11 @@ expression
 
 suffix
   : %epsilon
+    { $$ = undefined; }
   | '*'
+    { $$ = $1; }
   | '?'
+    { $$ = $1; }
   | '+'
+    { $$ = $1; }
   ;
