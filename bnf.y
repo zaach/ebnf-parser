@@ -526,3 +526,11 @@ function parseValue(v) {
     return v;
 }
 
+parser.warn = function p_warn() {
+    console.warn.apply(console, arguments);
+};
+
+parser.log = function p_log() {
+    console.log.apply(console, arguments);
+};
+
