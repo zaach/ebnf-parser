@@ -31,8 +31,8 @@
     "xregexp": "github:GerHobbelt/xregexp#master"
   },
   "devDependencies": {
-    "chai": "4.1.0",
-    "jison-gho": "github:GerHobbelt/jison#master",
+    "chai": "4.1.1",
+    "jison-gho": "0.4.18-184",
     "mocha": "3.5.0"
   }
 }

@@ -1,4 +1,16 @@
 
+ifeq ($(wildcard ../../lib/cli.js),) 
+	ifeq ($(wildcard ./node_modules/.bin/jison),) 
+		echo "### FAILURE: Make sure you have run 'make prep' before as the jison compiler is unavailable! ###"
+	else
+		JISON = sh node_modules/.bin/jison
+	endif
+else 
+	JISON = node $(wildcard ../../lib/cli.js)
+endif 
+
+
+
 all: build test
 
 prep: npm-install
@@ -7,11 +19,10 @@ npm-install:
 	npm install
 
 build:
-	@[ -a  node_modules/.bin/jison ] || echo "### FAILURE: Make sure you have run 'make prep' before as the jison compiler is unavailable! ###"
-	sh node_modules/.bin/jison bnf.y bnf.l
+	$(JISON) bnf.y bnf.l
 	mv bnf.js parser.js
 
-	sh node_modules/.bin/jison ebnf.y
+	$(JISON) ebnf.y
 	mv ebnf.js transform-parser.js
 
 test:
@@ -38,6 +49,8 @@ clean:
 
 superclean: clean
 	-find . -type d -name 'node_modules' -exec rm -rf "{}" \;
+
+
 
 
 
