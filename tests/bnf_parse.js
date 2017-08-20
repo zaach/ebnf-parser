@@ -1,6 +1,34 @@
 var assert = require("chai").assert;
 var bnf = require("../ebnf-parser");
 
+function parser_reset() {
+    if (bnf.bnf_parser.parser.yy) {
+        var y = bnf.bnf_parser.parser.yy;
+        if (y.parser) {
+            delete y.parser;
+        }
+        if (y.lexer) {
+            delete y.lexer;
+        }
+    }
+
+    //bnf.bnf_parser.parser.yy = {};
+
+    var debug = 0;
+
+    if (!debug) {
+        // silence warn+log messages from the test internals:
+        bnf.bnf_parser.parser.warn = function bnf_warn() {
+            // console.warn("TEST WARNING: ", arguments);
+        };
+
+        bnf.bnf_parser.parser.log = function bnf_log() {
+            // console.warn("TEST LOG: ", arguments);
+        };
+    }
+}
+
+
 describe("BNF parser", function () {
   it("test basic grammar", function () {
     var grammar = "%% test: foo bar | baz ; hello: world ;";
@@ -109,6 +137,7 @@ describe("BNF parser", function () {
     var expected = {bnf: {test: ["foo bar", "baz"], hello: ["world"]},
                     extra_tokens: [{id: "blah"}]};
 
+    parser_reset();
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
   });
 
@@ -116,6 +145,7 @@ describe("BNF parser", function () {
     var grammar = "%type <type> blah\n%% test: foo bar | baz ; hello: world ;";
     var expected = {bnf: {test: ["foo bar", "baz"], hello: ["world"]}, unknownDecls: [['type', '<type> blah']]};
 
+    parser_reset();
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
   });
 
@@ -137,6 +167,7 @@ describe("BNF parser", function () {
                         bnf: {test: ["foo bar", "baz"], hello: ["world"]}
                     };
 
+    parser_reset();
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
   });
 
