@@ -5,7 +5,7 @@
     "url": "http://zaa.ch"
   },
   "name": "ebnf-parser",
-  "version": "0.1.10-185",
+  "version": "0.1.10-186",
   "description": "A parser for BNF and EBNF grammars used by jison",
   "main": "ebnf-parser.js",
   "scripts": {
@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "chai": "4.1.1",
+    "globby": "^6.1.0",
     "jison-gho": "0.4.18-184",
     "mocha": "3.5.0"
   }

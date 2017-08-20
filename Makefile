@@ -19,6 +19,8 @@ npm-install:
 	npm install
 
 build:
+	node __patch_version_in_js.js
+
 	$(JISON) bnf.y bnf.l
 	mv bnf.js parser.js
 
