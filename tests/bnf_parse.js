@@ -1,6 +1,7 @@
 var assert = require("chai").assert;
 var bnf = require("../ebnf-parser");
 
+
 function parser_reset() {
     if (bnf.bnf_parser.parser.yy) {
         var y = bnf.bnf_parser.parser.yy;
@@ -30,6 +31,10 @@ function parser_reset() {
 
 
 describe("BNF parser", function () {
+  beforeEach(function beforeEachTest() {
+    parser_reset();
+  });
+
   it("test basic grammar", function () {
     var grammar = "%% test: foo bar | baz ; hello: world ;";
     var expected = {bnf: {test: ["foo bar", "baz"], hello: ["world"]}};
@@ -137,7 +142,6 @@ describe("BNF parser", function () {
     var expected = {bnf: {test: ["foo bar", "baz"], hello: ["world"]},
                     extra_tokens: [{id: "blah"}]};
 
-    parser_reset();
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
   });
 
@@ -145,7 +149,6 @@ describe("BNF parser", function () {
     var grammar = "%type <type> blah\n%% test: foo bar | baz ; hello: world ;";
     var expected = {bnf: {test: ["foo bar", "baz"], hello: ["world"]}, unknownDecls: [['type', '<type> blah']]};
 
-    parser_reset();
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
   });
 
@@ -167,7 +170,6 @@ describe("BNF parser", function () {
                         bnf: {test: ["foo bar", "baz"], hello: ["world"]}
                     };
 
-    parser_reset();
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
   });
 
