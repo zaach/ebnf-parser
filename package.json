@@ -4,8 +4,8 @@
   "description": "A parser for BNF and EBNF grammars used by jison",
   "main": "ebnf-parser.js",
   "scripts": {
-    "prepublish": "make",
-    "test": "make test"
+    "build": "npx jison bnf.y bnf.l && mv bnf.js parser.js && npx jison ebnf.y && mv ebnf.js transform-parser.js",
+    "test": "node tests/all-tests.js"
   },
   "repository": {
     "type": "git",
