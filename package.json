@@ -21,7 +21,7 @@
   "author": "Zach Carter",
   "license": "MIT",
   "dependencies": {
-    "lex-parser": "0.1.0"
+    "lex-parser": "~0.1.3"
   },
   "devDependencies": {
     "jison": "git://github.com/zaach/jison.git#ef2647",
