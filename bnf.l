@@ -220,7 +220,7 @@ function dquote(s) {
 }
 
 lexer.warn = function l_warn() {
-    if (this.yy.parser && typeof this.yy.parser.warn === 'function') {
+    if (this.yy && this.yy.parser && typeof this.yy.parser.warn === 'function') {
         return this.yy.parser.warn.apply(this, arguments);
     } else {
         console.warn.apply(console, arguments);
@@ -228,7 +228,7 @@ lexer.warn = function l_warn() {
 };
 
 lexer.log = function l_log() {
-    if (this.yy.parser && typeof this.yy.parser.log === 'function') {
+    if (this.yy && this.yy.parser && typeof this.yy.parser.log === 'function') {
         return this.yy.parser.log.apply(this, arguments);
     } else {
         console.log.apply(console, arguments);
