@@ -25,12 +25,14 @@ DOUBLEQUOTED_STRING_CONTENT             (?:\\\"|\\[^\"]|[^\\\"])*
 // Regex for matching all the possible stuff which can be placed between those `%lex.../lex` markers:
 // multiple lines of arbitrary material. Use a non-gready `*?` in there to ensure that the regex
 // doesn't also consume the terminating `/lex` token!
-LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
+LEX_CONTENT                             {WS}*(?:{BR}[^]*?)?{BR}{WS}*
+
 
 
 %x action code path options
 %s token
 %s bnf ebnf
+
 
 
 %options easy_keyword_rules
@@ -72,7 +74,7 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
 // Comments should be gobbled and discarded anywhere *except* the code/action blocks:
 <INITIAL,ebnf,bnf,token,path,options>"//"[^\r\n]*
                                         /* skip single-line comment */
-<INITIAL,ebnf,bnf,token,path,options>"/*"(.|\n|\r)*?"*/"
+<INITIAL,ebnf,bnf,token,path,options>"/*"[^]*?"*/"
                                         /* skip multi-line comment */
 
 <options>[^\s\r\n]+                     return 'OPTION_VALUE';
@@ -142,17 +144,17 @@ LEX_CONTENT                             {WS}*(?:{BR}[\w\W]*?)?{BR}{WS}*
                                             return 'UNKNOWN_DECL';
                                         %}
 "<"{ID}">"                              yytext = this.matches[1]; return 'TOKEN_TYPE';
-"{{"[\w\W]*?"}}"                        yytext = yytext.substr(2, yyleng - 4); return 'ACTION';
-"%{"(?:.|\r|\n)*?"%}"                   yytext = yytext.substr(2, yyleng - 4); return 'ACTION';
+"{{"[^]*?"}}"                           yytext = yytext.substr(2, yyleng - 4); return 'ACTION';
+"%{"[^]*?"%}"                           yytext = yytext.substr(2, yyleng - 4); return 'ACTION';
 "{"                                     yy.depth = 0; this.pushState('action'); return '{';
 "->".*                                  yytext = yytext.substr(2, yyleng - 2).trim(); return 'ARROW_ACTION';
 "→".*                                   yytext = yytext.substr(1, yyleng - 1).trim(); return 'ARROW_ACTION';
 {HEX_NUMBER}                            yytext = parseInt(yytext, 16); return 'INTEGER';
 {DECIMAL_NUMBER}(?![xX0-9a-fA-F])       yytext = parseInt(yytext, 10); return 'INTEGER';
 
-<action>"/*"(.|\n|\r)*?"*/"             return 'ACTION_BODY';
+<action>"/*"[^]*?"*/"                   return 'ACTION_BODY';
 <action>"//"[^\r\n]*                    return 'ACTION_BODY';
-<action>"/"[^ /]*?['"{}'][^ ]*?"/"      return 'ACTION_BODY'; // regexp with braces or quotes (and no spaces)
+<action>"/"[^ /]*?['"{}][^ ]*?"/"       return 'ACTION_BODY'; // regexp with braces or quotes (and no spaces)
 <action>\"{DOUBLEQUOTED_STRING_CONTENT}\"
                                         return 'ACTION_BODY';
 <action>\'{QUOTED_STRING_CONTENT}\'
