@@ -87,6 +87,7 @@ LEX_CONTENT                             {WS}*(?:{BR}[^]*?)?{BR}{WS}*
 
 "["{ID}"]"                              yytext = this.matches[1]; return 'ALIAS';
 {ID}                                    return 'ID';
+{NAME}                                  return 'NAME';
 "$end"                                  return 'EOF_ID';
 // `$eof` and `EOF` are synonyms of `$end` ('$eof' is for bison compatibility);
 // this is the only place where two symbol names may map to a single symbol ID number

@@ -95,12 +95,29 @@ declaration
         {
             yyerror("Each '%import'-ed initialization code section must be qualified by a name, e.g. 'required' before the import path itself: '%import qualifier_name file_path'.");
         }
-    | INIT_CODE import_name action_ne
-        { $$ = {initCode: {qualifier: $import_name, include: $action_ne}}; }
+    | INIT_CODE init_code_name action_ne
+        { 
+            $$ = {
+                initCode: {
+                    qualifier: $init_code_name, 
+                    include: $action_ne,
+                    
+                }
+            }; 
+        }
     | INIT_CODE error action_ne
         {
             yyerror("Each '%code' initialization code section must be qualified by a name, e.g. 'required' before the action code itself: '%code qualifier_name {action code}'.");
         }
+    ;
+
+init_code_name
+    : ID
+        { $$ = $ID; }
+    | NAME
+        { $$ = $NAME; }
+    | STRING
+        { $$ = $STRING; }
     ;
 
 import_name
