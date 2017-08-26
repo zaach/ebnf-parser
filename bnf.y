@@ -457,11 +457,6 @@ handle_action
                 $$ = $$[0];
             }
         }
-    | handle prec error
-        {
-	    // TODO ...
-            yyerror("rule production action declaration error?");
-        }
     | EPSILON error
         {
 	    // TODO ...
