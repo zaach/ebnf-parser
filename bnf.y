@@ -60,6 +60,11 @@ declaration_list
         { $$ = $declaration_list; yy.addDeclaration($$, $declaration); }
     | %epsilon
         { $$ = {}; }
+    | declaration_list error
+        {
+	    // TODO ...
+            yyerror("declaration list error?");
+        }
     ;
 
 declaration
@@ -109,6 +114,22 @@ declaration
         {
             yyerror("Each '%code' initialization code section must be qualified by a name, e.g. 'required' before the action code itself: '%code qualifier_name {action code}'.");
         }
+    | START error
+        {
+	    // TODO ...
+            yyerror("%start token error?");
+        }
+    | TOKEN error
+        {
+	    // TODO ...
+            yyerror("%token definition list error?");
+        }
+    | IMPORT error
+        {
+	    // TODO ...
+            yyerror("%import name or source filename missing maybe?");
+        }
+//    | INIT_CODE error
     ;
 
 init_code_name
@@ -137,6 +158,16 @@ import_path
 options
     : OPTIONS option_list OPTIONS_END
         { $$ = $option_list; }
+    | OPTIONS error OPTIONS_END
+        {
+	    // TODO ...
+            yyerror("%options ill defined / error?");
+        }
+    | OPTIONS error
+        {
+	    // TODO ...
+            yyerror("%options don't seem terminated?");
+        }
     ;
 
 option_list
@@ -155,21 +186,46 @@ option
         { $$ = [$option, parseValue($value)]; }
     | NAME[option] '=' NAME[value]
         { $$ = [$option, parseValue($value)]; }
+    | NAME[option] '=' error
+        {
+	    // TODO ...
+            yyerror(`named %option value error for ${$option}?`);
+        }
+    | NAME[option] error
+        {
+	    // TODO ...
+            yyerror("named %option value assignment error?");
+        }
     ;
 
 parse_params
     : PARSE_PARAM token_list
         { $$ = $token_list; }
+    | PARSE_PARAM error
+        {
+	    // TODO ...
+            yyerror("%pase-params declaration error?");
+        }
     ;
 
 parser_type
     : PARSER_TYPE symbol
         { $$ = $symbol; }
+    | PARSER_TYPE error
+        {
+	    // TODO ...
+            yyerror("%parser-type declaration error?");
+        }
     ;
 
 operator
     : associativity token_list
         { $$ = [$associativity]; $$.push.apply($$, $token_list); }
+    | associativity error
+        {
+	    // TODO ...
+            yyerror("operator token list error in an associativity statement?");
+        }
     ;
 
 associativity
@@ -295,6 +351,16 @@ production_list
 production
     : production_id handle_list ';'
         {$$ = [$production_id, $handle_list];}
+    | production_id error ';'
+        {
+	    // TODO ...
+            yyerror("rule production declaration error?");
+        }
+    | production_id error
+        {
+	    // TODO ...
+            yyerror("rule production declaration error: did you terminate the rule production set with a semicolon?");
+        }
     ;
 
 production_id
@@ -304,6 +370,11 @@ production_id
 
 	    // TODO: carry rule description support into the parser generator...
 	}
+    | id optional_production_description error
+        {
+	    // TODO ...
+            yyerror("rule id should be followed by a colon, but that one seems missing?");
+        }
     ;
 
 optional_production_description
@@ -321,6 +392,16 @@ handle_list
     | handle_action
         {
             $$ = [$handle_action];
+        }
+    | handle_list '|' error
+        {
+	    // TODO ...
+            yyerror("rule alternative production declaration error?");
+        }
+    | handle_list ':' error
+        {
+	    // TODO ...
+            yyerror("multiple alternative rule productions should be separated by a '|' pipe character, not a ':' colon!");
         }
     ;
 
@@ -353,6 +434,16 @@ handle_action
             if ($$.length === 1) {
                 $$ = $$[0];
             }
+        }
+    | handle prec error
+        {
+	    // TODO ...
+            yyerror("rule production action declaration error?");
+        }
+    | EPSILON error
+        {
+	    // TODO ...
+            yyerror("%epsilon rule action declaration error?");
         }
     ;
 
@@ -435,6 +526,11 @@ prec
     : PREC symbol
         {
             $$ = { prec: $symbol };
+        }
+    | PREC error
+        {
+	    // TODO ...
+            yyerror("%prec precedence override declaration error?");
         }
     | %epsilon
         {
@@ -528,6 +624,11 @@ module_code_chunk
         { $$ = $CODE; }
     | module_code_chunk CODE
         { $$ = $module_code_chunk + $CODE; }
+    | error
+        {
+	    // TODO ...
+            yyerror("module code declaration error?");
+        }
     ;
 
 optional_module_code_chunk
