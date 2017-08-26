@@ -293,8 +293,23 @@ production_list
     ;
 
 production
-    : id ':' handle_list ';'
-        {$$ = [$id, $handle_list];}
+    : production_id handle_list ';'
+        {$$ = [$production_id, $handle_list];}
+    ;
+
+production_id
+    : id optional_production_description ':'
+        {
+	    $$ = $id;
+
+	    // TODO: carry rule description support into the parser generator...
+	}
+    ;
+
+optional_production_description
+    : STRING
+        { $$ = $STRING; }
+    | %epsilon
     ;
 
 handle_list
