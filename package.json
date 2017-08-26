@@ -32,8 +32,8 @@
   },
   "devDependencies": {
     "chai": "4.1.1",
-    "globby": "^6.1.0",
-    "jison-gho": "0.4.18-184",
+    "globby": "6.1.0",
+    "jison-gho": "0.4.18-186",
     "mocha": "3.5.0"
   }
 }
