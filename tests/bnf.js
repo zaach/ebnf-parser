@@ -1,5 +1,6 @@
 var assert = require("chai").assert;
 var bnf = require("../ebnf-parser");
+
 var Jison = require('jison-gho');
 
 describe("BNF parser", function () {
