@@ -1,12 +1,13 @@
 
-ifeq ($(wildcard ../../lib/cli.js),) 
+JISON_VERSION := $(shell node ../../lib/cli.js -V 2> /dev/null )
+ifndef JISON_VERSION 
 	ifeq ($(wildcard ./node_modules/.bin/jison),) 
 		echo "### FAILURE: Make sure you have run 'make prep' before as the jison compiler is unavailable! ###"
 	else
 		JISON = sh node_modules/.bin/jison
 	endif
 else 
-	JISON = node $(wildcard ../../lib/cli.js)
+	JISON = node ../../lib/cli.js
 endif 
 
 
