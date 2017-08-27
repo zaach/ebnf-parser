@@ -1,6 +1,7 @@
 var bnf = require("./parser");
 var ebnf = require("./ebnf-transform");
-var jisonlex = require("lex-parser");
+var jisonlex = require("@gerhobbelt/lex-parser");
+
 var version = '0.6.0-186';                              // require('./package.json').version;
 
 exports.parse = function parse(grammar) {

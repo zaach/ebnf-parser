@@ -1,6 +1,6 @@
 var EBNF = (function () {
     var parser = require('./transform-parser.js');
-    var XRegExp = require('xregexp');
+    var XRegExp = require('@gerhobbelt/xregexp');
     //var assert = require('assert');
 
     var devDebug = 0;

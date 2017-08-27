@@ -9,7 +9,7 @@
 var fs = require('fs');
 var transform = require('./ebnf-transform').transform;
 var ebnf = false;
-var XRegExp = require('xregexp');       // for helping out the `%options xregexp` in the lexer
+var XRegExp = require('@gerhobbelt/xregexp');       // for helping out the `%options xregexp` in the lexer
 %}
 
 

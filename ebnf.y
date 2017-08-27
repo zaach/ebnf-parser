@@ -2,7 +2,7 @@
 
 
 %{
-var XRegExp = require('xregexp');       // for helping out the `%options xregexp` in the lexer
+var XRegExp = require('@gerhobbelt/xregexp');       // for helping out the `%options xregexp` in the lexer
 %}
 
 
