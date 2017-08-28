@@ -16,15 +16,15 @@ var XRegExp = require('@gerhobbelt/xregexp');       // for helping out the `%opt
 %code error_recovery_reduction %{
     // Note:
     //
-    // This code section is specifically targetting error recovery handling in the 
-    // generated parser when the error recovery is unwinding the parse stack to arrive 
+    // This code section is specifically targetting error recovery handling in the
+    // generated parser when the error recovery is unwinding the parse stack to arrive
     // at the targeted error handling production rule.
     //
     // This code is treated like any production rule action code chunk:
     // Special variables `$$`, `$@`, etc. are recognized, while the 'rule terms' can be
     // addressed via `$n` macros as in usual rule actions, only here we DO NOT validate
-    // their usefulness as the 'error reduce action' accepts a variable number of 
-    // production terms (available in `yyrulelength` in case you wish to address the 
+    // their usefulness as the 'error reduce action' accepts a variable number of
+    // production terms (available in `yyrulelength` in case you wish to address the
     // input terms directly in the `yyvstack` and `yylstack` arrays, for instance).
     //
     // This example recovery rule simply collects all parse info stored in the parse
@@ -84,7 +84,7 @@ declaration_list
         { $$ = {}; }
     | declaration_list error
         {
-	    // TODO ...
+        // TODO ...
             yyerror("declaration list error?");
         }
     ;
@@ -123,14 +123,14 @@ declaration
             yyerror("Each '%import'-ed initialization code section must be qualified by a name, e.g. 'required' before the import path itself: '%import qualifier_name file_path'.");
         }
     | INIT_CODE init_code_name action_ne
-        { 
+        {
             $$ = {
                 initCode: {
-                    qualifier: $init_code_name, 
+                    qualifier: $init_code_name,
                     include: $action_ne,
-                    
+
                 }
-            }; 
+            };
         }
     | INIT_CODE error action_ne
         {
@@ -138,17 +138,17 @@ declaration
         }
     | START error
         {
-	    // TODO ...
+        // TODO ...
             yyerror("%start token error?");
         }
     | TOKEN error
         {
-	    // TODO ...
+        // TODO ...
             yyerror("%token definition list error?");
         }
     | IMPORT error
         {
-	    // TODO ...
+        // TODO ...
             yyerror("%import name or source filename missing maybe?");
         }
 //    | INIT_CODE error
@@ -182,12 +182,12 @@ options
         { $$ = $option_list; }
     | OPTIONS error OPTIONS_END
         {
-	    // TODO ...
+        // TODO ...
             yyerror("%options ill defined / error?");
         }
     | OPTIONS error
         {
-	    // TODO ...
+        // TODO ...
             yyerror("%options don't seem terminated?");
         }
     ;
@@ -210,12 +210,12 @@ option
         { $$ = [$option, parseValue($value)]; }
     | NAME[option] '=' error
         {
-	    // TODO ...
+        // TODO ...
             yyerror(`named %option value error for ${$option}?`);
         }
     | NAME[option] error
         {
-	    // TODO ...
+        // TODO ...
             yyerror("named %option value assignment error?");
         }
     ;
@@ -225,7 +225,7 @@ parse_params
         { $$ = $token_list; }
     | PARSE_PARAM error
         {
-	    // TODO ...
+        // TODO ...
             yyerror("%pase-params declaration error?");
         }
     ;
@@ -235,7 +235,7 @@ parser_type
         { $$ = $symbol; }
     | PARSER_TYPE error
         {
-	    // TODO ...
+        // TODO ...
             yyerror("%parser-type declaration error?");
         }
     ;
@@ -245,7 +245,7 @@ operator
         { $$ = [$associativity]; $$.push.apply($$, $token_list); }
     | associativity error
         {
-	    // TODO ...
+        // TODO ...
             yyerror("operator token list error in an associativity statement?");
         }
     ;
@@ -375,12 +375,12 @@ production
         {$$ = [$production_id, $handle_list];}
     | production_id error ';'
         {
-	    // TODO ...
+        // TODO ...
             yyerror("rule production declaration error?");
         }
     | production_id error
         {
-	    // TODO ...
+        // TODO ...
             yyerror("rule production declaration error: did you terminate the rule production set with a semicolon?");
         }
     ;
@@ -388,13 +388,13 @@ production
 production_id
     : id optional_production_description ':'
         {
-	    $$ = $id;
+        $$ = $id;
 
-	    // TODO: carry rule description support into the parser generator...
-	}
+        // TODO: carry rule description support into the parser generator...
+    }
     | id optional_production_description error
         {
-	    // TODO ...
+            // TODO ...
             yyerror("rule id should be followed by a colon, but that one seems missing?");
         }
     ;
@@ -417,12 +417,12 @@ handle_list
         }
     | handle_list '|' error
         {
-	    // TODO ...
+        // TODO ...
             yyerror("rule alternative production declaration error?");
         }
     | handle_list ':' error
         {
-	    // TODO ...
+        // TODO ...
             yyerror("multiple alternative rule productions should be separated by a '|' pipe character, not a ':' colon!");
         }
     ;
@@ -459,7 +459,7 @@ handle_action
         }
     | EPSILON error
         {
-	    // TODO ...
+        // TODO ...
             yyerror("%epsilon rule action declaration error?");
         }
     ;
@@ -546,7 +546,7 @@ prec
         }
     | PREC error
         {
-	    // TODO ...
+        // TODO ...
             yyerror("%prec precedence override declaration error?");
         }
     | %epsilon
@@ -643,7 +643,7 @@ module_code_chunk
         { $$ = $module_code_chunk + $CODE; }
     | error
         {
-	    // TODO ...
+        // TODO ...
             yyerror("module code declaration error?");
         }
     ;

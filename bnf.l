@@ -132,7 +132,7 @@ LEX_CONTENT                             {WS}*(?:{BR}[^]*?)?{BR}{WS}*
                                             var l1 = Math.min(79 - 4 - l0 - l2, yylloc.first_column, 0);
                                             this.warn('EBNF: ignoring unsupported parser option:', dquote(yytext), 'while lexing in', this.topState(), 'state:\n' + indent(this.showPosition(l1, l2), 4)
                                                 // , '\n', {
-                                                //     remaining_input: this._input, 
+                                                //     remaining_input: this._input,
                                                 //     matched: this.matched,
                                                 //     matches: this.matches
                                                 // }
