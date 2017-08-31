@@ -47,11 +47,11 @@ spec
         }
     | declaration_list '%%' grammar error EOF
         {
-            yyerror("Maybe you did not correctly separate trailing code from the grammar rule set with a '%%' marker on an otherwise empty line?");
+            yyerror("Maybe you did not correctly separate trailing code from the grammar rule set with a '%%' marker on an otherwise empty line?\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     | declaration_list error EOF
         {
-            yyerror("Maybe you did not correctly separate the parse 'header section' (token definitions, options, lexer spec, etc.) from the grammar rule set with a '%%' on an otherwise empty line?");
+            yyerror("Maybe you did not correctly separate the parse 'header section' (token definitions, options, lexer spec, etc.) from the grammar rule set with a '%%' on an otherwise empty line?\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     ;
 
@@ -84,8 +84,8 @@ declaration_list
         { $$ = {}; }
     | declaration_list error
         {
-        // TODO ...
-            yyerror("declaration list error?");
+            // TODO ...
+            yyerror("declaration list error?\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     ;
 
@@ -116,11 +116,11 @@ declaration
         { $$ = {imports: {name: $import_name, path: $import_path}}; }
     | IMPORT import_name error
         {
-            yyerror("You did not specify a legal file path for the '%import' initialization code statement, which must have the format: '%import qualifier_name file_path'.");
+            yyerror("You did not specify a legal file path for the '%import' initialization code statement, which must have the format: '%import qualifier_name file_path'.\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     | IMPORT error import_path
         {
-            yyerror("Each '%import'-ed initialization code section must be qualified by a name, e.g. 'required' before the import path itself: '%import qualifier_name file_path'.");
+            yyerror("Each '%import'-ed initialization code section must be qualified by a name, e.g. 'required' before the import path itself: '%import qualifier_name file_path'.\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     | INIT_CODE init_code_name action_ne
         {
@@ -134,22 +134,22 @@ declaration
         }
     | INIT_CODE error action_ne
         {
-            yyerror("Each '%code' initialization code section must be qualified by a name, e.g. 'required' before the action code itself: '%code qualifier_name {action code}'.");
+            yyerror("Each '%code' initialization code section must be qualified by a name, e.g. 'required' before the action code itself: '%code qualifier_name {action code}'.\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     | START error
         {
-        // TODO ...
-            yyerror("%start token error?");
+            // TODO ...
+            yyerror("%start token error?\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     | TOKEN error
         {
-        // TODO ...
-            yyerror("%token definition list error?");
+            // TODO ...
+            yyerror("%token definition list error?\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     | IMPORT error
         {
-        // TODO ...
-            yyerror("%import name or source filename missing maybe?");
+            // TODO ...
+            yyerror("%import name or source filename missing maybe?\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
 //    | INIT_CODE error
     ;
@@ -182,13 +182,13 @@ options
         { $$ = $option_list; }
     | OPTIONS error OPTIONS_END
         {
-        // TODO ...
-            yyerror("%options ill defined / error?");
+            // TODO ...
+            yyerror("%options ill defined / error?\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     | OPTIONS error
         {
-        // TODO ...
-            yyerror("%options don't seem terminated?");
+            // TODO ...
+            yyerror("%options don't seem terminated?\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     ;
 
@@ -210,13 +210,13 @@ option
         { $$ = [$option, parseValue($value)]; }
     | NAME[option] '=' error
         {
-        // TODO ...
-            yyerror(`named %option value error for ${$option}?`);
+            // TODO ...
+            yyerror(`named %option value error for ${$option}?` + "\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     | NAME[option] error
         {
-        // TODO ...
-            yyerror("named %option value assignment error?");
+            // TODO ...
+            yyerror("named %option value assignment error?\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     ;
 
@@ -225,8 +225,8 @@ parse_params
         { $$ = $token_list; }
     | PARSE_PARAM error
         {
-        // TODO ...
-            yyerror("%pase-params declaration error?");
+            // TODO ...
+            yyerror("%pase-params declaration error?\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     ;
 
@@ -235,8 +235,8 @@ parser_type
         { $$ = $symbol; }
     | PARSER_TYPE error
         {
-        // TODO ...
-            yyerror("%parser-type declaration error?");
+            // TODO ...
+            yyerror("%parser-type declaration error?\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     ;
 
@@ -245,8 +245,8 @@ operator
         { $$ = [$associativity]; $$.push.apply($$, $token_list); }
     | associativity error
         {
-        // TODO ...
-            yyerror("operator token list error in an associativity statement?");
+            // TODO ...
+            yyerror("operator token list error in an associativity statement?\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     ;
 
@@ -375,27 +375,27 @@ production
         {$$ = [$production_id, $handle_list];}
     | production_id error ';'
         {
-        // TODO ...
-            yyerror("rule production declaration error?");
+            // TODO ...
+            yyerror("rule production declaration error?\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     | production_id error
         {
-        // TODO ...
-            yyerror("rule production declaration error: did you terminate the rule production set with a semicolon?");
+            // TODO ...
+            yyerror("rule production declaration error: did you terminate the rule production set with a semicolon?\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     ;
 
 production_id
     : id optional_production_description ':'
         {
-        $$ = $id;
+            $$ = $id;
 
-        // TODO: carry rule description support into the parser generator...
-    }
+            // TODO: carry rule description support into the parser generator...
+        }
     | id optional_production_description error
         {
             // TODO ...
-            yyerror("rule id should be followed by a colon, but that one seems missing?");
+            yyerror("rule id should be followed by a colon, but that one seems missing?\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     ;
 
@@ -417,13 +417,13 @@ handle_list
         }
     | handle_list '|' error
         {
-        // TODO ...
-            yyerror("rule alternative production declaration error?");
+            // TODO ...
+            yyerror("rule alternative production declaration error?\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     | handle_list ':' error
         {
-        // TODO ...
-            yyerror("multiple alternative rule productions should be separated by a '|' pipe character, not a ':' colon!");
+            // TODO ...
+            yyerror("multiple alternative rule productions should be separated by a '|' pipe character, not a ':' colon!\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     ;
 
@@ -436,7 +436,7 @@ handle_action
             }
             if ($prec) {
                 if ($handle.length === 0) {
-                    yyerror('You cannot specify a precedence override for an epsilon (a.k.a. empty) rule!');
+                    yyerror("You cannot specify a precedence override for an epsilon (a.k.a. empty) rule!\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @handle));
                 }
                 $$.push($prec);
             }
@@ -459,8 +459,8 @@ handle_action
         }
     | EPSILON error
         {
-        // TODO ...
-            yyerror("%epsilon rule action declaration error?");
+            // TODO ...
+            yyerror("%epsilon rule action declaration error?\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     ;
 
@@ -522,9 +522,7 @@ expression
         }
     | '(' handle_sublist error
         {
-            var l = $handle_sublist;
-            var ab = l.slice(0, 10).join(' | ');
-            yyerror("Seems you did not correctly bracket a grammar rule sublist in '( ... )' brackets. Offending handle sublist:\n" + ab);
+            yyerror("Seems you did not correctly bracket a grammar rule sublist in '( ... )' brackets.\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error, @1));
         }
     ;
 
@@ -546,8 +544,8 @@ prec
         }
     | PREC error
         {
-        // TODO ...
-            yyerror("%prec precedence override declaration error?");
+            // TODO ...
+            yyerror("%prec precedence override declaration error?\n\n  Erroneous precedence declaration:\n" + prettyPrintRange(yylexer, @error));
         }
     | %epsilon
         {
@@ -572,9 +570,7 @@ action_ne
         { $$ = $action_body; }
     | '{' action_body error
         {
-            var l = $action_body.split('\n');
-            var ab = l.slice(0, 10).join('\n');
-            yyerror("Seems you did not correctly bracket a parser rule action block in curly braces: '{ ... }'. Offending action body:\n" + ab);
+            yyerror("Seems you did not correctly bracket a parser rule action block in curly braces: '{ ... }'.\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error, @1));
         }
     | ACTION
         { $$ = $ACTION; }
@@ -602,9 +598,7 @@ action_body
         { $$ = $1 + $2 + $3 + $4; }
     | action_body '{' action_body error
         {
-            var l = $action_body2.split('\n');
-            var ab = l.slice(0, 10).join('\n');
-            yyerror("Seems you did not correctly match curly braces '{ ... }' in a parser rule action block. Offending action body part:\n" + ab);
+            yyerror("Seems you did not correctly match curly braces '{ ... }' in a parser rule action block.\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error, @2));
         }
     ;
 
@@ -632,7 +626,7 @@ include_macro_code
         }
     | INCLUDE error
         {
-            yyerror("%include MUST be followed by a valid file path");
+            yyerror("%include MUST be followed by a valid file path.\n\n  Erroneous path:\n" + prettyPrintRange(yylexer, @error));
         }
     ;
 
@@ -643,8 +637,8 @@ module_code_chunk
         { $$ = $module_code_chunk + $CODE; }
     | error
         {
-        // TODO ...
-            yyerror("module code declaration error?");
+            // TODO ...
+            yyerror("module code declaration error?\n\n  Erroneous area:\n" + prettyPrintRange(yylexer, @error));
         }
     ;
 
@@ -703,6 +697,50 @@ function parseValue(v) {
     }
     return v;
 }
+
+// pretty-print the erroneous section of the input, with line numbers and everything...
+function prettyPrintRange(lexer, loc, context_loc) {
+    var error_size = loc.last_line - loc.first_line;
+    const CONTEXT = 3;
+    var input = lexer.matched;
+    var lines = input.split('\n');
+    var show_context = (error_size < 5 || context_loc);
+    var l0 = (!show_context ? loc.first_line : context_loc ? context_loc.first_line : loc.first_line - CONTEXT);
+    var l1 = loc.last_line;
+    var lineno_display_width = (1 + Math.log10(l1 | 1) | 0);
+    var ws_prefix = new Array(lineno_display_width).join(' ');
+    var rv = lines.slice(l0 - 1, l1 + 1).map(function injectLineNumber(line, index) {
+        var lno = index + l0;
+        var lno_pfx = (ws_prefix + lno).substr(-lineno_display_width);
+        line = lno_pfx + ': ' + line;
+        if (show_context) {
+            var errpfx = (new Array(lineno_display_width + 1)).join('^');
+            if (lno === loc.first_line) {
+                var offset = loc.first_column + 2;
+                var len = (lno === loc.last_line ? loc.last_column : line.length) - loc.first_column + 1;
+                var lead = (new Array(offset)).join(' ');
+                var mark = (new Array(len)).join('^');
+                line += '\n' + errpfx + lead + mark;
+            } else if (lno === loc.last_line) {
+                var offset = 2 + 1;
+                var len = loc.last_column + 1;
+                var lead = (new Array(offset)).join(' ');
+                var mark = (new Array(len)).join('^');
+                line += '\n' + errpfx + lead + mark;
+            } else if (lno > loc.first_line && lno < loc.last_line) {
+                var offset = 2 + 1;
+                var len = line.length + 1;
+                var lead = (new Array(offset)).join(' ');
+                var mark = (new Array(len)).join('^');
+                line += '\n' + errpfx + lead + mark;
+            }
+        }
+        line = line.replace(/\t/g, ' ');
+        return line;
+    });
+    return rv.join('\n');
+}
+
 
 parser.warn = function p_warn() {
     console.warn.apply(console, arguments);
