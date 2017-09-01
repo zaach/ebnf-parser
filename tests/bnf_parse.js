@@ -358,14 +358,14 @@ describe("BNF parser", function () {
   });
 
   it("test options with string values which have embedded quotes", function () {
-    var grammar = '%options s1="s1\\"val\'ue" s2=\'s2\\\\x\\\'val\"ue\'\n%%hello: world;%%';
+    var grammar = '%options s1="s1\\"val\'ue" s2=\'s2\\\\x\\\'val\"ue\'\n%%\nhello: world;\n%%';
     var expected = {
         bnf: {
             hello: ["world"]
         }, 
         options: {
-            s1: "s1\\\"val'ue",
-            s2: "s2\\\\x\\'val\"ue"
+            s1: "s1\"val'ue",
+            s2: "s2\\\\x'val\"ue"
         }
     };
 
