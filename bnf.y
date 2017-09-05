@@ -110,6 +110,8 @@ declaration
         { $$ = {options: $options}; }
     | DEBUG
         { $$ = {options: [['debug', true]]}; }
+    | EBNF
+        { $$ = {options: [['ebnf', true]]}; }
     | UNKNOWN_DECL
         { $$ = {unknownDecl: $UNKNOWN_DECL}; }
     | IMPORT import_name import_path

@@ -31,7 +31,7 @@ LEX_CONTENT                             {WS}*(?:{BR}[^]*?)?{BR}{WS}*
 
 
 
-%x action code path options
+%x action code path options option_values
 %s token
 %s bnf ebnf
 
@@ -55,13 +55,19 @@ LEX_CONTENT                             {WS}*(?:{BR}[^]*?)?{BR}{WS}*
 <action>[/"'][^{}/"']+                  return 'ACTION_BODY';
 <action>[^{}/"']+                       return 'ACTION_BODY';
 <action>"{"                             yy.depth++; return '{';
-<action>"}"                             if (yy.depth === 0) { this.popState(); } else { yy.depth--; } return '}';
+<action>"}"                             if (yy.depth === 0) { 
+                                            this.popState(); 
+                                        } else { 
+                                            yy.depth--; 
+                                        } 
+                                        return '}';
 
 <token>{BR}                             this.popState();
 <token>"%%"                             this.popState();
 <token>";"                              this.popState();
 
-<bnf,ebnf>"%%"                          this.pushState('code'); return '%%';
+<bnf,ebnf>"%%"                          this.pushState('code'); 
+                                        return '%%';
 
 // Support bison's `%empty` (and our own alias `%epsilon`) to identify an empty rule alt:
 <bnf,ebnf>"%empty"                      return 'EPSILON';
@@ -79,24 +85,37 @@ LEX_CONTENT                             {WS}*(?:{BR}[^]*?)?{BR}{WS}*
 <ebnf>"+"                               return '+';
 
 <options>{NAME}                         return 'NAME';
-<options>"="                            return '=';
-<options>\"{DOUBLEQUOTED_STRING_CONTENT}\"
-                                        yytext = unescQuote(this.matches[1], /\\"/g); return 'OPTION_STRING_VALUE';   // value is always a string type
-<options>\'{QUOTED_STRING_CONTENT}\'
-                                        yytext = unescQuote(this.matches[1], /\\'/g); return 'OPTION_STRING_VALUE';   // value is always a string type
-<options>\`{ES2017_STRING_CONTENT}\`
-                                        yytext = unescQuote(this.matches[1], /\\`/g); return 'OPTION_STRING_VALUE';   // value is always a string type
+<options>"="                            this.pushState('option_values'); 
+                                        return '=';
+<option_values>{
+
+\"{DOUBLEQUOTED_STRING_CONTENT}\"
+                                        yytext = unescQuote(this.matches[1], /\\"/g); 
+                                        this.popState(); 
+                                        return 'OPTION_STRING_VALUE';   // value is always a string type
+\'{QUOTED_STRING_CONTENT}\'
+                                        yytext = unescQuote(this.matches[1], /\\'/g); 
+                                        this.popState(); 
+                                        return 'OPTION_STRING_VALUE';   // value is always a string type
+\`{ES2017_STRING_CONTENT}\`
+                                        yytext = unescQuote(this.matches[1], /\\`/g); 
+                                        this.popState(); 
+                                        return 'OPTION_STRING_VALUE';   // value is always a string type
+
+}
 
 // Comments should be gobbled and discarded anywhere *except* the code/action blocks:
-<INITIAL,ebnf,bnf,token,path,options>"//"[^\r\n]*
+<INITIAL,ebnf,bnf,token,path,options,option_values>"//"[^\r\n]*
                                         /* skip single-line comment */
-<INITIAL,ebnf,bnf,token,path,options>"/*"[^]*?"*/"
+<INITIAL,ebnf,bnf,token,path,options,option_values>"/*"[^]*?"*/"
                                         /* skip multi-line comment */
 
-<options>[^\s\r\n]+                     return 'OPTION_VALUE';
+<option_values>[^\s\r\n]+               this.popState(); 
+                                        return 'OPTION_VALUE';
+
 <options>{BR}{WS}+(?=\S)                /* skip leading whitespace on the next line of input, when followed by more options */
 <options>{BR}                           this.popState(); return 'OPTIONS_END';
-<options>{WS}+                          /* skip whitespace */
+<options,option_values>{WS}+            /* skip whitespace */
 
 {WS}+                                   /* skip whitespace */
 {BR}+                                   /* skip newlines */
@@ -124,9 +143,9 @@ LEX_CONTENT                             {WS}*(?:{BR}[^]*?)?{BR}{WS}*
 ":"                                     return ':';
 ";"                                     return ';';
 "|"                                     return '|';
-"%%"                                    this.pushState(ebnf ? 'ebnf' : 'bnf'); return '%%';
-"%ebnf"                                 if (!yy.options) { yy.options = {}; } ebnf = yy.options.ebnf = true;
-"%debug"                                if (!yy.options) { yy.options = {}; } yy.options.debug = true; return 'DEBUG';
+"%%"                                    this.pushState(yy.ebnf ? 'ebnf' : 'bnf'); return '%%';
+"%ebnf"                                 yy.ebnf = true; return 'EBNF';
+"%debug"                                return 'DEBUG';
 "%parser-type"                          return 'PARSER_TYPE';
 "%prec"                                 return 'PREC';
 "%start"                                return 'START';
@@ -145,16 +164,16 @@ LEX_CONTENT                             {WS}*(?:{BR}[^]*?)?{BR}{WS}*
 "%code"                                 return 'INIT_CODE';
 "%import"                               return 'IMPORT';
 <INITIAL,ebnf,bnf,code>"%include"       this.pushState('path'); 
-					return 'INCLUDE';
+                                        return 'INCLUDE';
 
 "%"{NAME}([^\r\n]*)                     %{
                                             /* ignore unrecognized decl */
                                             this.warn(rmCommonWS`
-					    	EBNF: ignoring unsupported parser option ${dquote(yytext)}
+                                                EBNF: ignoring unsupported parser option ${dquote(yytext)}
                                                 while lexing in ${dquote(this.topState())} state.
 
                                                   Erroneous area:
-						` + prettyPrintRange(this, yylloc));
+                                                ` + prettyPrintRange(this, yylloc));
                                             yytext = [
                                                 this.matches[1],            // {NAME}
                                                 this.matches[2].trim()      // optional value/parameters
@@ -217,19 +236,19 @@ LEX_CONTENT                             {WS}*(?:{BR}[^]*?)?{BR}{WS}*
                                             ` + prettyPrintRange(this, yylloc));
                                         return 'error';
 
-<options>\"                             yyerror(rmCommonWS`
+<option_values>\"                       yyerror(rmCommonWS`
                                             unterminated string constant in %options entry.
 
                                               Erroneous area:
                                             ` + prettyPrintRange(this, yylloc));
                                         return 'error';
-<options>\'                             yyerror(rmCommonWS`
+<option_values>\'                       yyerror(rmCommonWS`
                                             unterminated string constant in %options entry.
 
                                               Erroneous area:
                                             ` + prettyPrintRange(this, yylloc));
                                         return 'error';
-<options>\`                             yyerror(rmCommonWS`
+<option_values>\`                       yyerror(rmCommonWS`
                                             unterminated string constant in %options entry.
 
                                               Erroneous area:
@@ -265,11 +284,11 @@ LEX_CONTENT                             {WS}*(?:{BR}[^]*?)?{BR}{WS}*
 <*>.                                    %{
                                             /* b0rk on bad characters */
                                             yyerror(rmCommonWS`
-					    	unsupported parser input: ${dquote(yytext)}
-						while lexing in ${dquote(this.topState())} state.
-						
+                                                unsupported parser input: ${dquote(yytext)}
+                                                while lexing in ${dquote(this.topState())} state.
+                                                
                                                   Erroneous area:
-						` + prettyPrintRange(this, yylloc));
+                                                ` + prettyPrintRange(this, yylloc));
                                         %}
 
 <*><<EOF>>                              return 'EOF';
