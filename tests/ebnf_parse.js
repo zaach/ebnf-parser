@@ -5,6 +5,9 @@ var ebnf = require("../ebnf-transform");
 function testParse(top, strings) {
     return function() {
         var expected = {
+            "options": {
+                "ebnf": true
+            },
             "bnf": ebnf.transform({"top": [top]})
         };
         var grammar = "%ebnf\n%%\ntop : " + top + ";";
