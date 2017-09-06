@@ -4,7 +4,7 @@ var EBNF = (function () {
 
     //var assert = require('assert');
 
-    var devDebug = 0;
+    var devDebug = 1;
 
     // WARNING: this regex MUST match the regex for `ID` in ebnf-parser::bnf.l jison language lexer spec! (`ID = [{ALPHA}]{ALNUM}*`)
     //
@@ -234,7 +234,7 @@ var EBNF = (function () {
                     if (devDebug > 2) console.log('alist ~ rhs rule terms: ', alist, rhs);
 
                     var alias_re = new XRegExp(`\\[${ID_REGEX_BASE}\\]`);
-                    var term_re = new XRegExp(`^(?:[$@#]|##)${ID_REGEX_BASE}$`);
+                    var term_re = new XRegExp(`^${ID_REGEX_BASE}$`);
                     // and collect the PERMITTED aliases: the names of the terms and all the remaining aliases
                     var good_aliases = {};
                     var alias_cnt = {};
@@ -370,8 +370,13 @@ var EBNF = (function () {
 
     return {
         transform: function (ebnf) {
+            try {
             if (devDebug > 0) console.log('EBNF:\n ', JSON.stringify(ebnf, null, 2));
             transformGrammar(ebnf);
+        }
+        catch (e) {
+            console.log("!@@@@@@@@@@@@@@ exception: ", e, e.stack);
+        }
             if (devDebug > 0) console.log('\n\nEBNF after transformation:\n ', JSON.stringify(ebnf, null, 2));
             return ebnf;
         }
