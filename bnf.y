@@ -129,8 +129,7 @@ declaration
             $$ = {
                 initCode: {
                     qualifier: $init_code_name,
-                    include: $action_ne,
-
+                    include: $action_ne
                 }
             };
         }
