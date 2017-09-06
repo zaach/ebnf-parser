@@ -301,17 +301,22 @@ var EBNF = (function () {
                         alias_cnt: alias_cnt,
                     });
 
-                    // now scan the action for all named and numeric semantic values ($nonterminal / $1)
-                    var nameref_re = new XRegExp(`(?:[$@#]|##)${ID_REGEX_BASE}`, 'g');
+                    // now scan the action for all named and numeric semantic values ($nonterminal / $1 / @1, ##1, ...)
+                    //
+                    // Note that `#name` are straight **static** symbol translations, which are okay as they don't
+                    // require access to the parse stack: `#n` references can be resolved completely 
+                    // at grammar compile time.
+                    //
+                    var nameref_re = new XRegExp(`(?:[$@]|##)${ID_REGEX_BASE}`, 'g');
                     var named_spots = nameref_re.exec(action);
-                    var numbered_spots = action.match(/[$@][0-9]+\b/g);
+                    var numbered_spots = action.match(/(?:[$@]|##)[0-9]+\b/g);
                     var max_term_index = list.terms.length;
                     if (devDebug > 2) console.log('ACTION named_spots: ', named_spots);
                     if (devDebug > 2) console.log('ACTION numbered_spots: ', numbered_spots);
 
                     // loop through the XRegExp alias regex matches in `action`
                     while (named_spots) {
-                        n = named_spots[0].substr(1);
+                        n = named_spots[0].replace(/^(?:[$@]|##)/, '');
                         if (!good_aliases[n]) {
                             throw new Error('The action block references the named alias "' + n + '" ' +
                                             'which is not available in production "' + handle + '"; ' +
@@ -335,7 +340,7 @@ var EBNF = (function () {
                     }
                     if (numbered_spots) {
                         for (i = 0, len = numbered_spots.length; i < len; i++) {
-                            n = parseInt(numbered_spots[i].substr(1));
+                            n = parseInt(numbered_spots[i].replace(/^(?:[$@]|##)/, ''));
                             if (n > max_term_index) {
                                 /* @const */ var n_suffixes = [ 'st', 'nd', 'rd', 'th' ];
                                 throw new Error('The action block references the ' + n + n_suffixes[Math.max(0, Math.min(3, n - 1))] + ' term, ' +
