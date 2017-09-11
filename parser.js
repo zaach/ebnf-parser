@@ -3665,6 +3665,14 @@ parse: function parse(input) {
         post_lex: undefined
     };
 
+    if (typeof assert !== 'function') {
+        assert = function JisonAssert(cond, msg) {
+            if (!cond) {
+                throw new Error('assertion failed: ' + (msg || '***'));
+            }
+        };
+    }
+    
     this.yyGetSharedState = function yyGetSharedState() {
         return sharedState_yy;
     };
@@ -4025,7 +4033,7 @@ parse: function parse(input) {
             token: this.describeSymbol(symbol) || symbol,
             token_id: symbol,
             line: lexer.yylineno,
-            loc: lexer.yylloc,
+            loc: copy_yylloc(lexer.yylloc),
             expected: expected,
             recoverable: recoverable,
             state: state,
@@ -4386,6 +4394,7 @@ parse: function parse(input) {
 
                         yyloc = lexer.yylloc;
 
+                        preErrorSymbol = 0; 
                         symbol = lex();
 
 
@@ -4400,7 +4409,7 @@ parse: function parse(input) {
 
                     // try to recover from error
                     if (error_rule_depth < 0) {
-                        //assert(recovering);
+                        assert(recovering > 0);
                         recoveringErrorInfo.info_stack_pointer = esp;
 
                         // barf a fatal hairball when we're out of look-ahead symbols and none hit a match
@@ -4514,6 +4523,231 @@ parse: function parse(input) {
 
 
 
+                    // Now duplicate the standard parse machine here, at least its initial
+                    // couple of rounds until the TERROR symbol is **pushed onto the parse stack**, 
+                    // as we wish to push something special then!
+
+
+                    // Run the state machine in this copy of the parser state machine
+                    // until we *either* consume the error symbol (and its related information)
+                    // *or* we run into another error while recovering from this one
+                    // *or* we execute a `reduce` action which outputs a final parse
+                    // result (yes, that MAY happen!)...
+
+                    assert(symbol === TERROR);
+                    while (symbol) {
+                        // retrieve state number from top of stack
+                        state = newState;               // sstack[sp - 1];
+
+                        // use default actions if available
+                        if (this.defaultActions[state]) {
+                            action = 2;
+                            newState = this.defaultActions[state];
+                        } else {
+                            // read action for current state and first input
+                            t = (table[state] && table[state][symbol]) || NO_ACTION;
+                            newState = t[1];
+                            action = t[0];
+
+
+
+
+
+
+
+
+
+
+                            // encountered another parse error? If so, break out to main loop
+                            // and take it from there!
+                            if (!action) {
+                                newState = state;
+                                break;
+                            }
+                        }
+
+
+
+
+
+
+
+
+
+
+                        switch (action) {
+                        // catch misc. parse failures:
+                        default:
+                            // this shouldn't happen, unless resolve defaults are off
+                            if (action instanceof Array) {
+                                p = this.constructParseErrorInfo('Parse Error: multiple actions possible at state: ' + state + ', token: ' + symbol, null, null, false);
+                                retval = this.parseError(p.errStr, p, this.JisonParserError);
+                                // signal end of error recovery loop AND end of outer parse loop
+                                action = 3;
+                                break;
+                            }
+                            // Another case of better safe than sorry: in case state transitions come out of another error recovery process
+                            // or a buggy LUT (LookUp Table):
+                            p = this.constructParseErrorInfo('Parsing halted. No viable error recovery approach available due to internal system failure.', null, null, false);
+                            retval = this.parseError(p.errStr, p, this.JisonParserError);
+                            // signal end of error recovery loop AND end of outer parse loop
+                            action = 3;
+                            break;
+
+                        // shift:
+                        case 1:
+                            stack[sp] = symbol;
+                            //vstack[sp] = lexer.yytext;
+                            vstack[sp] = recoveringErrorInfo;
+                            //lstack[sp] = copy_yylloc(lexer.yylloc);
+                            lstack[sp] = this.yyMergeLocationInfo(null, null, recoveringErrorInfo.loc, lexer.yylloc, true);
+                            sstack[sp] = newState; // push state
+                            ++sp;
+                            symbol = 0;
+                            if (!preErrorSymbol) { // normal execution / no error
+                                // Pick up the lexer details for the current symbol as that one is not 'look-ahead' any more:
+
+
+
+                                yyloc = lexer.yylloc;
+
+                                if (recovering > 0) {
+                                    recovering--;
+
+
+
+
+
+
+
+
+
+                                }
+                            } else {
+                                // error just occurred, resume old lookahead f/ before error, *unless* that drops us straight back into error mode:
+                                symbol = preErrorSymbol;
+                                preErrorSymbol = 0;
+
+
+
+
+
+
+
+
+
+                                // read action for current state and first input
+                                t = (table[newState] && table[newState][symbol]) || NO_ACTION;
+                                if (!t[0] || symbol === TERROR) {
+                                    // forget about that symbol and move forward: this wasn't a 'forgot to insert' error type where
+                                    // (simple) stuff might have been missing before the token which caused the error we're
+                                    // recovering from now...
+                                    //
+                                    // Also check if the LookAhead symbol isn't the ERROR token we set as part of the error
+                                    // recovery, for then this we would we idling (cycling) on the error forever.
+                                    // Yes, this does not take into account the possibility that the *lexer* may have
+                                    // produced a *new* TERROR token all by itself, but that would be a very peculiar grammar!
+
+
+
+
+
+
+
+
+
+                                    symbol = 0;
+                                }
+                            }
+
+                            continue;
+
+                        // reduce:
+                        case 2:
+                            this_production = this.productions_[newState - 1];  // `this.productions_[]` is zero-based indexed while states start from 1 upwards...
+                            yyrulelen = this_production[1];
+
+
+
+
+
+
+
+
+
+
+                            r = this.performAction.call(yyval, yyloc, newState, sp - 1, vstack, lstack);
+
+                            if (typeof r !== 'undefined') {
+                                // signal end of error recovery loop AND end of outer parse loop
+                                action = 3;
+                                retval = r;
+                                break;
+                            }
+
+                            // pop off stack
+                            sp -= yyrulelen;
+
+                            // don't overwrite the `symbol` variable: use a local var to speed things up:
+                            var ntsymbol = this_production[0];    // push nonterminal (reduce)
+                            stack[sp] = ntsymbol;
+                            vstack[sp] = yyval.$;
+                            lstack[sp] = yyval._$;
+                            // goto new state = table[STATE][NONTERMINAL]
+                            newState = table[sstack[sp - 1]][ntsymbol];
+                            sstack[sp] = newState;
+                            ++sp;
+
+
+
+
+
+
+
+
+
+                            continue;
+
+                        // accept:
+                        case 3:
+                            retval = true;
+                            // Return the `$accept` rule's `$$` result, if available.
+                            //
+                            // Also note that JISON always adds this top-most `$accept` rule (with implicit,
+                            // default, action):
+                            //
+                            //     $accept: <startSymbol> $end
+                            //                  %{ $$ = $1; @$ = @1; %}
+                            //
+                            // which, combined with the parse kernel's `$accept` state behaviour coded below,
+                            // will produce the `$$` value output of the <startSymbol> rule as the parse result,
+                            // IFF that result is *not* `undefined`. (See also the parser kernel code.)
+                            //
+                            // In code:
+                            //
+                            //                  %{
+                            //                      @$ = @1;            // if location tracking support is included
+                            //                      if (typeof $1 !== 'undefined')
+                            //                          return $1;
+                            //                      else
+                            //                          return true;           // the default parse result if the rule actions don't produce anything
+                            //                  %}
+                            sp--;
+                            if (typeof vstack[sp] !== 'undefined') {
+                                retval = vstack[sp];
+                            }
+                            break;
+                        }
+
+                        // break out of loop: we accept or fail with error
+                        break;
+                    }
+
+                    // should we also break out of the regular/outer parse loop, 
+                    // i.e. did the parser already produce a parse result in here?!
+                    if (action === 3) {
+                        break;
+                    }
                     continue;
                 }
 
@@ -4548,10 +4782,11 @@ parse: function parse(input) {
             case 1:
                 stack[sp] = symbol;
                 vstack[sp] = lexer.yytext;
-                lstack[sp] = lexer.yylloc;
+                lstack[sp] = copy_yylloc(lexer.yylloc);
                 sstack[sp] = newState; // push state
                 ++sp;
                 symbol = 0;
+                assert(preErrorSymbol === 0);
                 if (!preErrorSymbol) { // normal execution / no error
                     // Pick up the lexer details for the current symbol as that one is not 'look-ahead' any more:
 

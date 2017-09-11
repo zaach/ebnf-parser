@@ -1052,6 +1052,14 @@ parse: function parse(input) {
         post_lex: undefined
     };
 
+    if (typeof assert !== 'function') {
+        assert = function JisonAssert(cond, msg) {
+            if (!cond) {
+                throw new Error('assertion failed: ' + (msg || '***'));
+            }
+        };
+    }
+    
     this.yyGetSharedState = function yyGetSharedState() {
         return sharedState_yy;
     };
@@ -1076,7 +1084,6 @@ parse: function parse(input) {
 
     sharedState_yy.lexer = lexer;
     sharedState_yy.parser = this;
-
 
 
 
@@ -1175,7 +1182,6 @@ parse: function parse(input) {
                 }
             }
             this.__error_infos.length = 0;
-
 
 
         }
@@ -1522,6 +1528,7 @@ parse: function parse(input) {
                 sstack[sp] = newState; // push state
                 ++sp;
                 symbol = 0;
+
 
                     // Pick up the lexer details for the current symbol as that one is not 'look-ahead' any more:
 
