@@ -173,7 +173,7 @@ LEX_CONTENT                             {WS}*(?:{BR}[^]*?)?{BR}{WS}*
                                                 while lexing in ${dquote(this.topState())} state.
 
                                                   Erroneous area:
-                                                ` + prettyPrintRange(this, yylloc));
+                                                ` + this.prettyPrintRange(this, yylloc));
                                             yytext = [
                                                 this.matches[1],            // {NAME}
                                                 this.matches[2].trim()      // optional value/parameters
@@ -221,38 +221,38 @@ LEX_CONTENT                             {WS}*(?:{BR}[^]*?)?{BR}{WS}*
                                             unterminated string constant in lexer rule action block.
 
                                               Erroneous area:
-                                            ` + prettyPrintRange(this, yylloc));
+                                            ` + this.prettyPrintRange(this, yylloc));
                                         return 'error';
 <action>\'                              yyerror(rmCommonWS`
                                             unterminated string constant in lexer rule action block.
 
                                               Erroneous area:
-                                            ` + prettyPrintRange(this, yylloc));
+                                            ` + this.prettyPrintRange(this, yylloc));
                                         return 'error';
 <action>\`                              yyerror(rmCommonWS`
                                             unterminated string constant in lexer rule action block.
 
                                               Erroneous area:
-                                            ` + prettyPrintRange(this, yylloc));
+                                            ` + this.prettyPrintRange(this, yylloc));
                                         return 'error';
 
 <option_values>\"                       yyerror(rmCommonWS`
                                             unterminated string constant in %options entry.
 
                                               Erroneous area:
-                                            ` + prettyPrintRange(this, yylloc));
+                                            ` + this.prettyPrintRange(this, yylloc));
                                         return 'error';
 <option_values>\'                       yyerror(rmCommonWS`
                                             unterminated string constant in %options entry.
 
                                               Erroneous area:
-                                            ` + prettyPrintRange(this, yylloc));
+                                            ` + this.prettyPrintRange(this, yylloc));
                                         return 'error';
 <option_values>\`                       yyerror(rmCommonWS`
                                             unterminated string constant in %options entry.
 
                                               Erroneous area:
-                                            ` + prettyPrintRange(this, yylloc));
+                                            ` + this.prettyPrintRange(this, yylloc));
                                         return 'error';
 
 <*>\"                                   var rules = (this.topState() === 'macro' ? 'macro\'s' : this.topState());
@@ -261,7 +261,7 @@ LEX_CONTENT                             {WS}*(?:{BR}[^]*?)?{BR}{WS}*
                                             ${rules}.
 
                                               Erroneous area:
-                                            ` + prettyPrintRange(this, yylloc));
+                                            ` + this.prettyPrintRange(this, yylloc));
                                         return 'error';
 <*>\'                                   var rules = (this.topState() === 'macro' ? 'macro\'s' : this.topState());
                                         yyerror(rmCommonWS`
@@ -269,7 +269,7 @@ LEX_CONTENT                             {WS}*(?:{BR}[^]*?)?{BR}{WS}*
                                             ${rules}.
 
                                               Erroneous area:
-                                            ` + prettyPrintRange(this, yylloc));
+                                            ` + this.prettyPrintRange(this, yylloc));
                                         return 'error';
 <*>\`                                   var rules = (this.topState() === 'macro' ? 'macro\'s' : this.topState());
                                         yyerror(rmCommonWS`
@@ -277,7 +277,7 @@ LEX_CONTENT                             {WS}*(?:{BR}[^]*?)?{BR}{WS}*
                                             ${rules}.
 
                                               Erroneous area:
-                                            ` + prettyPrintRange(this, yylloc));
+                                            ` + this.prettyPrintRange(this, yylloc));
                                         return 'error';
 
 
@@ -288,7 +288,7 @@ LEX_CONTENT                             {WS}*(?:{BR}[^]*?)?{BR}{WS}*
                                                 while lexing in ${dquote(this.topState())} state.
                                                 
                                                   Erroneous area:
-                                                ` + prettyPrintRange(this, yylloc));
+                                                ` + this.prettyPrintRange(this, yylloc));
                                         %}
 
 <*><<EOF>>                              return 'EOF';
@@ -384,50 +384,6 @@ function rmCommonWS(strings, ...values) {
     }
     var sv = rv.join('');
     return sv;
-}
-
-// pretty-print the erroneous section of the input, with line numbers and everything...
-function prettyPrintRange(lexer, loc, context_loc, context_loc2) {
-    var error_size = loc.last_line - loc.first_line;
-    const CONTEXT = 3;
-    const CONTEXT_TAIL = 1;
-    var input = lexer.matched + lexer._input;
-    var lines = input.split('\n');
-    var show_context = (error_size < 5 || context_loc);
-    var l0 = Math.max(1, (!show_context ? loc.first_line : context_loc ? context_loc.first_line : loc.first_line - CONTEXT));
-    var l1 = Math.max(1, (!show_context ? loc.last_line : context_loc2 ? context_loc2.last_line : loc.last_line + CONTEXT_TAIL));
-    var lineno_display_width = (1 + Math.log10(l1 | 1) | 0);
-    var ws_prefix = new Array(lineno_display_width).join(' ');
-    var rv = lines.slice(l0 - 1, l1 + 1).map(function injectLineNumber(line, index) {
-        var lno = index + l0;
-        var lno_pfx = (ws_prefix + lno).substr(-lineno_display_width);
-        var rv = lno_pfx + ': ' + line;
-        if (show_context) {
-            var errpfx = (new Array(lineno_display_width + 1)).join('^');
-            if (lno === loc.first_line) {
-                var offset = loc.first_column + 2;
-                var len = Math.max(2, (lno === loc.last_line ? loc.last_column : line.length) - loc.first_column + 1);
-                var lead = (new Array(offset)).join('.');
-                var mark = (new Array(len)).join('^');
-                rv += '\n' + errpfx + lead + mark + offset + '/A' + len;
-            } else if (lno === loc.last_line) {
-                var offset = 2 + 1;
-                var len = Math.max(2, loc.last_column + 1);
-                var lead = (new Array(offset)).join('.');
-                var mark = (new Array(len)).join('^');
-                rv += '\n' + errpfx + lead + mark + offset + '/B' + len;
-            } else if (lno > loc.first_line && lno < loc.last_line) {
-                var offset = 2 + 1;
-                var len = Math.max(2, line.length + 1);
-                var lead = (new Array(offset)).join('.');
-                var mark = (new Array(len)).join('^');
-                rv += '\n' + errpfx + lead + mark + offset + '/C' + len;
-            }
-        }
-        rv = rv.replace(/\t/g, ' ');
-        return rv;
-    });
-    return rv.join('\n');
 }
 
 
