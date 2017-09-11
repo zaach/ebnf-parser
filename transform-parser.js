@@ -2520,6 +2520,147 @@ var lexer = (function() {
     },
 
     /**
+    return a string which displays the lines & columns of input which are referenced 
+    by the given location info range, plus a few lines of context.
+
+    This function pretty-prints the indicated section of the input, with line numbers 
+    and everything!
+
+    This function is very useful to provide highly readable error reports, while
+    the location range may be specified in various flexible ways:
+
+    - `loc` is the location info object which references the area which should be
+      displayed and 'marked up': these lines & columns of text are marked up by `^`
+      characters below each character in the entire input range.
+
+    - `context_loc` is the *optional* location info object which instructs this
+      pretty-printer how much *leading* context should be displayed alongside
+      the area referenced by `loc`. This can help provide context for the displayed
+      error, etc.
+
+      When this location info is not provided, a default context of 3 lines is
+      used.
+
+    - `context_loc2` is another *optional* location info object, which serves
+      a similar purpose to `context_loc`: it specifies the amount of *trailing*
+      context lines to display in the pretty-print output.
+
+      When this location info is not provided, a default context of 1 line only is
+      used.
+
+    Special Notes:
+
+    - when the `loc`-indicated range is very large (about 5 lines or more), then
+      only the first and last few lines of this block are printed while a
+      `...continued...` message will be printed between them.
+
+      This serves the purpose of not printing a huge amount of text when the `loc`
+      range happens to be huge: this way a manageable & readable output results
+      for arbitrary large ranges.
+
+    - this function can display lines of input which whave not yet been lexed.
+      `prettyPrintRange()` can access the entire input!
+
+    @public
+    @this {RegExpLexer}
+    */
+    prettyPrintRange: function lexer_prettyPrintRange(
+      loc,
+      context_loc,
+      context_loc2
+    ) {
+      var error_size = loc.last_line - loc.first_line;
+      const CONTEXT = 3;
+      const CONTEXT_TAIL = 1;
+      const MINIMUM_VISIBLE_NONEMPTY_LINE_COUNT = 2;
+      var input = this.matched + this._input;
+      var lines = input.split("\n");
+      //var show_context = (error_size < 5 || context_loc);
+      var l0 = Math.max(
+        1,
+        context_loc ? context_loc.first_line : loc.first_line - CONTEXT
+      );
+      var l1 = Math.max(
+        1,
+        context_loc2 ? context_loc2.last_line : loc.last_line + CONTEXT_TAIL
+      );
+      var lineno_display_width = (1 + Math.log10(l1 | 1)) | 0;
+      var ws_prefix = new Array(lineno_display_width).join(" ");
+      var nonempty_line_indexes = [];
+      var rv = lines
+        .slice(l0 - 1, l1 + 1)
+        .map(function injectLineNumber(line, index) {
+          var lno = index + l0;
+          var lno_pfx = (ws_prefix + lno).substr(-lineno_display_width);
+          var rv = lno_pfx + ": " + line;
+          var errpfx = new Array(lineno_display_width + 1).join("^");
+          if (lno === loc.first_line) {
+            var offset = loc.first_column + 2;
+            var len = Math.max(
+              2,
+              (lno === loc.last_line ? loc.last_column : line.length) -
+                loc.first_column +
+                1
+            );
+            var lead = new Array(offset).join(".");
+            var mark = new Array(len).join("^");
+            rv += "\n" + errpfx + lead + mark;
+            if (line.trim().length > 0) {
+              nonempty_line_indexes.push(index);
+            }
+          } else if (lno === loc.last_line) {
+            var offset = 2 + 1;
+            var len = Math.max(2, loc.last_column + 1);
+            var lead = new Array(offset).join(".");
+            var mark = new Array(len).join("^");
+            rv += "\n" + errpfx + lead + mark;
+            if (line.trim().length > 0) {
+              nonempty_line_indexes.push(index);
+            }
+          } else if (lno > loc.first_line && lno < loc.last_line) {
+            var offset = 2 + 1;
+            var len = Math.max(2, line.length + 1);
+            var lead = new Array(offset).join(".");
+            var mark = new Array(len).join("^");
+            rv += "\n" + errpfx + lead + mark;
+            if (line.trim().length > 0) {
+              nonempty_line_indexes.push(index);
+            }
+          }
+          rv = rv.replace(/\t/g, " ");
+          return rv;
+        });
+      // now make sure we don't print an overly large amount of error area: limit it
+      // to the top and bottom line count:
+      if (
+        nonempty_line_indexes.length >
+        2 * MINIMUM_VISIBLE_NONEMPTY_LINE_COUNT
+      ) {
+        var clip_start =
+          nonempty_line_indexes[MINIMUM_VISIBLE_NONEMPTY_LINE_COUNT - 1] + 1;
+        var clip_end =
+          nonempty_line_indexes[
+            nonempty_line_indexes.length - MINIMUM_VISIBLE_NONEMPTY_LINE_COUNT
+          ] - 1;
+        console.log("clip off: ", {
+          start: clip_start,
+          end: clip_end,
+          len: clip_end - clip_start + 1,
+          arr: nonempty_line_indexes,
+          rv
+        });
+        var intermediate_line =
+          new Array(lineno_display_width + 1).join(" ") + "  (...continued...)";
+        intermediate_line +=
+          "\n" +
+          new Array(lineno_display_width + 1).join("-") +
+          "  (---------------)";
+        rv.splice(clip_start, clip_end - clip_start + 1, intermediate_line);
+      }
+      return rv.join("\n");
+    },
+
+    /**
     helper function, used to produce a human readable description as a string, given
     the input `yylloc` location object.
 
