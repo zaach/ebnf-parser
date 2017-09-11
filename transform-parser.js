@@ -632,6 +632,7 @@ yyMergeLocationInfo: null,
 
 __reentrant_call_depth: 0,      // INTERNAL USE ONLY
 __error_infos: [],              // INTERNAL USE ONLY: the set of parseErrorInfo objects created since the last cleanup
+__error_recovery_infos: [],     // INTERNAL USE ONLY: the set of parseErrorInfo objects created since the last cleanup
 
 // APIs which will be set up depending on user action code analysis:
 //yyRecovering: 0,

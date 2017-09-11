@@ -771,6 +771,7 @@ yyMergeLocationInfo: null,
 
 __reentrant_call_depth: 0,      // INTERNAL USE ONLY
 __error_infos: [],              // INTERNAL USE ONLY: the set of parseErrorInfo objects created since the last cleanup
+__error_recovery_infos: [],     // INTERNAL USE ONLY: the set of parseErrorInfo objects created since the last cleanup
 
 // APIs which will be set up depending on user action code analysis:
 //yyRecovering: 0,
@@ -3750,7 +3751,7 @@ parse: function parse(input) {
                 var esp = recoveringErrorInfo.info_stack_pointer; 
 
                 recoveringErrorInfo.symbol_stack[esp] = symbol;
-                var v = shallowCopyErrorInfo(hash);
+                var v = this.shallowCopyErrorInfo(hash);
                 v.yyError = true;
                 v.errorRuleDepth = error_rule_depth;
                 v.recovering = recovering;
@@ -3763,7 +3764,7 @@ parse: function parse(input) {
                 ++esp;
                 recoveringErrorInfo.info_stack_pointer = esp;
             } else {
-                recoveringErrorInfo = shallowCopyErrorInfo(hash);
+                recoveringErrorInfo = this.shallowCopyErrorInfo(hash);
                 recoveringErrorInfo.yyError = true;
                 recoveringErrorInfo.errorRuleDepth = error_rule_depth;
                 recoveringErrorInfo.recovering = recovering;
@@ -3880,6 +3881,14 @@ parse: function parse(input) {
             }
             this.__error_infos.length = 0;
 
+
+            for (var i = this.__error_recovery_infos.length - 1; i >= 0; i--) {
+                var el = this.__error_recovery_infos[i];
+                if (el && typeof el.destroy === 'function') {
+                    el.destroy();
+                }
+            }
+            this.__error_recovery_infos.length = 0;
 
             if (recoveringErrorInfo && typeof recoveringErrorInfo.destroy === 'function') {
                 recoveringErrorInfo.destroy();
@@ -4078,8 +4087,14 @@ parse: function parse(input) {
 
     // clone some parts of the (possibly enhanced!) errorInfo object
     // to give them some persistence.
-    function shallowCopyErrorInfo(p) {
+    this.shallowCopyErrorInfo = function parser_shallowCopyErrorInfo(p) {
         var rv = shallow_copy(p);
+
+        // remove the large parts which can only cause cyclic references
+        // and are otherwise available from the parser kernel anyway.
+        delete rv.sharedState_yy;
+        delete rv.parser;
+        delete rv.lexer;
 
         // lexer.yytext MAY be a complex value object, rather than a simple string/value:
         rv.value = shallow_copy(rv.value);
@@ -4150,8 +4165,11 @@ parse: function parse(input) {
 
         rv.root_failure_pointer = rv.stack_pointer;
 
+        // track this instance so we can `destroy()` it once we deem it superfluous and ready for garbage collection!
+        this.__error_recovery_infos.push(rv);
+
         return rv;
-    }
+    };
 
 
     function lex() {
@@ -4345,7 +4363,7 @@ parse: function parse(input) {
                         if (recoveringErrorInfo && typeof recoveringErrorInfo.destroy === 'function') {
                             recoveringErrorInfo.destroy();
                         }
-                        recoveringErrorInfo = shallowCopyErrorInfo(p);
+                        recoveringErrorInfo = this.shallowCopyErrorInfo(p);
 
                         r = this.parseError(p.errStr, p, this.JisonParserError);
 
@@ -4534,6 +4552,7 @@ parse: function parse(input) {
                     // *or* we execute a `reduce` action which outputs a final parse
                     // result (yes, that MAY happen!)...
 
+                    assert(recoveringErrorInfo);
                     assert(symbol === TERROR);
                     while (symbol) {
                         // retrieve state number from top of stack
@@ -4598,6 +4617,7 @@ parse: function parse(input) {
                         case 1:
                             stack[sp] = symbol;
                             //vstack[sp] = lexer.yytext;
+                            assert(recoveringErrorInfo);
                             vstack[sp] = recoveringErrorInfo;
                             //lstack[sp] = copy_yylloc(lexer.yylloc);
                             lstack[sp] = this.yyMergeLocationInfo(null, null, recoveringErrorInfo.loc, lexer.yylloc, true);
@@ -4660,7 +4680,8 @@ parse: function parse(input) {
                                 }
                             }
 
-                            continue;
+                            // once we have pushed the special ERROR token value, we're done in this inner loop!
+                            break;
 
                         // reduce:
                         case 2:
