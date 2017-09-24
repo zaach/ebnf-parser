@@ -17,6 +17,7 @@ function testParse(top, strings) {
                 ]
             },
             "start": "top",
+            "ebnf": {"top": [top]},
             "bnf": ebnf.transform({"top": [top]})
         };
         strings = (typeof(strings) === 'string' ? [strings] : strings);
@@ -61,6 +62,7 @@ function testAlias(top, obj, str) {
                 ]
             },
             "start": "top",
+            "ebnf": {"top": [top]},
             "bnf": ebnf.transform({"top": [top]})
         };
         assert.deepEqual(grammar['bnf'], obj);

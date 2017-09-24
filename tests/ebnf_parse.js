@@ -8,6 +8,7 @@ function testParse(top, strings) {
             "options": {
                 "ebnf": true
             },
+            "ebnf": {"top": [top]},
             "bnf": ebnf.transform({"top": [top]})
         };
         var grammar = "%ebnf\n%%\ntop : " + top + ";";
