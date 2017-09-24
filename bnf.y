@@ -682,7 +682,13 @@ function dquote(s) {
 
 // transform ebnf to bnf if necessary
 function extend(json, grammar) {
-    json.bnf = ebnf ? transform(grammar.grammar) : grammar.grammar;
+    if (ebnf) {
+        json.ebnf = grammar.grammar;        // keep the original source EBNF around for possible pretty-printing & AST exports.
+        json.bnf = transform(grammar.grammar);
+    }
+    else {
+        json.bnf = grammar.grammar;
+    }
     if (grammar.actionInclude) {
         json.actionInclude = grammar.actionInclude;
     }
