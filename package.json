@@ -28,13 +28,13 @@
     "node": ">=4.0"
   },
   "dependencies": {
-    "@gerhobbelt/lex-parser": "0.6.0-192",
+    "@gerhobbelt/lex-parser": "0.6.0-193",
     "@gerhobbelt/xregexp": "3.2.0-21"
   },
   "devDependencies": {
     "chai": "4.1.2",
     "globby": "6.1.0",
-    "jison-gho": "0.6.0-192",
+    "jison-gho": "0.6.0-193",
     "mocha": "3.5.3"
   }
 }
