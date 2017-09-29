@@ -34,7 +34,7 @@ endif
 	mv ebnf.js transform-parser.js
 
 test:
-	node_modules/.bin/mocha --timeout 18000 tests/
+	node_modules/.bin/mocha --timeout 18000 --check-leaks --globals assert tests/
 
 
 # increment the XXX <prelease> number in the package.json file: version <major>.<minor>.<patch>-<prelease>
