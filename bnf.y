@@ -580,13 +580,13 @@ action_ne
         { $$ = $ACTION; }
     | include_macro_code
         { $$ = $include_macro_code; }
-    | ARROW_ACTION
-        { $$ = '$$ = ' + $ARROW_ACTION; }
     ;
 
 action
     : action_ne
         { $$ = $action_ne; }
+    | ARROW_ACTION
+        { $$ = '$$ = ' + $ARROW_ACTION; }
     | %epsilon
         { $$ = ''; }
     ;
@@ -650,7 +650,7 @@ module_code_chunk
                 module code declaration error?
 
                   Erroneous area:
-                ` + prettyPrintRange(yylexer, @error));
+                ` + yylexer.prettyPrintRange(yylexer, @error));
         }
     ;
 
