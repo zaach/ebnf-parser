@@ -295,8 +295,11 @@ LEX_CONTENT                             {WS}*(?:{BR}[^]*?)?{BR}{WS}*
 
 %%
 
+
 var helpers    = require('../../modules/helpers-lib');
 var rmCommonWS = helpers.rmCommonWS;
+var dquote     = helpers.dquote;
+
 
 function indent(s, i) {
     var a = s.split('\n');
@@ -313,23 +316,6 @@ function unescQuote(str) {
     });
     str = a.join('\\\\');
     return str;
-}
-
-// properly quote and escape the given input string
-function dquote(s) {
-    var sq = (s.indexOf('\'') >= 0);
-    var dq = (s.indexOf('"') >= 0);
-    if (sq && dq) {
-        s = s.replace(/"/g, '\\"');
-        dq = false;
-    }
-    if (dq) {
-        s = '\'' + s + '\'';
-    }
-    else {
-        s = '"' + s + '"';
-    }
-    return s;
 }
 
 
