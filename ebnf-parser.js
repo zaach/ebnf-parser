@@ -1,21 +1,13 @@
-var bnf = require("./parser");
-var ebnf = require("./ebnf-transform");
-var jisonlex = require("@gerhobbelt/lex-parser");
+
+import * as bnf from "./parser";
+import transform from "./ebnf-transform";
+import jisonlex from "@gerhobbelt/lex-parser";
 
 var version = '0.6.0-194';                              // require('./package.json').version;
 
-exports.parse = function parse(grammar) {
+function parse(grammar) {
     return bnf.parser.parse(grammar);
-};
-
-exports.transform = ebnf.transform;
-
-// assistant exports for debugging/testing:
-exports.bnf_parser = bnf;
-exports.ebnf_parser = ebnf;
-exports.bnf_lexer = jisonlex;
-
-exports.version = version;
+}
 
 // adds a declaration to the grammar
 bnf.parser.yy.addDeclaration = function bnfAddDeclaration(grammar, decl) {
@@ -69,7 +61,7 @@ bnf.parser.yy.addDeclaration = function bnfAddDeclaration(grammar, decl) {
 };
 
 // parse an embedded lex section
-var parseLex = function bnfParseLex(text, position) {
+function parseLex(text, position) {
     text = text.replace(/(?:^%lex)|(?:\/lex$)/g, '');
     // We want the lex input to start at the given 'position', if any,
     // so that error reports will produce a line number and character index
@@ -87,4 +79,22 @@ var parseLex = function bnfParseLex(text, position) {
         prelude = '// ' + (new Array(c - 3)).join('.') + prelude;
     }
     return jisonlex.parse(prelude + text);
+}
+
+const ebnf_parser = {
+    transform
 };
+
+export {
+    parse,
+
+    transform,
+
+    // assistant exports for debugging/testing:
+    bnf as bnf_parser,
+    ebnf_parser,
+    jisonlex as bnf_lexer,
+
+    version,
+};
+
