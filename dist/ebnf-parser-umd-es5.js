@@ -8858,7 +8858,7 @@ function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defi
         if (decl.start) {
             grammar.start = decl.start;
         } else if (decl.lex) {
-            grammar.lex = bnfParseLex(decl.lex.text, decl.lex.position);
+            grammar.lex = parseLex(decl.lex.text, decl.lex.position);
         } else if (decl.operator) {
             if (!grammar.operators) grammar.operators = [];
             grammar.operators.push(decl.operator);
@@ -8905,7 +8905,7 @@ function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defi
     };
 
     // parse an embedded lex section
-    function bnfParseLex(text, position) {
+    function parseLex(text, position) {
         text = text.replace(/(?:^%lex)|(?:\/lex$)/g, '');
         // We want the lex input to start at the given 'position', if any,
         // so that error reports will produce a line number and character index
