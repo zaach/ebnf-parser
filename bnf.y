@@ -47,11 +47,21 @@ spec
         }
     | declaration_list '%%' grammar error EOF
         {
-            yyerror("Maybe you did not correctly separate trailing code from the grammar rule set with a '%%' marker on an otherwise empty line?\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @grammar));
+            yyerror(rmCommonWS`
+                Maybe you did not correctly separate trailing code from the grammar rule set with a '%%' marker on an otherwise empty line?
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @grammar)}
+            `);
         }
     | declaration_list error EOF
         {
-            yyerror("Maybe you did not correctly separate the parse 'header section' (token definitions, options, lexer spec, etc.) from the grammar rule set with a '%%' on an otherwise empty line?\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @declaration_list));
+            yyerror(rmCommonWS`
+                Maybe you did not correctly separate the parse 'header section' (token definitions, options, lexer spec, etc.) from the grammar rule set with a '%%' on an otherwise empty line?
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @declaration_list)}
+            `);
         }
     ;
 
@@ -85,7 +95,12 @@ declaration_list
     | declaration_list error
         {
             // TODO ...
-            yyerror("declaration list error?\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @declaration_list));
+            yyerror(rmCommonWS`
+                declaration list error?
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @declaration_list)}
+            `);
         }
     ;
 
@@ -121,11 +136,25 @@ declaration
         { $$ = {imports: {name: $import_name, path: $import_path}}; }
     | IMPORT import_name error
         {
-            yyerror("You did not specify a legal file path for the '%import' initialization code statement, which must have the format: '%import qualifier_name file_path'.\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @IMPORT));
+            yyerror(rmCommonWS`
+                You did not specify a legal file path for the '%import' initialization code statement, which must have the format:
+
+                    %import qualifier_name file_path
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @IMPORT)}
+            `);
         }
     | IMPORT error import_path
         {
-            yyerror("Each '%import'-ed initialization code section must be qualified by a name, e.g. 'required' before the import path itself: '%import qualifier_name file_path'.\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @IMPORT));
+            yyerror(rmCommonWS`
+                Each '%import'-ed initialization code section must be qualified by a name, e.g. 'required' before the import path itself:
+
+                    %import qualifier_name file_path
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @IMPORT)}
+            `);
         }
     | INIT_CODE init_code_name action_ne
         {
@@ -138,22 +167,44 @@ declaration
         }
     | INIT_CODE error action_ne
         {
-            yyerror("Each '%code' initialization code section must be qualified by a name, e.g. 'required' before the action code itself: '%code qualifier_name {action code}'.\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @INIT_CODE, @action_ne));
+            yyerror(rmCommonWS`
+                Each '%code' initialization code section must be qualified by a name, e.g. 'required' before the action code itself:
+
+                    %code qualifier_name {action code}
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @INIT_CODE, @action_ne)}
+            `);
         }
     | START error
         {
             // TODO ...
-            yyerror("%start token error?\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @START));
+            yyerror(rmCommonWS`
+                %start token error?
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @START)}
+            `);
         }
     | TOKEN error
         {
             // TODO ...
-            yyerror("%token definition list error?\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @TOKEN));
+            yyerror(rmCommonWS`
+                %token definition list error?
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @TOKEN)}
+            `);
         }
     | IMPORT error
         {
             // TODO ...
-            yyerror("%import name or source filename missing maybe?\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @IMPORT));
+            yyerror(rmCommonWS`
+                %import name or source filename missing maybe?
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @IMPORT)}
+            `);
         }
 //    | INIT_CODE error
     ;
@@ -187,12 +238,22 @@ options
     | OPTIONS error OPTIONS_END
         {
             // TODO ...
-            yyerror("%options ill defined / error?\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @OPTIONS, @OPTIONS_END));
+            yyerror(rmCommonWS`
+                %options ill defined / error?
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @OPTIONS, @OPTIONS_END)}
+            `);
         }
     | OPTIONS error
         {
             // TODO ...
-            yyerror("%options don't seem terminated?\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @OPTIONS));
+            yyerror(rmCommonWS`
+                %options don't seem terminated?
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @OPTIONS)}
+            `);
         }
     ;
 
@@ -215,12 +276,22 @@ option
     | NAME[option] '=' error
         {
             // TODO ...
-            yyerror(`named %option value error for ${$option}?` + "\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @option));
+            yyerror(rmCommonWS`
+                named %option value error for ${$option}?
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @option)}
+            `);
         }
     | NAME[option] error
         {
             // TODO ...
-            yyerror("named %option value assignment error?\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @option));
+            yyerror(rmCommonWS`
+                named %option value assignment error?
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @option)}
+            `);
         }
     ;
 
@@ -230,7 +301,12 @@ parse_params
     | PARSE_PARAM error
         {
             // TODO ...
-            yyerror("%pase-params declaration error?\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @PARSE_PARAM));
+            yyerror(rmCommonWS`
+                %pase-params declaration error?
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @PARSE_PARAM)}
+            `);
         }
     ;
 
@@ -240,7 +316,12 @@ parser_type
     | PARSER_TYPE error
         {
             // TODO ...
-            yyerror("%parser-type declaration error?\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @PARSER_TYPE));
+            yyerror(rmCommonWS`
+                %parser-type declaration error?
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @PARSER_TYPE)}
+            `);
         }
     ;
 
@@ -250,7 +331,12 @@ operator
     | associativity error
         {
             // TODO ...
-            yyerror("operator token list error in an associativity statement?\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @associativity));
+            yyerror(rmCommonWS`
+                operator token list error in an associativity statement?
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @associativity)}
+            `);
         }
     ;
 
@@ -380,12 +466,22 @@ production
     | production_id error ';'
         {
             // TODO ...
-            yyerror("rule production declaration error?\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @production_id));
+            yyerror(rmCommonWS`
+                rule production declaration error?
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @production_id)}
+            `);
         }
     | production_id error
         {
             // TODO ...
-            yyerror("rule production declaration error: did you terminate the rule production set with a semicolon?\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @production_id));
+            yyerror(rmCommonWS`
+                rule production declaration error: did you terminate the rule production set with a semicolon?
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @production_id)}
+            `);
         }
     ;
 
@@ -399,7 +495,12 @@ production_id
     | id optional_production_description error
         {
             // TODO ...
-            yyerror("rule id should be followed by a colon, but that one seems missing?\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @id));
+            yyerror(rmCommonWS`
+                rule id should be followed by a colon, but that one seems missing?
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @id)}
+            `);
         }
     ;
 
@@ -422,12 +523,22 @@ handle_list
     | handle_list '|' error
         {
             // TODO ...
-            yyerror("rule alternative production declaration error?\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @handle_list));
+            yyerror(rmCommonWS`
+                rule alternative production declaration error?
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @handle_list)}
+            `);
         }
     | handle_list ':' error
         {
             // TODO ...
-            yyerror("multiple alternative rule productions should be separated by a '|' pipe character, not a ':' colon!\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @handle_list));
+            yyerror(rmCommonWS`
+                multiple alternative rule productions should be separated by a '|' pipe character, not a ':' colon!
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @handle_list)}
+            `);
         }
     ;
 
@@ -440,7 +551,12 @@ handle_action
             }
             if ($prec) {
                 if ($handle.length === 0) {
-                    yyerror("You cannot specify a precedence override for an epsilon (a.k.a. empty) rule!\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @handle));
+                    yyerror(rmCommonWS`
+                        You cannot specify a precedence override for an epsilon (a.k.a. empty) rule!
+
+                          Erroneous area:
+                        ${yylexer.prettyPrintRange(yylexer, @handle)}
+                    `);
                 }
                 $$.push($prec);
             }
@@ -464,7 +580,12 @@ handle_action
     | EPSILON error
         {
             // TODO ...
-            yyerror("%epsilon rule action declaration error?\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @EPSILON));
+            yyerror(rmCommonWS`
+                %epsilon rule action declaration error?
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @EPSILON)}
+            `);
         }
     ;
 
@@ -526,7 +647,12 @@ expression
         }
     | '(' handle_sublist error
         {
-            yyerror("Seems you did not correctly bracket a grammar rule sublist in '( ... )' brackets.\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @1));
+            yyerror(rmCommonWS`
+                Seems you did not correctly bracket a grammar rule sublist in '( ... )' brackets.
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @1)}
+            `);
         }
     ;
 
@@ -549,7 +675,12 @@ prec
     | PREC error
         {
             // TODO ...
-            yyerror("%prec precedence override declaration error?\n\n  Erroneous precedence declaration:\n" + yylexer.prettyPrintRange(yylexer, @error, @PREC));
+            yyerror(rmCommonWS`
+                %prec precedence override declaration error?
+
+                  Erroneous precedence declaration:
+                ${yylexer.prettyPrintRange(yylexer, @error, @PREC)}
+            `);
         }
     | %epsilon
         {
@@ -574,7 +705,12 @@ action_ne
         { $$ = $action_body; }
     | '{' action_body error
         {
-            yyerror("Seems you did not correctly bracket a parser rule action block in curly braces: '{ ... }'.\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @1));
+            yyerror(rmCommonWS`
+                Seems you did not correctly bracket a parser rule action block in curly braces: '{ ... }'.
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @1)}
+            `);
         }
     | ACTION
         { $$ = $ACTION; }
@@ -602,7 +738,12 @@ action_body
         { $$ = $1 + $2 + $3 + $4; }
     | action_body '{' action_body error
         {
-            yyerror("Seems you did not correctly match curly braces '{ ... }' in a parser rule action block.\n\n  Erroneous area:\n" + yylexer.prettyPrintRange(yylexer, @error, @2));
+            yyerror(rmCommonWS`
+                Seems you did not correctly match curly braces '{ ... }' in a parser rule action block.
+
+                  Erroneous area:
+                ${yylexer.prettyPrintRange(yylexer, @error, @2)}
+            `);
         }
     ;
 
