@@ -302,7 +302,7 @@ parse_params
         {
             // TODO ...
             yyerror(rmCommonWS`
-                %pase-params declaration error?
+                %parse-params declaration error?
 
                   Erroneous area:
                 ${yylexer.prettyPrintRange(yylexer, @error, @PARSE_PARAM)}
