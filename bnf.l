@@ -1,4 +1,10 @@
 
+%code imports %{
+//  import helpers from 'jison-helpers-lib';
+%}
+
+
+
 ASCII_LETTER                            [a-zA-z]
 // \p{Alphabetic} already includes [a-zA-z], hence we don't need to merge
 // with {UNICODE_LETTER} (though jison has code to optimize if you *did*
@@ -296,7 +302,6 @@ LEX_CONTENT                             {WS}*(?:{BR}[^]*?)?{BR}{WS}*
 %%
 
 
-var helpers    = require('../../modules/helpers-lib');
 var rmCommonWS = helpers.rmCommonWS;
 var dquote     = helpers.dquote;
 

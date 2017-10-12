@@ -1,3 +1,14 @@
+
+%code imports %{
+//  import XRegExp from '@gerhobbelt/xregexp';       // for helping out the `%options xregexp` in the lexer
+//  import helpers from 'jison-helpers-lib';
+//  import fs from 'fs';
+//  import ebnfModule from './ebnf-transform';
+//  var transform = ebnfModule.transform;
+%}
+
+
+
 %start spec
 
 // %parse-param options
@@ -6,10 +17,7 @@
 /* grammar for parsing jison grammar files */
 
 %{
-var fs = require('fs');
-var transform = require('./ebnf-transform').transform;
 var ebnf = false;
-var XRegExp = require('@gerhobbelt/xregexp');       // for helping out the `%options xregexp` in the lexer
 %}
 
 
@@ -764,7 +772,6 @@ extra_parser_module_code
 include_macro_code
     : INCLUDE PATH
         {
-            var fs = require('fs');
             var fileContent = fs.readFileSync($PATH, { encoding: 'utf-8' });
             // And no, we don't support nested '%include':
             $$ = '\n// Included by Jison: ' + $PATH + ':\n\n' + fileContent + '\n\n// End Of Include by Jison: ' + $PATH + '\n\n';
@@ -805,7 +812,6 @@ optional_module_code_chunk
 %%
 
 
-var helpers    = require('../../modules/helpers-lib');
 var rmCommonWS = helpers.rmCommonWS;
 var dquote     = helpers.dquote;
 
