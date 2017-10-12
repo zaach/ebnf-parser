@@ -7,6 +7,10 @@ else
 	JISON = node ../../lib/cli.js
 endif
 
+ROLLUP = node_modules/.bin/rollup
+BABEL = node_modules/.bin/babel
+MOCHA = node_modules/.bin/mocha
+
 
 
 
@@ -27,14 +31,21 @@ endif
 
 	node __patch_version_in_js.js
 
-	$(JISON) bnf.y bnf.l
+	$(JISON) -m es bnf.y bnf.l
 	mv bnf.js parser.js
 
-	$(JISON) ebnf.y
+	$(JISON) -m es ebnf.y
 	mv ebnf.js transform-parser.js
 
+	node __patch_prelude_in_js.js
+
+	-mkdir -p dist
+	$(ROLLUP) -c
+	$(BABEL) dist/ebnf-parser-cjs.js -o dist/ebnf-parser-cjs-es5.js
+	$(BABEL) dist/ebnf-parser-umd.js -o dist/ebnf-parser-umd-es5.js
+
 test:
-	node_modules/.bin/mocha --timeout 18000 --check-leaks --globals assert tests/
+	$(MOCHA) --timeout 18000 --check-leaks --globals assert tests/
 
 
 # increment the XXX <prelease> number in the package.json file: version <major>.<minor>.<patch>-<prelease>
@@ -57,6 +68,7 @@ clean:
 	-rm -f transform-parser.js
 	-rm -f bnf.js
 	-rm -f ebnf.js
+	-rm -rf dist/
 	-rm -rf node_modules/
 	-rm -f package-lock.json
 
@@ -67,4 +79,5 @@ superclean: clean
 
 
 
-.PHONY: all prep npm-install build test clean superclean bump git-tag publish
+.PHONY: all prep npm-install build test clean superclean bump git-tag publish npm-update
+
