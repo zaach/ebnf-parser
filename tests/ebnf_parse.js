@@ -1,6 +1,6 @@
 var assert = require("chai").assert;
-var bnf = require("../ebnf-parser");
-var ebnf = require("../ebnf-transform");
+var bnf = require("../dist/ebnf-parser-cjs-es5");
+var ebnf = bnf.ebnf_parser;
 
 function testParse(top, strings) {
     return function() {
