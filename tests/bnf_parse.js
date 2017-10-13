@@ -78,15 +78,15 @@ describe("BNF parser", function () {
   });
 
   it("test nullable rule with %{ %} delimited action", function () {
-    var grammar = "%% test: foo bar | %{action{}%}; hello: world ;";
-    var expected = {bnf: {test: ["foo bar", [ "", "action{}" ]], hello: ["world"]}};
+    var grammar = "%% test: foo bar | %{action={}%}; hello: world ;";
+    var expected = {bnf: {test: ["foo bar", [ "", "action={}" ]], hello: ["world"]}};
 
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
   });
 
   it("test nullable rule with {{ }} delimited action", function () {
-    var grammar = "%% test: foo bar | {{action{};}}; hello: world ;";
-    var expected = {bnf: {test: ["foo bar", [ "", "action{};" ]], hello: ["world"]}};
+    var grammar = "%% test: foo bar | {{action={};}}; hello: world ;";
+    var expected = {bnf: {test: ["foo bar", [ "", "action={};" ]], hello: ["world"]}};
 
     assert.deepEqual(bnf.parse(grammar), expected, "grammar should be parsed correctly");
   });
