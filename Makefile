@@ -1,10 +1,10 @@
 
-JISON_VERSION := $(shell node ../../lib/cli.js -V 2> /dev/null )
+JISON_VERSION := $(shell node ../../dist/cli-cjs-es5.js -V 2> /dev/null )
 
 ifndef JISON_VERSION
 	JISON = sh node_modules/.bin/jison
 else
-	JISON = node ../../lib/cli.js
+	JISON = node ../../dist/cli-cjs-es5.js
 endif
 
 ROLLUP = node_modules/.bin/rollup
