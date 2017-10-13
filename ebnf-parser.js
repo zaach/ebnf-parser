@@ -85,15 +85,15 @@ const ebnf_parser = {
     transform
 };
 
-export {
+export default {
     parse,
 
     transform,
 
     // assistant exports for debugging/testing:
-    bnf as bnf_parser,
+    bnf_parser: bnf,
     ebnf_parser,
-    jisonlex as bnf_lexer,
+    bnf_lexer: jisonlex,
 
     version,
 };
