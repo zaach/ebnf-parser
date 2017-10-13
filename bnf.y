@@ -77,7 +77,18 @@ optional_end_block
     : %empty
         { $$ = undefined; }
     | '%%' extra_parser_module_code
-        { $$ = $extra_parser_module_code; }
+        { 
+            var rv = checkActionBlock($extra_parser_module_code);
+            if (rv) {
+                yyerror(rmCommonWS`
+                    The extra parser module code section does not compile: ${rv}
+
+                      Erroneous area:
+                    ${yylexer.prettyPrintRange(yylexer, @extra_parser_module_code)}
+                `);
+            }
+            $$ = $extra_parser_module_code; 
+        }
     ;
 
 optional_action_header_block
@@ -86,11 +97,29 @@ optional_action_header_block
     | optional_action_header_block ACTION
         {
             $$ = $optional_action_header_block;
+            var rv = checkActionBlock($ACTION);
+            if (rv) {
+                yyerror(rmCommonWS`
+                    action header code block does not compile: ${rv}
+
+                      Erroneous area:
+                    ${yylexer.prettyPrintRange(yylexer, @ACTION)}
+                `);
+            }
             yy.addDeclaration($$, { actionInclude: $ACTION });
         }
     | optional_action_header_block include_macro_code
         {
             $$ = $optional_action_header_block;
+            var rv = checkActionBlock($include_macro_code);
+            if (rv) {
+                yyerror(rmCommonWS`
+                    action header code block does not compile: ${rv}
+
+                      Erroneous area:
+                    ${yylexer.prettyPrintRange(yylexer, @include_macro_code)}
+                `);
+            }
             yy.addDeclaration($$, { actionInclude: $include_macro_code });
         }
     ;
@@ -122,9 +151,31 @@ declaration
     | TOKEN full_token_definitions
         { $$ = {token_list: $full_token_definitions}; }
     | ACTION
-        { $$ = {include: $ACTION}; }
+        { 
+            var rv = checkActionBlock($ACTION);
+            if (rv) {
+                yyerror(rmCommonWS`
+                    action code block does not compile: ${rv}
+
+                      Erroneous area:
+                    ${yylexer.prettyPrintRange(yylexer, @ACTION)}
+                `);
+            }
+            $$ = {include: $ACTION}; 
+        }
     | include_macro_code
-        { $$ = {include: $include_macro_code}; }
+        { 
+            var rv = checkActionBlock($include_macro_code);
+            if (rv) {
+                yyerror(rmCommonWS`
+                    action header code block does not compile: ${rv}
+
+                      Erroneous area:
+                    ${yylexer.prettyPrintRange(yylexer, @include_macro_code)}
+                `);
+            }
+            $$ = {include: $include_macro_code}; 
+        }
     | parse_params
         { $$ = {parseParams: $parse_params}; }
     | parser_type
@@ -166,6 +217,15 @@ declaration
         }
     | INIT_CODE init_code_name action_ne
         {
+            var rv = checkActionBlock($action_ne);
+            if (rv) {
+                yyerror(rmCommonWS`
+                    %code "${$init_code_name}" initialization section action code block does not compile: ${rv}
+
+                      Erroneous area:
+                    ${yylexer.prettyPrintRange(yylexer, @action_ne, @INIT_CODE)}
+                `);
+            }
             $$ = {
                 initCode: {
                     qualifier: $init_code_name,
@@ -555,6 +615,15 @@ handle_action
         {
             $$ = [($handle.length ? $handle.join(' ') : '')];
             if ($action) {
+                var rv = checkActionBlock($action);
+                if (rv) {
+                    yyerror(rmCommonWS`
+                        production rule action code block does not compile: ${rv}
+
+                          Erroneous area:
+                        ${yylexer.prettyPrintRange(yylexer, @action, @handle)}
+                    `);
+                }
                 $$.push($action);
             }
             if ($prec) {
@@ -579,6 +648,15 @@ handle_action
         {
             $$ = [''];
             if ($action) {
+                var rv = checkActionBlock($action);
+                if (rv) {
+                    yyerror(rmCommonWS`
+                        epsilon production rule action code block does not compile: ${rv}
+
+                          Erroneous area:
+                        ${yylexer.prettyPrintRange(yylexer, @action, @EPSILON)}
+                    `);
+                }
                 $$.push($action);
             }
             if ($$.length === 1) {
@@ -773,6 +851,15 @@ include_macro_code
     : INCLUDE PATH
         {
             var fileContent = fs.readFileSync($PATH, { encoding: 'utf-8' });
+            var rv = checkActionBlock(fileContent);
+            if (rv) {
+                yyerror(rmCommonWS`
+                    included action code file "${$PATH}" does not compile: ${rv}
+
+                      Erroneous area:
+                    ${yylexer.prettyPrintRange(yylexer, @PATH, @INCLUDE)}
+                `);
+            }
             // And no, we don't support nested '%include':
             $$ = '\n// Included by Jison: ' + $PATH + ':\n\n' + fileContent + '\n\n// End Of Include by Jison: ' + $PATH + '\n\n';
         }
@@ -814,7 +901,26 @@ optional_module_code_chunk
 
 var rmCommonWS = helpers.rmCommonWS;
 var dquote     = helpers.dquote;
+var parse2AST  = helpers.parseCodeChunkToAST;
 
+
+// validate the given JavaScript snippet: does it compile?
+function checkActionBlock(src) {
+    src = src.trim();
+    if (!src) {
+        return false;
+    }
+    try {
+        parse2AST(src);
+        return false;
+    } catch (ex) {
+        console.error("parse2AST error: ", {
+            src,
+            ex
+        });
+        return ex.message || "code snippet cannot be parsed";
+    }
+}
 
 // transform ebnf to bnf if necessary
 function extend(json, grammar) {
