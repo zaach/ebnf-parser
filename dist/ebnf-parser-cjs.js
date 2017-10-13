@@ -11630,7 +11630,7 @@ var bnf = Object.freeze({
 	parse: yyparse
 });
 
-var version = '0.6.0-194';                              // require('./package.json').version;
+var version = '0.6.0-195';                              // require('./package.json').version;
 
 function parse(grammar) {
     return parser.parse(grammar);
