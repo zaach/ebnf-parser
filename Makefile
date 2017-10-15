@@ -50,10 +50,8 @@ test:
 
 # increment the XXX <prelease> number in the package.json file: version <major>.<minor>.<patch>-<prelease>
 bump:
-	npm version --no-git-tag-version prerelease
 
 git-tag:
-	node -e 'var pkg = require("./package.json"); console.log(pkg.version);' | xargs git tag
 
 publish:
 	npm run pub
