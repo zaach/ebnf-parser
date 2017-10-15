@@ -1,9 +1,4 @@
 
-import XRegExp from '@gerhobbelt/xregexp';       // for helping out the `%options xregexp` in the lexer
-import helpers from 'jison-helpers-lib';
-import fs from 'fs';
-import transform from './ebnf-transform';
-
 // hack:
 var assert;
 
@@ -385,6 +380,7 @@ var assert;
  */
 
 
+import XRegExp from '@gerhobbelt/xregexp';       // for helping out the `%options xregexp` in the lexer;
 
 // See also:
 // http://stackoverflow.com/questions/1382107/whats-a-good-way-to-extend-error-in-javascript/#35881508
@@ -437,8 +433,6 @@ if (typeof Object.setPrototypeOf === 'function') {
 JisonParserError.prototype.constructor = JisonParserError;
 JisonParserError.prototype.name = 'JisonParserError';
 
-
-//  import XRegExp from '@gerhobbelt/xregexp';       // for helping out the `%options xregexp` in the lexer;
 
 
         // helper: reconstruct the productions[] table
@@ -2036,49 +2030,47 @@ var lexer = function() {
 
   var lexer = {
     
-       // Code Generator Information Report
-       // ---------------------------------
-       //
-       // Options:
-       //
-       //   backtracking: .................... false
-       //   location.ranges: ................. true
-       //   location line+column tracking: ... true
-       //
-       //
-       // Forwarded Parser Analysis flags:
-       //
-       //   uses yyleng: ..................... false
-       //   uses yylineno: ................... false
-       //   uses yytext: ..................... false
-       //   uses yylloc: ..................... false
-       //   uses lexer values: ............... true/ true
-       //   location tracking: ............... false
-       //   location assignment: ............. false
-       //
-       //
-       // Lexer Analysis flags:
-       //
-       //   uses yyleng: ..................... ???
-       //   uses yylineno: ................... ???
-       //   uses yytext: ..................... ???
-       //   uses yylloc: ..................... ???
-       //   uses ParseError API: ............. ???
-       //   uses yyerror: .................... ???
-       //   uses location tracking & editing:  ???
-       //   uses more() API: ................. ???
-       //   uses unput() API: ................ ???
-       //   uses reject() API: ............... ???
-       //   uses less() API: ................. ???
-       //   uses display APIs pastInput(), upcomingInput(), showPosition():
-       //        ............................. ???
-       //   uses describeYYLLOC() API: ....... ???
-       //
-       // --------- END OF REPORT -----------
+// Code Generator Information Report
+// ---------------------------------
+//
+// Options:
+//
+//   backtracking: .................... false
+//   location.ranges: ................. true
+//   location line+column tracking: ... true
+//
+//
+// Forwarded Parser Analysis flags:
+//
+//   uses yyleng: ..................... false
+//   uses yylineno: ................... false
+//   uses yytext: ..................... false
+//   uses yylloc: ..................... false
+//   uses lexer values: ............... true / true
+//   location tracking: ............... false
+//   location assignment: ............. false
+//
+//
+// Lexer Analysis flags:
+//
+//   uses yyleng: ..................... ???
+//   uses yylineno: ................... ???
+//   uses yytext: ..................... ???
+//   uses yylloc: ..................... ???
+//   uses ParseError API: ............. ???
+//   uses yyerror: .................... ???
+//   uses location tracking & editing:  ???
+//   uses more() API: ................. ???
+//   uses unput() API: ................ ???
+//   uses reject() API: ............... ???
+//   uses less() API: ................. ???
+//   uses display APIs pastInput(), upcomingInput(), showPosition():
+//        ............................. ???
+//   uses describeYYLLOC() API: ....... ???
+//
+// --------- END OF REPORT -----------
 
-
-    EOF: 1,
-
+EOF: 1,
     ERROR: 2,
 
     // JisonLexerError: JisonLexerError,        /// <-- injected by the code generator
