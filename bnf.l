@@ -1,6 +1,6 @@
 
 %code imports %{
-//  import helpers from 'jison-helpers-lib';
+  import helpers from 'jison-helpers-lib';
 %}
 
 
