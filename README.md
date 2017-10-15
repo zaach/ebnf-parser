@@ -1,4 +1,4 @@
-# ebnf-parser
+# ebnf-parser \[SECONDARY SOURCE REPO]
 
 
 [![build status](https://secure.travis-ci.org/GerHobbelt/ebnf-parser.png)](http://travis-ci.org/GerHobbelt/ebnf-parser)
@@ -7,9 +7,29 @@
 A parser for BNF and EBNF grammars used by jison.
 
 
+> 
+> # deprecation ~ secondary-source notice
+>
+> From today (2017/oct/15) the ebnf-parser repository is only a **secondary source** 
+> for the `ebnf-parser` package/codebase: the **primary source** is the 
+> [jison](https://github.com/GerHobbelt/jison) 
+> [monorepo](https://medium.com/netscape/the-case-for-monorepos-907c1361708a)'s `packages/ebnf-parser/` 
+> directory.
+>
+> (For a comparable argument, see also ["Why is Babel a monorepo?"](https://github.com/babel/babel/blob/master/doc/design/monorepo.md))
+>
+> Issues, pull requests, etc. for `ebnf-parser` should be filed there; hence 
+> we do not accept issue reports in this secondary repository any more.
+>
+> This repository will track the primary source for a while still, but be 
+> *very aware* that this particular repository will always be lagging behind!
+>
+
+
+
 ## install
 
-    npm install ebnf-parser
+    npm install @gerhobbelt/ebnf-parser
 
 
 ## build
@@ -31,7 +51,7 @@ This will generate `parser.js`, which is required by `ebnf-parser.js`.
 
 The parser translates a string grammar or JSON grammar into a JSON grammar that jison can use (ENBF is transformed into BNF).
 
-    var ebnfParser = require('ebnf-parser');
+    var ebnfParser = require('@gerhobbelt/ebnf-parser');
 
     // parse a bnf or ebnf string grammar
     ebnfParser.parse("%start ... %");
