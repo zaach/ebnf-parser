@@ -1,4 +1,4 @@
-# ebnf-parser \[SECONDARY SOURCE REPO]
+# ebnf-parser \[OBSOLETED]
 
 
 [![Join the chat at https://gitter.im/jison-parsers-lexers/Lobby](https://badges.gitter.im/jison-parsers-lexers/Lobby.svg)](https://gitter.im/jison-parsers-lexers/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) 
@@ -12,13 +12,13 @@ A parser for BNF and EBNF grammars used by jison.
 
 
 > 
-> # deprecation ~ secondary-source notice
+> # deprecation notice
 >
-> From today (2017/oct/15) the ebnf-parser repository is only a **secondary source** 
+> From today (2017/oct/15) the ebnf-parser repository is **obsoleted** 
 > for the `ebnf-parser` package/codebase: the **primary source** is the 
 > [jison](https://github.com/GerHobbelt/jison) 
 > [monorepo](https://medium.com/netscape/the-case-for-monorepos-907c1361708a)'s `packages/ebnf-parser/` 
-> directory.
+> directory. See also https://github.com/GerHobbelt/jison/issues/16.
 >
 > (For a comparable argument, see also ["Why is Babel a monorepo?"](https://github.com/babel/babel/blob/master/doc/design/monorepo.md))
 >
