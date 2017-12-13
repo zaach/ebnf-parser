@@ -3,7 +3,7 @@
 
 [![Join the chat at https://gitter.im/jison-parsers-lexers/Lobby](https://badges.gitter.im/jison-parsers-lexers/Lobby.svg)](https://gitter.im/jison-parsers-lexers/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) 
 [![Build Status](https://travis-ci.org/GerHobbelt/ebnf-parser.svg?branch=master)](https://travis-ci.org/GerHobbelt/ebnf-parser)
-[![NPM version]https://badge.fury.io/js/jison-gho.svg)](https://badge.fury.io/js/jison-gho)
+[![NPM version](https://badge.fury.io/js/jison-gho.svg)](https://badge.fury.io/js/jison-gho)
 [![Dependency Status](https://img.shields.io/david/GerHobbelt/ebnf-parser.svg)](https://david-dm.org/GerHobbelt/ebnf-parser)
 [![npm](https://img.shields.io/npm/dm/@gerhobbelt/ebnf-parser.svg?maxAge=2592000)]()
 
