@@ -1,13 +1,15 @@
-var Jison = require("../setup").Jison,
-    Lexer = require("../setup").Lexer,
-    assert = require("assert");
+var assert = require("chai").assert;
+var bnf = require("../dist/ebnf-parser-cjs-es5");
 
-exports["test BNF parser"] = function () {
+var Jison = require('../../../../jison/');  // jison-gho
+
+describe("BNF parser", function () {
+  it("test BNF production", function () {
     var grammar = {
         "lex": {
             "rules": [
               ["\\s+", "/* skip whitespace */"],
-              ["[a-zA-Z][a-zA-Z0-9_-]*", "return 'ID';"],
+              ["[a-zA-Z][a-zA-Z0-9_]*", "return 'ID';"],
               ["\"[^\"]+\"", "yytext = yytext.substr(1, yyleng-2); return 'STRING';"],
               ["'[^']+'", "yytext = yytext.substr(1, yyleng-2); return 'STRING';"],
               [":", "return ':';"],
@@ -74,7 +76,7 @@ exports["test BNF parser"] = function () {
     var parser = new Jison.Parser(grammar);
     parser.yy.addDeclaration = function (grammar, decl) {
         if (decl.start) {
-            grammar.start = decl.start
+            grammar.start = decl.start;
         }
         if (decl.operator) {
             if (!grammar.operators) {
@@ -82,10 +84,10 @@ exports["test BNF parser"] = function () {
             }
             grammar.operators.push(decl.operator);
         }
-
     };
 
     var result = parser.parse('%start foo %left "+" "-" %right "*" "/" %nonassoc "=" STUFF %left UMINUS %% foo : bar baz blitz { stuff } %prec GEMINI | bar %prec UMINUS | ;\nbar: { things };\nbaz: | foo ;');
     assert.ok(result, "parse bnf production");
-};
+  });
+});
 

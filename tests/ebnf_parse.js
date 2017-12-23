@@ -1,13 +1,17 @@
-var assert = require("assert"),
-    bnf = require("../ebnf-parser"),
-    ebnf = require("../ebnf-transform");
+var assert = require("chai").assert;
+var bnf = require("../dist/ebnf-parser-cjs-es5");
+var ebnf = bnf.ebnf_parser;
 
 function testParse(top, strings) {
     return function() {
         var expected = {
+            "options": {
+                "ebnf": true
+            },
+            "ebnf": {"top": [top]},
             "bnf": ebnf.transform({"top": [top]})
         };
-        var grammar = "%ebnf\n%%\ntop : "+top+";";
+        var grammar = "%ebnf\n%%\ntop : " + top + ";";
         assert.deepEqual(bnf.parse(grammar), expected);
     };
 }
@@ -30,9 +34,11 @@ var tests = {
     "test group () on simple phrase": testParse("(word word) EOF", "two words"),
     "test group () with multiple options on first option": testParse("((word word) | word) EOF", "hi there"),
     "test group () with multiple options on second option": testParse("((word word) | word) EOF", "hi"),
-    "test complex expression ( *, ?, () )": testParse("(word (',' word)*)? EOF", ["", "hi", "hi, there"])
+    "test complex expression ( *, ?, () )": testParse("(word (\",\" word)*)? EOF", ["", "hi", "hi, there"])
 };
 
-for (var test in tests) {
-    exports[test] = tests[test];
-}
+describe("EBNF parser", function () {
+    for (var test in tests) {
+        it(test, tests[test]);
+    }
+});

@@ -1,7 +1,9 @@
-parser.js
+.DS_Store
 node_modules/
+npm-debug.log
 
 # Editor bak files
 *~
 *.bak
 *.orig
+
